@@ -289,6 +289,17 @@ Zonder geheugen herhaalt Kompas zichzelf — precies het patroon dat tot deze
 herbouw leidde (dezelfde ASML-trigger drie cycli na elkaar herhaald zonder
 controle).
 
+**Belangrijk (bijgesteld 17/9/2026): dit is een interne component, geen
+pagina-onderdeel.** De `events`-collectie groeit voor altijd — dat is
+precies waarom hij nooit als "activiteitenlog"-tabel op de Kompas-pagina
+zelf getoond wordt: een groeiende lijst tonen is geen UI, het is een
+databaseleeg-scherm. De kern *gebruikt* dit geheugen (signaalversheid,
+staleness, audit), de pagina *toont* enkel de bewuste, begrensde afleidingen
+ervan die al elders staan: de aanbevelingshistoriek per watchlist-naam
+(begrensd tot die ene naam) en de decision objects (begrensd tot actieve
+posities/watchlist-namen). Geheugen bijhouden en geheugen tonen zijn
+losse dingen — Kompas doet het eerste altijd, het tweede nooit rechtstreeks.
+
 ### De Kompas-database
 
 Gedeelde database via de `ArtifactData`-tool (apart van de `Artifact`-tool
