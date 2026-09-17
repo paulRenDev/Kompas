@@ -36,22 +36,54 @@ Pijler A en Pijler B zijn, architecturaal, de personal-adapters achter twee
 van de vier vervangbare poorten — zie "Architectuur — losse, vervangbare
 componenten" hieronder voor waarom dat onderscheid vanaf dag 1 vastligt.
 
-### Pijler A — vier analistrollen
+### Pijler A — drie vaste rollen + een sector-specialistenpool
 
-Elke rol doorzoekt eigen RSS-bronnen en rapporteert apart, vóór synthese.
-Conflict tussen rollen wordt zichtbaar gemaakt, nooit gemiddeld tot een
-vage consensus.
+Elke rol/specialist doorzoekt eigen RSS-bronnen en rapporteert apart, vóór
+synthese. Conflict wordt zichtbaar gemaakt, nooit gemiddeld tot een vage
+consensus.
 
 | Rol | Kernvraag | Bron | Output |
 |---|---|---|---|
 | Stock watchers | Wat gebeurt er met deze naam? | Bedrijfsspecifiek nieuws per holding/watchlist-naam | Gebeurtenis + waarom relevant voor die naam |
-| Trend viewers | Structurele trend of ruis? | Macro-/beleidsnieuws | Trendbevestiging, -breuk of ruis, expliciet benoemd |
+| Trend viewers | Structurele trend of ruis? | Macro-/beleidsnieuws (geopolitiek, industriebeleid, energie, handel) | Trendbevestiging, -breuk of ruis, expliciet benoemd |
 | Technical stock watchers | Wat zegt de koers zelf? | Koersactie, chartpatronen, momentum | Technisch niveau bereikt/gebroken, los van fundamentals |
-| Sector specialists | Wat verandert er sectorbreed? | Sectorbrede vakpers | Sectorbrede verschuiving die meerdere namen raakt |
 
-Cadans: alle vier rollen draaien gelijktijdig, niet gestaggerd — op de twee
-dagelijkse Kompas-verversmomenten (09:00 CEST en 18:00 CEST), zodat de
-synthese altijd met volledige, gelijktijdige input werkt.
+**Sector specialisten zijn geen vierde rij in deze tabel, maar een pool**
+(bijgesteld 17/9/2026, uit de sectoranalist-review + Paul's beslissing:
+"we moeten meerdere sector analysten hebben, het gaat niet over slechts
+vijf sectoren"). Eén generalist die halfgeleiders, defensie, energie,
+uranium én datacenters tegelijk moet dekken, produceert structureel
+oppervlakkige cross-sector-verhaaltjes — echte diepte komt van smalle,
+diepe specialisten, niet van één breed overzicht.
+
+- Elke sector die relevant is (via portefeuille, watchlist, of het
+  anti-bevestigingsbias-quotum buiten portefeuille/watchlist — zie
+  hieronder) krijgt zijn **eigen** sector-specialist-instantie: bv.
+  "Sector specialist — Halfgeleiders", "Sector specialist —
+  Uranium/Nucleair", "Sector specialist — Defensie", "Sector specialist —
+  Datacenter-infra", enzovoort.
+- Het aantal is niet vast — het schaalt met hoeveel sectoren daadwerkelijk
+  gevolgd worden, niet met een vooraf bepaald lijstje van vijf of tien.
+  Nieuwe sectoren (nieuwe holding, nieuwe watchlist-naam, of een nieuwe
+  "buiten"-sector voor het anti-bias-quotum) krijgen een nieuwe
+  specialist-instantie; een sector die niet meer relevant is, verliest
+  zijn instantie — dezelfde levenscyclus-logica als de watchlist.
+- Een cross-sector spotlight (zoals "defensie → halfgeleiders") ontstaat
+  pas wanneer **twee specifieke specialisten** elkaar kruisen — nooit als
+  output van één generalistische pass over meerdere sectoren tegelijk.
+- **Geopolitiek is niet enkel voor Trend viewers.** Elke sector-specialist
+  volgt ook de geopolitiek die specifiek zijn eigen sector raakt
+  (exportcontroles die halfgeleiders raken, sancties die energie/defensie
+  raken, handelsbeleid dat specifieke ketens raakt) — als onderdeel van
+  zijn sectorbrede vakpers, niet als apart kanaal. Trend viewers dekken de
+  macro-laag (brede geopolitieke/beleidsverschuivingen); een
+  sector-specialist dekt hoe die verschuiving specifiek zijn sector raakt.
+
+Cadans: de drie vaste rollen én de volledige sector-specialistenpool
+draaien allemaal gelijktijdig, niet gestaggerd — op de twee dagelijkse
+Kompas-verversmomenten (09:00 CEST en 18:00 CEST), zodat de synthese
+altijd met volledige, gelijktijdige input werkt, hoeveel specialisten er
+ook in de pool zitten.
 
 Zie `docs/kompas-rss-signaalscan.md` voor de netwerktoegang-research
 (curl vs. WebFetch) die aan concrete RSS-bronkeuzes voorafgaat.
@@ -390,8 +422,13 @@ RSS-doeldomeinen vóór Pijler A gebouwd wordt.
 
 - [x] **Cadans per rol** (17/9/2026): alle vier rollen draaien gelijktijdig,
   op de twee dagelijkse verversmomenten (09:00 CEST, 18:00 CEST).
-- [ ] **Concrete RSS-bronnen per rol**: welke feeds precies per rol — Paul
-  levert de concrete URL's aan.
+- [ ] **Concrete RSS-bronnenlijst** (bijgesteld 17/9/2026, Paul vroeg "hebben
+  we een lijst van bronnen"): nog niet — er bestaat enkel
+  netwerktoegang-research (`docs/kompas-rss-signaalscan.md`) over welke
+  domeinen technisch bereikbaar zijn, geen lijst van effectieve feeds per
+  rol/sector-specialist. Op te stellen (door Paul, of door Claude als
+  voorstel te verifiëren met `WebFetch`) en te testen vóór Pijler A
+  gebouwd wordt.
 - [x] **Automatisering vs. menselijke review** (17/9/2026): volledig
   autonoom — geen check-in-moment per signaal vóór de synthese-laag.
 - [x] **Architectuur** (17/9/2026): volledig nieuw artifact + databaseschema
@@ -408,9 +445,15 @@ RSS-doeldomeinen vóór Pijler A gebouwd wordt.
   poorten (signaalbron, portefeuillebron, geheugen, publicatiekanaal), elk
   met vandaag één personal adapter — zie "Architectuur — losse, vervangbare
   componenten" hierboven.
-- [ ] **Sectorquotum buiten portefeuille/watchlist**: hoeveel sectoren
-  moeten sector specialists structureel volgen die niets met Paul's huidige
-  posities te maken hebben, puur voor tegengeluid? Nog te beslissen.
+- [x] **Sector-specialistenpool in plaats van één generalist** (17/9/2026,
+  Paul's beslissing: "we moeten meerdere sector analysten hebben, het gaat
+  niet over slechts vijf sectoren"): elke gevolgde sector krijgt een eigen,
+  smalle specialist-instantie; het aantal schaalt met wat relevant is,
+  geen vast lijstje — zie "Pijler A" hierboven.
+- [ ] **Sectorquotum buiten portefeuille/watchlist**: hoeveel van de
+  specialist-pool moet structureel sectoren volgen die niets met Paul's
+  huidige posities te maken hebben, puur voor tegengeluid — als
+  verhouding (bv. 1 op 3), of als vast aantal? Nog te beslissen.
 - [ ] **Staleness-drempel watchlist**: is 6 cycli (3 dagen) de juiste
   termijn vóór een naam gemarkeerd wordt voor herbeoordeling, of moet dit
   per sector/type verschillen? Nog te beslissen.
