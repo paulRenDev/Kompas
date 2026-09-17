@@ -381,6 +381,13 @@ RSS-doeldomeinen vóór Pijler A gebouwd wordt.
   klant gekoppeld) valt daar doorgaans buiten. Geen juridisch advies —
   bij een echte bank-uitrol hoort dit door een jurist bevestigd te worden.
   Voor Paul's persoonlijk gebruik niet van toepassing.
+- [x] **Disclaimer** (17/9/2026): standaard, altijd toevoegen — "geen
+  beleggingsadvies, enkel ter informatie, doe zelf onderzoek" op elke
+  publicatie. Goedkoop, geen reden om het niet te doen. Beschermt het
+  fantasyfund-/journalistiek-scenario mee (onderscheid algemene info vs.
+  geïndividualiseerd advies), maar verandert niets aan de juridische
+  classificatie zodra het substantieel geïndividualiseerd advies is (bv.
+  een bank op een klant se eigen portefeuille) — een label, geen schild.
 
 ## Status
 
