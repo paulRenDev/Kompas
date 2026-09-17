@@ -213,12 +213,33 @@ Google Sheet komt of van een broker.
 
 ### Poort 1 — Signaalbron (Pijler A)
 Interface: levert signalen als `{rol, naam/sector, tekst, bron, brontier,
-tijdstip}`.
+omvang, tijdshorizon, vertrouwensniveau, tijdstip}`.
 - **Personal adapter (nu)**: vier RSS-gedreven analistrollen (stock
   watchers, trend viewers, technical stock watchers, sector specialists).
 - **Andere adapter (bv. een bank)**: de eigen signalenengine/researchdesk
   van die bank — de kern moet niet weten of een signaal van RSS komt of van
   een intern team, zolang het in dezelfde vorm binnenkomt.
+
+**Verplichte velden, harde publicatievoorwaarde (17/9/2026, uit de
+sectoranalist-review):** zonder deze velden kan de synthese-laag geen
+advies-consensus bouwen — een claim zonder omvang, tijdshorizon of
+citeerbare bron is niet combineerbaar met een ander signaal, en dus
+onbruikbaar voor een decision object. Een signaal dat één van deze velden
+mist, wordt niet gepubliceerd:
+- **`bron`**: citeerbaar en specifiek (het artikel, de uitgever, het
+  beleidsdocument) — nooit enkel een categorie ("sectorpers", "tier 1").
+  Een bron die niemand kan terugvinden, is niet controleerbaar en dus niet
+  publiceerbaar.
+- **`brontier`**: de bestaande tier-classificatie (tier 1/2/…) — blijft,
+  maar vervangt nooit een echte bronvermelding.
+- **`omvang`**: een indicatie van hoe groot/materieel dit is (bv.
+  percentage van omzet, geschatte impact) — geen vage kwalificatie zonder
+  getal.
+- **`tijdshorizon`**: wanneer dit zichtbaar zou moeten worden (volgende
+  kwartaalcijfers, komende weken, structureel/jaren) — zonder tijdshorizon
+  is een signaal niet te toetsen.
+- **`vertrouwensniveau`**: expliciet speculatief / voorlopig / hoog
+  vertrouwen — nooit stilzwijgend als feit gepresenteerd.
 
 ### Poort 2 — Portefeuillebron (Pijler B)
 Interface: levert holdings + watchlist + aantallen/cost/waarde/gain, plus
@@ -377,6 +398,10 @@ RSS-doeldomeinen vóór Pijler A gebouwd wordt.
 - [ ] **Staleness-drempel watchlist**: is 6 cycli (3 dagen) de juiste
   termijn vóór een naam gemarkeerd wordt voor herbeoordeling, of moet dit
   per sector/type verschillen? Nog te beslissen.
+- [x] **Verplichte signaalvelden** (17/9/2026): elk signaal moet omvang,
+  tijdshorizon, vertrouwensniveau en een citeerbare (niet-categorische)
+  bron hebben, anders geen publicatie — zie Poort 1 hierboven. Zonder
+  deze velden kan de synthese-laag geen advies-consensus bouwen.
 - [ ] **Klant-identiteit** (erkend 17/9/2026, niet ontworpen): een vijfde
   dimensie naast de vier poorten — wie de gebruiker/klant is, met opties en
   klantgegevens. Voor Paul's eigen gebruik is er precies één impliciete
