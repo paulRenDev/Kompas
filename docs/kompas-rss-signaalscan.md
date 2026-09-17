@@ -73,11 +73,14 @@ Elke URL hieronder is live getest met `WebFetch`, niet aangenomen.
 | Investing.com — economische indicatoren | `https://www.investing.com/rss/news_95.rss` | Trend viewers — macro-economische data |
 | Investing.com — forex | `https://www.investing.com/rss/news_1.rss` | minder relevant, valuta/macro |
 | Investing.com — technische pagina per ticker | (geen RSS, page-fetch, bv. `/equities/asml-holding-nv-technical`) | Technical stock watchers — al bevestigd in vorige sessie (zie Bevinding 2) |
+| Investing.com — "Stock Market News"-pagina | `https://www.investing.com/news/stock-market-news` (geen RSS, page-fetch) | Bevat al concrete semiconductor-, defensie- én datacenter-headlines (Micron, Intel, AMD, F-35-deal, Crusoe-funding) — sectorbreder dan de RSS-feed |
+| Investing.com — "Technology News"-pagina | `https://www.investing.com/news/technology-news` (geen RSS, page-fetch) | Zelfde: bevat sector-specifieke tech/chip-headlines |
 
 Het volledige `investing.com`-domein lijkt open te staan op de egress-proxy
-— zowel de RSS-categoriefeeds als losse pagina's (technische analyse per
-ticker) werken. Dat maakt het vandaag de enige domeinbrede, betrouwbare
-bron.
+— RSS-categoriefeeds én losse nieuwspagina's werken allemaal. De
+nieuwspagina's (niet enkel de RSS-feeds) bevatten al concrete
+sector-headlines (semiconductors, defensie, datacenters) — dat is meer
+sectordekking dan de RSS-categorieën alleen bieden.
 
 ### Geblokkeerd — `EGRESS_BLOCKED` (expliciete deny-list, geen subdomein-probleem)
 
@@ -100,27 +103,50 @@ los van of het een apex- of subdomein is (`www.vrt.be` werkt,
 is unable to fetch" — geen `EGRESS_BLOCKED`-label, maar in de praktijk
 even onbruikbaar. Niet verder onderzocht of dit een ander mechanisme is.
 
-**Kritieke bevinding voor het sector-specialistenpool-ontwerp:** geen
-enkele sector-specifieke vakpersbron (halfgeleiders, defensie,
-nucleair/uranium, datacenters) is bereikbaar gebleken. De enige
-sector-relevante bron die werkt, is investing.com's generieke
-"commodities & futures"-categorie (olie/gas/metalen) — nuttig voor een
-Sector specialist – Uranium/Energie, maar er is nog niets werkend voor
-Sector specialist – Halfgeleiders, – Defensie of – Datacenter-infra. Dit
-is vandaag de grootste blocker voor de sector-specialistenpool, groter dan
-het aantal specialisten zelf.
+**Bijgesteld (17/9/2026, na Bevinding 4 hieronder):** geen enkele
+sector-specifieke vakpersbron werkt als vaste RSS-feed — maar dat is
+opgelost via `WebSearch` en via investing.com's nieuwspagina's (niet
+enkel de RSS-categorieën), zie Bevinding 4. De sector-specialistenpool
+heeft dus wél voldoende bronnen, alleen niet in de vorm van een vast
+RSS-feed per sector.
+
+## Bevinding 4 — WebSearch en investing.com-nieuwspagina's als workaround (17/9/2026)
+
+`WebSearch` (los van `WebFetch`) blijkt niet onderhevig aan dezelfde
+domein-deny-list — vermoedelijk omdat het via een zoek-API loopt, niet via
+een directe fetch naar het brondomein. Live getest:
+
+- Zoekopdracht "semiconductor industry news September 2026" leverde
+  actuele, gedateerde resultaten op mét bronnen van domeinen die via
+  directe `WebFetch` geblokkeerd zijn (EE Times, SIA, Deloitte, SCMP) —
+  de content komt door, ook al zou een rechtstreekse fetch naar die
+  domeinen falen.
+- Zoekopdracht "defense industry news chip demand September 2026" gaf
+  hetzelfde: bruikbare, citeerbare resultaten (Defense One, SIA,
+  Manufacturing Dive) inclusief concrete cijfers (defensie-halfgeleidermarkt
+  $10,73 mrd → $12,01 mrd, 11,9% CAGR).
+- Investing.com's `/news/stock-market-news`- en `/news/technology-news`-
+  pagina's (gewone pagina's, geen RSS) bevatten zelf al concrete
+  sector-headlines: Micron, Intel, AMD (halfgeleiders), de F-35-deal met
+  Saoedi-Arabië (defensie), Crusoe's datacenter-funding (datacenter-infra).
+
+**Praktische conclusie:** een sector-specialist die geen vaste,
+bereikbare RSS-feed heeft, gebruikt in plaats daarvan `WebSearch` met een
+sectorspecifieke zoekopdracht per cyclus (bv. "uranium mining news
+[datum]") — dit levert per definitie al een `bron`-veld (elk resultaat
+heeft een citeerbare URL) en is per ontwerp niet gebonden aan één
+specifiek, mogelijk geblokkeerd domein.
 
 ## Openstaand voor Pijler A
 
-- **Sectorspecifieke vakpers** (halfgeleiders, defensie, datacenters):
-  geen enkele bron bevestigd werkend — nog te onderzoeken (andere
-  domeinen proberen, of overwegen of Google/Bing-achtige geaggregeerde
-  zoekresultaten via `WebSearch` een alternatief zijn voor sectoren zonder
-  eigen bereikbare vakpers).
 - **Stock watchers per naam**: `investing.com/rss/news_25.rss` is
   algemeen, niet gefilterd per holding/watchlist-naam — een per-naam
   aanpak (page-fetch van de company-newspagina per ticker, zoals al
-  gebruikt voor de technische pagina) is nog niet getest voor alle 6
-  holdings + 24 watchlist-namen.
+  gebruikt voor de technische pagina, of `WebSearch` per naam) is nog niet
+  getest voor alle 6 holdings + 24 watchlist-namen.
+- **WebSearch-dekking valideren op méér sectoren** dan de twee getest
+  (halfgeleiders, defensie) — nucleair/uranium en datacenter-infra nog te
+  testen, al is er geen reden om aan te nemen dat die anders zouden
+  uitvallen.
 - Verdere kandidaten testen zodra Paul specifieke bronnen aanlevert die
   hij zelf al leest/vertrouwt.

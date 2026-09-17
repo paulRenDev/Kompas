@@ -427,13 +427,14 @@ RSS-doeldomeinen vóór Pijler A gebouwd wordt.
   (`docs/kompas-rss-signaalscan.md`, Bevinding 3). Bevestigd werkend:
   VRT NWS, NOS, ECB-persberichten, Fed-persberichten, en het volledige
   `investing.com`-domein (RSS-categorieën aandelen/grondstoffen/economie/
-  forex + technische pagina's per ticker). **Kritieke resterende blocker:**
-  geen enkele sector-specifieke vakpersbron (halfgeleiders, defensie,
-  datacenters) is bereikbaar gebleken — enkel investing.com's generieke
-  "commodities"-categorie raakt zijdelings uranium/energie. De
-  sector-specialistenpool heeft dus vandaag te weinig bronnen om
-  daadwerkelijk te draaien voor de meeste sectoren — dit is nu de
-  grootste blocker voor Pijler A, groter dan het ontwerp zelf.
+  forex + technische pagina's per ticker). **Blocker opgelost (zelfde
+  dag):** geen enkele sector-specifieke vakpersbron werkt als vaste
+  RSS-feed, maar `WebSearch` blijkt niet aan dezelfde domein-deny-list
+  onderhevig — live getest op halfgeleiders en defensie, beide gaven
+  actuele, citeerbare resultaten van domeinen die via directe `WebFetch`
+  net geblokkeerd waren. Een sector-specialist zonder eigen bereikbare
+  feed gebruikt dus `WebSearch` met een sectorspecifieke zoekopdracht per
+  cyclus — zie `docs/kompas-rss-signaalscan.md`, Bevinding 4.
 - [x] **Automatisering vs. menselijke review** (17/9/2026): volledig
   autonoom — geen check-in-moment per signaal vóór de synthese-laag.
 - [x] **Architectuur** (17/9/2026): volledig nieuw artifact + databaseschema
