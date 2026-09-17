@@ -67,6 +67,16 @@ tegen worden gelegd.
   enkel tegen de vorige bekende toestand.
 - Cadans: kan onafhankelijk en desgewenst vaker draaien dan Pijler A, zonder
   dat dit ten koste gaat van de signalenmotor.
+- **Aanbevelingshistoriek per watchlist-naam**: elke entry houdt een array
+  bij (datum, aanbeveling, welke rol, reden) — niet enkel de laatste status.
+- **Levenscyclus/opruiming**: geen bevestiging of nieuw signaal over een
+  naam gedurende N cycli (voorlopig: 6 cycli = 3 dagen) → gemarkeerd voor
+  herbeoordeling → van de lijst als niemand het opnieuw bevestigt. Voorkomt
+  dat de watchlist, net als in het oude Kompas, alleen maar aangroeit.
+- **Actieve posities krijgen dezelfde continue behandeling als de
+  watchlist**: elke cyclus een expliciete houd/verkoop/bijkoop-aanbeveling
+  per positie in de synthese-laag, met dezelfde actiedrempel-discipline als
+  decision objects — niet enkel wanneer toevallig een signaal binnenkomt.
 
 Technische verbinding (al werkend): `mcp__Google_Drive__read_file_content`,
 strikt read-only. Drie tabbladen: `live` (actuele PORTEFEUILLE- en
@@ -112,6 +122,56 @@ watchlist-namen).
    totalCost/totalValue/totalGain/gainPct uit de zes actieve posities en
    vergelijk met de sheet's eigen totaalrij — bij afwijking stoppen, nooit
    publiceren met een onverklaard verschil.
+
+## Signaalversheid — geen herhaling zonder wijziging
+
+Directe les uit de diagnose hierboven: een geheugen dat alleen *kan*
+detecteren dat iets al eerder gezegd is, maar publicatie niet blokkeert, is
+decoratie. Daarom, vóór elke publicatie van een signaal:
+
+- Verplichte query tegen `events` voor dezelfde naam/sector: bestaat er al
+  een niet-vervallen signaal met dezelfde kern?
+- Zo ja: alleen opnieuw publiceren bij een materiële wijziging (nieuwe
+  cijfers, technisch niveau gebroken, nieuwe sectordata) — anders wordt het
+  signaal stilzwijgend onderdrukt, nooit herhaald.
+- Deze check is een harde publicatievoorwaarde, net als de reconciliatie in
+  Pijler B — geen los "nice to have".
+
+## Chat met de specialisten
+
+Naast de geautomatiseerde cyclus kan Paul rechtstreeks chatten met elk van
+de vier analistrollen, alsof hij met die specialist praat.
+
+- **Context**: elke chat-thread leest uit dezelfde `events`/`watchlist`/
+  `wallet-positions`-collecties als de synthese-laag — nooit een aparte
+  waarheid opbouwen naast de gepubliceerde pagina.
+- **Consistentie**: een chat-antwoord dat afwijkt van het laatst
+  gepubliceerde synthese-oordeel moet dat expliciet benoemen ("dit wijkt af
+  van de synthese omdat...") — nooit stilzwijgend een ander verhaal
+  vertellen dan de pagina.
+- **Historiek**: chat-geschiedenis per rol wordt bewaard (bv.
+  `chat/<rol>/<thread_id>`) zodat een specialist niet elke keer bij nul
+  begint — met een bewaar-/samenvattingsregel zodat dit niet ongecontroleerd
+  groeit.
+- **Live websearch tijdens chat**: toegestaan en gewenst voor
+  actualiteit, maar begrensd (bv. max N zoekopdrachten per gesprek) —
+  onbegrensde live search per chatbeurt is een kosten- en latency-risico dat
+  de 2x/dag-cyclus niet draagt.
+
+## Anti-bevestigingsbias — uitdaging is een vereiste, geen bijeffect
+
+Elke input in dit systeem (watchlist, portefeuille, zelfs de gevolgde
+sectoren) is afgeleid van wat Paul al bezit of al interessant vindt. Vier
+onafhankelijke rollen lossen het *gemiddelde-tot-vage-consensus*-probleem
+op — ze lossen niet het *enkel lezen over eigen namen*-probleem op.
+
+- Sector specialists krijgen een vast quotum sectoren/thema's **buiten** de
+  portefeuille en watchlist, puur omdat ze bewegen — niet omdat Paul ze al
+  volgt.
+- Een positie die cyclus na cyclus hetzelfde bullish-signaal krijgt zonder
+  ooit tegengeluid, is zelf een waarschuwingssignaal (mogelijke
+  bevestigingsbias in de bronnenselectie, geen marktfeit) en wordt apart
+  gemarkeerd, nooit stil herhaald.
 
 ## Waar de twee pijlers samenkomen
 
@@ -197,6 +257,21 @@ RSS-doeldomeinen vóór Pijler A gebouwd wordt.
 - [x] **Architectuur** (17/9/2026): volledig nieuw artifact + databaseschema
   in een eigen repo (`paulRenDev/kompas`), geen uitbreiding op het
   bestaande Kompas.
+- [x] **Signaalversheid** (17/9/2026): publicatie van een herhaald signaal
+  zonder materiële wijziging wordt onderdrukt — harde publicatievoorwaarde
+  (zie "Signaalversheid" hierboven).
+- [ ] **Chat-scope**: mag een chatgesprek met een specialist ooit de
+  synthese-laag zelf beïnvloeden (bv. een decision object aanpassen), of
+  blijft chat altijd read-only/adviserend ten opzichte van de gepubliceerde
+  pagina? Nog te beslissen.
+- [ ] **Websearch-budget per chatgesprek**: hoeveel live zoekopdrachten per
+  chatbeurt zijn aanvaardbaar qua kost/latency? Nog te beslissen.
+- [ ] **Sectorquotum buiten portefeuille/watchlist**: hoeveel sectoren
+  moeten sector specialists structureel volgen die niets met Paul's huidige
+  posities te maken hebben, puur voor tegengeluid? Nog te beslissen.
+- [ ] **Staleness-drempel watchlist**: is 6 cycli (3 dagen) de juiste
+  termijn vóór een naam gemarkeerd wordt voor herbeoordeling, of moet dit
+  per sector/type verschillen? Nog te beslissen.
 
 ## Status
 
