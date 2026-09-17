@@ -59,7 +59,9 @@ Zie `docs/kompas-rss-signaalscan.md` voor de netwerktoegang-research
 ### Pijler B — de dagelijkse aandelencollectie
 
 Puur feitelijk, geen interpretatie — het fundament waar Pijler A's signalen
-tegen worden gelegd.
+tegen worden gelegd. Dit is de personal adapter achter Poort 2
+(Portefeuillebron); alles hieronder tot en met de vertaallaag is
+adapter-intern en irrelevant voor een toekomstige andere adapter.
 
 - Bron: Google Sheet "Aandelen" (fileId `1l1XSohzp0wS8JAQFaMTGkJe0zrur1BKbZdkbN6MLR7A`),
   read-only, enige bron van waarheid voor holdings-/watchlist-identiteit,
@@ -88,7 +90,13 @@ Watchlist-tabel), `Data` (transactieledger sinds 2015, ACTIVE=1 = huidige
 holdings), `watchListData` (watchlist-ledger, ACTIVE=2 = actieve
 watchlist-namen).
 
-#### Verbindingsinstructies (voor een sessie zonder voorkennis)
+#### Vertaallaag van de Google Sheet-adapter (ruwe dump → Poort 2-vorm)
+
+Onderstaande stappen zetten de ruwe, ongestructureerde pivot-tabeldump van
+de Google Sheet om naar de generieke Poort 2-vorm (naam, aantal, waarde,
+cost, gain, totaalregel). Dit hoort volledig bij deze adapter — een andere
+portefeuillebron (Bolero, een snapshot, een custodian-feed) heeft hier
+niets aan en krijgt zijn eigen, andere vertaallaag of geen enkele.
 
 1. Roep `mcp__Google_Drive__read_file_content` aan met
    `fileId: "1l1XSohzp0wS8JAQFaMTGkJe0zrur1BKbZdkbN6MLR7A"`. Read-only —
@@ -215,11 +223,24 @@ tijdstip}`.
 ### Poort 2 — Portefeuillebron (Pijler B)
 Interface: levert holdings + watchlist + aantallen/cost/waarde/gain, plus
 een eigen totaalregel om tegen te reconciliëren.
-- **Personal adapter (nu)**: Google Sheet "Aandelen" (read-only).
+- **Personal adapter (nu)**: Google Sheet "Aandelen" (read-only). Deze
+  adapter bevat een eigen **vertaallaag** (ruwe pivot-tabeldump → deze
+  generieke vorm) — zie "Vertaallaag van de Google Sheet-adapter" onder
+  Pijler B. Die vertaallaag hoort volledig bij déze adapter, nooit bij de
+  poort-interface of de kern.
 - **Andere adapters (zelfde interface)**: een Bolero-rekening
   (brokerage-API), een portefeuille-snapshot op een vast tijdstip, een
   custodian-feed van een bank — altijd dezelfde vorm: naam, aantal, waarde,
-  cost, gain, en een totaalregel om tegen te reconciliëren.
+  cost, gain, en een totaalregel om tegen te reconciliëren. Zo'n adapter
+  heeft mogelijk een heel andere vertaallaag (of geen: een brokerage-API
+  levert vaak al gestructureerde velden, geen ledger-kolommen om af te
+  tellen) — dat is per adapter, nooit gedeeld.
+
+**Nog niet nu, wél al voorzien:** naast deze vier poorten komt er ooit een
+vijfde dimensie bij — wie de gebruiker/klant is, met de opties en
+klantgegevens die daaraan hangen (nodig zodra dit multi-tenant wordt, zie
+"Klant-identiteit" in Open vragen). Voor Paul's eigen gebruik is er precies
+één impliciete gebruiker, dus dit wordt nu niet ontworpen.
 
 ### Poort 3 — Geheugen/opslag
 Interface: `get`/`list`/`query`/write op events/watchlist/decisions, met
@@ -345,6 +366,21 @@ RSS-doeldomeinen vóór Pijler A gebouwd wordt.
 - [ ] **Staleness-drempel watchlist**: is 6 cycli (3 dagen) de juiste
   termijn vóór een naam gemarkeerd wordt voor herbeoordeling, of moet dit
   per sector/type verschillen? Nog te beslissen.
+- [ ] **Klant-identiteit** (erkend 17/9/2026, niet ontworpen): een vijfde
+  dimensie naast de vier poorten — wie de gebruiker/klant is, met opties en
+  klantgegevens. Voor Paul's eigen gebruik is er precies één impliciete
+  gebruiker; pas relevant zodra dit multi-tenant wordt. Niet nu bouwen.
+- [ ] **Juridisch kader voor autonome aanbevelingen** (erkend 17/9/2026,
+  niet blocking): een manuele review-stap past niet in dit systeem
+  (draait volledig autonoom, zonder mens in de cyclus). Of dat een
+  probleem is, hangt af van wie het aanbiedt en aan wie — een bank die
+  eigen klanten op hun echte portefeuille adviseert zit in
+  gereguleerd-advies-territorium; een fantasyfund/beleggerswedstrijd
+  (geen echt geld, geen adviesrelatie) of financiële journalistiek
+  (algemene modelportefeuille-commentaar, niet aan een geïdentificeerde
+  klant gekoppeld) valt daar doorgaans buiten. Geen juridisch advies —
+  bij een echte bank-uitrol hoort dit door een jurist bevestigd te worden.
+  Voor Paul's persoonlijk gebruik niet van toepassing.
 
 ## Status
 
