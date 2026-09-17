@@ -137,26 +137,27 @@ decoratie. Daarom, vóór elke publicatie van een signaal:
 - Deze check is een harde publicatievoorwaarde, net als de reconciliatie in
   Pijler B — geen los "nice to have".
 
-## Chat met de specialisten
+## Verdieping via Claude — geen chat in de tool zelf (bijgesteld 17/9/2026)
 
-Naast de geautomatiseerde cyclus kan Paul rechtstreeks chatten met elk van
-de vier analistrollen, alsof hij met die specialist praat.
+Geen chatfunctie in de Kompas-pagina zelf. Wanneer iets op de pagina Paul's
+aandacht trekt en hij dieper wil graven, doet hij dat in een gewone
+Claude-conversatie (claude.ai/code), niet in Kompas — precies zoals deze
+sessie nu werkt. Wat daar moet kloppen is niet een nieuwe feature, maar een
+gewoonte: die Claude-sessie moet, wanneer Paul een naam/signaal/sector uit
+Kompas aanhaalt, meteen de context uit de Kompas-database kunnen ophalen in
+plaats van bij nul te beginnen.
 
-- **Context**: elke chat-thread leest uit dezelfde `events`/`watchlist`/
-  `wallet-positions`-collecties als de synthese-laag — nooit een aparte
-  waarheid opbouwen naast de gepubliceerde pagina.
-- **Consistentie**: een chat-antwoord dat afwijkt van het laatst
-  gepubliceerde synthese-oordeel moet dat expliciet benoemen ("dit wijkt af
-  van de synthese omdat...") — nooit stilzwijgend een ander verhaal
-  vertellen dan de pagina.
-- **Historiek**: chat-geschiedenis per rol wordt bewaard (bv.
-  `chat/<rol>/<thread_id>`) zodat een specialist niet elke keer bij nul
-  begint — met een bewaar-/samenvattingsregel zodat dit niet ongecontroleerd
-  groeit.
-- **Live websearch tijdens chat**: toegestaan en gewenst voor
-  actualiteit, maar begrensd (bv. max N zoekopdrachten per gesprek) —
-  onbegrensde live search per chatbeurt is een kosten- en latency-risico dat
-  de 2x/dag-cyclus niet draagt.
+- Elke Claude-sessie die met Kompas te maken heeft, haalt die context op via
+  dezelfde `ArtifactData`-tool tegen dezelfde artifact-url, met
+  `get`/`list`/`query` tegen `events`/`watchlist`/`wallet-positions` — geen
+  apart chat-threadsysteem, geen aparte opslag van gesprekshistoriek per
+  rol. De bestaande `events`-collectie (signaal: wie, wanneer, wat, bron) is
+  het geheugen; een Claude-sessie leest die net als de synthese-laag zelf
+  doet.
+- Live websearch/WebFetch voor verdieping gebeurt gewoon binnen die
+  Claude-conversatie zelf, zoals in elke andere sessie — geen apart
+  budget- of chat-mechanisme nodig, want het is geen los kanaal binnen de
+  tool.
 
 ## Anti-bevestigingsbias — uitdaging is een vereiste, geen bijeffect
 
@@ -260,12 +261,10 @@ RSS-doeldomeinen vóór Pijler A gebouwd wordt.
 - [x] **Signaalversheid** (17/9/2026): publicatie van een herhaald signaal
   zonder materiële wijziging wordt onderdrukt — harde publicatievoorwaarde
   (zie "Signaalversheid" hierboven).
-- [ ] **Chat-scope**: mag een chatgesprek met een specialist ooit de
-  synthese-laag zelf beïnvloeden (bv. een decision object aanpassen), of
-  blijft chat altijd read-only/adviserend ten opzichte van de gepubliceerde
-  pagina? Nog te beslissen.
-- [ ] **Websearch-budget per chatgesprek**: hoeveel live zoekopdrachten per
-  chatbeurt zijn aanvaardbaar qua kost/latency? Nog te beslissen.
+- [x] **Chat-in-de-tool** (17/9/2026): bewust geschrapt — geen chatfunctie
+  in Kompas zelf. Verdieping gebeurt in een gewone Claude-conversatie, die
+  context ophaalt uit de bestaande database (zie "Verdieping via Claude"
+  hierboven).
 - [ ] **Sectorquotum buiten portefeuille/watchlist**: hoeveel sectoren
   moeten sector specialists structureel volgen die niets met Paul's huidige
   posities te maken hebben, puur voor tegengeluid? Nog te beslissen.
