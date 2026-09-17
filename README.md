@@ -32,6 +32,10 @@ kan Pijler A draaien ongeacht wat Pijler B die dag doet, en omgekeerd. Pas
 wanneer beide apart betrouwbaar draaien, komen ze samen in een
 synthese-laag.
 
+Pijler A en Pijler B zijn, architecturaal, de personal-adapters achter twee
+van de vier vervangbare poorten — zie "Architectuur — losse, vervangbare
+componenten" hieronder voor waarom dat onderscheid vanaf dag 1 vastligt.
+
 ### Pijler A — vier analistrollen
 
 Elke rol doorzoekt eigen RSS-bronnen en rapporteert apart, vóór synthese.
@@ -174,6 +178,72 @@ op — ze lossen niet het *enkel lezen over eigen namen*-probleem op.
   bevestigingsbias in de bronnenselectie, geen marktfeit) en wordt apart
   gemarkeerd, nooit stil herhaald.
 
+## Architectuur — losse, vervangbare componenten (17/9/2026)
+
+Kernidee, rechtstreeks uit de bank-PM review: "het zijn toch altijd
+dezelfde dingen waarmee gewerkt wordt" — een signaalbron, een
+portefeuillebron, een geheugen, een publicatiekanaal. Voor Paul is elk
+daarvan vandaag één specifieke keuze (RSS + vier rollen, Google Sheet,
+ArtifactData, Artifact-pagina), maar de synthese-logica mag daar nooit
+rechtstreeks van afhangen. Daarom bestaat Kompas uit een **kern**
+(domeinlogica, nooit vervangbaar) rond vier **poorten** (interfaces), elk
+met vandaag precies één **adapter** (de personal-implementatie), maar
+zonder dat de kern ooit een adapter rechtstreeks aanspreekt.
+
+### De kern — adapter-onafhankelijk
+- Synthese-laag: combineert signalen + portefeuille/watchlist-toestand tot
+  capital map + decision objects.
+- Signaalversheid: dedup-regel tegen het geheugen vóór publicatie.
+- Anti-bevestigingsbias-regels: sectorquotum buiten portefeuille,
+  markering bij herhaald eenzijdig signaal.
+- Watchlist-levenscyclus: aanbevelingshistoriek + staleness-opruiming.
+- Publicatietrio (validatie vóór output).
+
+De kern kent alleen de vier poort-interfaces hieronder — nooit of een
+signaal van RSS komt of van iets anders, nooit of een positie uit een
+Google Sheet komt of van een broker.
+
+### Poort 1 — Signaalbron (Pijler A)
+Interface: levert signalen als `{rol, naam/sector, tekst, bron, brontier,
+tijdstip}`.
+- **Personal adapter (nu)**: vier RSS-gedreven analistrollen (stock
+  watchers, trend viewers, technical stock watchers, sector specialists).
+- **Andere adapter (bv. een bank)**: de eigen signalenengine/researchdesk
+  van die bank — de kern moet niet weten of een signaal van RSS komt of van
+  een intern team, zolang het in dezelfde vorm binnenkomt.
+
+### Poort 2 — Portefeuillebron (Pijler B)
+Interface: levert holdings + watchlist + aantallen/cost/waarde/gain, plus
+een eigen totaalregel om tegen te reconciliëren.
+- **Personal adapter (nu)**: Google Sheet "Aandelen" (read-only).
+- **Andere adapters (zelfde interface)**: een Bolero-rekening
+  (brokerage-API), een portefeuille-snapshot op een vast tijdstip, een
+  custodian-feed van een bank — altijd dezelfde vorm: naam, aantal, waarde,
+  cost, gain, en een totaalregel om tegen te reconciliëren.
+
+### Poort 3 — Geheugen/opslag
+Interface: `get`/`list`/`query`/write op events/watchlist/decisions, met
+versiebeveiliging (`if_version`).
+- **Personal adapter (nu)**: `ArtifactData` tegen de vaste artifact-url.
+- **Andere adapter**: een gedeelde/enterprise database — nodig zodra dit
+  multi-tenant wordt (zie de bank-PM review hiervoor).
+
+### Poort 4 — Publicatiekanaal
+Interface: toon de synthese aan een lezer.
+- **Personal adapter (nu)**: de Artifact HTML-pagina (`Ververs
+  Kompas`-knop, vaste url).
+- **Andere adapter**: een bank-app-scherm, een PDF-rapport, een
+  API-response voor een derde partij.
+
+### Wat dit voor de bouwvolgorde betekent
+Geen wijziging in wát er eerst gebouwd wordt: nog steeds Poort 2's
+personal adapter (Google Sheet) als eerste effectieve implementatie. De
+wijziging is dat die adapter vanaf dag 1 **achter de Poort 2-interface**
+gebouwd wordt, nooit rechtstreeks door de synthese-laag aangeroepen. Zonder
+die scheiding zou elke latere aanpassing (andere portefeuillebron, ander
+signalenteam) dwars door de synthese-logica moeten; met de scheiding
+verandert alleen de adapter.
+
 ## Waar de twee pijlers samenkomen
 
 Een aparte synthese-/aggregatielaag combineert de vier analistoordelen van
@@ -265,6 +335,10 @@ RSS-doeldomeinen vóór Pijler A gebouwd wordt.
   in Kompas zelf. Verdieping gebeurt in een gewone Claude-conversatie, die
   context ophaalt uit de bestaande database (zie "Verdieping via Claude"
   hierboven).
+- [x] **Componentarchitectuur** (17/9/2026): kern + vier vervangbare
+  poorten (signaalbron, portefeuillebron, geheugen, publicatiekanaal), elk
+  met vandaag één personal adapter — zie "Architectuur — losse, vervangbare
+  componenten" hierboven.
 - [ ] **Sectorquotum buiten portefeuille/watchlist**: hoeveel sectoren
   moeten sector specialists structureel volgen die niets met Paul's huidige
   posities te maken hebben, puur voor tegengeluid? Nog te beslissen.
