@@ -213,7 +213,8 @@ Google Sheet komt of van een broker.
 
 ### Poort 1 — Signaalbron (Pijler A)
 Interface: levert signalen als `{rol, naam/sector, tekst, bron, brontier,
-omvang, tijdshorizon, vertrouwensniveau, tijdstip}`.
+omvang, tijdshorizon, databetrouwbaarheid, signaalbetrouwbaarheid,
+tijdstip}` (technische signalen ook: `timeframe`).
 - **Personal adapter (nu)**: vier RSS-gedreven analistrollen (stock
   watchers, trend viewers, technical stock watchers, sector specialists).
 - **Andere adapter (bv. een bank)**: de eigen signalenengine/researchdesk
@@ -238,8 +239,23 @@ mist, wordt niet gepubliceerd:
 - **`tijdshorizon`**: wanneer dit zichtbaar zou moeten worden (volgende
   kwartaalcijfers, komende weken, structureel/jaren) — zonder tijdshorizon
   is een signaal niet te toetsen.
-- **`vertrouwensniveau`**: expliciet speculatief / voorlopig / hoog
-  vertrouwen — nooit stilzwijgend als feit gepresenteerd.
+- **`databetrouwbaarheid`** en **`signaalbetrouwbaarheid`** (gesplitst
+  17/9/2026, uit de technical-analyst-review — vervangt het eerdere,
+  samengevoegde `vertrouwensniveau`): twee losse assen, nooit tot één
+  woord samengevoegd.
+  - `databetrouwbaarheid`: is het onderliggende cijfer correct berekend
+    (bv. een RSI-waarde is deterministisch, dus hoog) — zegt niets over
+    of het iets voorspelt.
+  - `signaalbetrouwbaarheid`: hoe voorspellend is dit soort signaal
+    historisch (technische patronen hebben gekende valse-signalen-ratio's;
+    een speculatieve sector-link heeft dat per definitie niet) — expliciet
+    speculatief / voorlopig / hoog, nooit stilzwijgend als feit
+    gepresenteerd.
+- **`timeframe`** (verplicht, enkel voor technische signalen): het
+  chart-timeframe waarop de indicator berekend is (dag/week/…) — een
+  technisch niveau zonder timeframe is niet te interpreteren; een
+  "Strong Sell" op dagbasis betekent iets anders dan op weekbasis voor een
+  positie die weken tot maanden aangehouden wordt.
 
 ### Poort 2 — Portefeuillebron (Pijler B)
 Interface: levert holdings + watchlist + aantallen/cost/waarde/gain, plus
@@ -398,10 +414,12 @@ RSS-doeldomeinen vóór Pijler A gebouwd wordt.
 - [ ] **Staleness-drempel watchlist**: is 6 cycli (3 dagen) de juiste
   termijn vóór een naam gemarkeerd wordt voor herbeoordeling, of moet dit
   per sector/type verschillen? Nog te beslissen.
-- [x] **Verplichte signaalvelden** (17/9/2026): elk signaal moet omvang,
-  tijdshorizon, vertrouwensniveau en een citeerbare (niet-categorische)
-  bron hebben, anders geen publicatie — zie Poort 1 hierboven. Zonder
-  deze velden kan de synthese-laag geen advies-consensus bouwen.
+- [x] **Verplichte signaalvelden** (17/9/2026, bijgesteld na de
+  technical-analyst-review): elk signaal moet omvang, tijdshorizon,
+  databetrouwbaarheid, signaalbetrouwbaarheid en een citeerbare
+  (niet-categorische) bron hebben, anders geen publicatie; technische
+  signalen ook een `timeframe` — zie Poort 1 hierboven. Zonder deze
+  velden kan de synthese-laag geen advies-consensus bouwen.
 - [ ] **Klant-identiteit** (erkend 17/9/2026, niet ontworpen): een vijfde
   dimensie naast de vier poorten — wie de gebruiker/klant is, met opties en
   klantgegevens. Voor Paul's eigen gebruik is er precies één impliciete
