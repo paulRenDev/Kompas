@@ -1,0 +1,15 @@
+# Kompas dependencies
+# Minimale dependencies voor lokale ontwikkeling en testing
+
+# Voor unit tests
+pytest>=7.0.0
+pytest-cov>=4.0.0
+
+# Voor type checking (optioneel)
+mypy>=1.0.0
+
+# Voor linting (optioneel)
+ruff>=0.1.0
+
+# Voor documentatie generatie (optioneel)
+pdoc>=0.5.0

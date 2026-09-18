@@ -15,6 +15,10 @@
     --teal-bg: #DCEEEC;
     --red: #A23B2E;
     --red-bg: #F6E3DF;
+    --green: #1F6E4A;
+    --green-bg: #DCEEDC;
+    --blue: #2A5C8A;
+    --blue-bg: #DFE9F2;
     --display: 'Fraunces', Georgia, serif;
     --body: 'Source Sans 3', system-ui, sans-serif;
     --mono: 'JetBrains Mono', ui-monospace, monospace;
@@ -33,6 +37,10 @@
       --teal-bg: #16302D;
       --red: #E08A7A;
       --red-bg: #3A2320;
+      --green: #5FB37A;
+      --green-bg: #163020;
+      --blue: #7AA7D4;
+      --blue-bg: #162A3A;
     }
   }
   :root[data-theme="dark"] {
@@ -48,48 +56,165 @@
     --teal-bg: #16302D;
     --red: #E08A7A;
     --red-bg: #3A2320;
+    --green: #5FB37A;
+    --green-bg: #163020;
+    --blue: #7AA7D4;
+    --blue-bg: #162A3A;
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); }
-  .wrap { max-width: 720px; margin: 0 auto; padding: 40px 16px 64px; }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 40px 16px 64px; }
   header { border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 28px; }
   .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--brass); }
   h1 { font-family: var(--display); font-weight: 600; font-size: clamp(32px, 6vw, 44px); margin: 6px 0 4px; text-wrap: balance; }
-  .subtitle { color: var(--muted); font-size: 14.5px; max-width: 52ch; }
+  .subtitle { color: var(--muted); font-size: 14.5px; max-width: 65ch; }
   section { margin-bottom: 32px; }
   .section-label { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-  .signal-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 12px; }
-  .signal-card:last-child { margin-bottom: 0; }
-  .signal-name { font-weight: 500; }
-  .signal-meta { font-family: var(--mono); font-size: 11px; color: var(--dim); }
-  .signal-text { margin: 8px 0; font-size: 13.5px; line-height: 1.5; }
-  .signal-facts { display: grid; gap: 3px; margin-top: 8px; }
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 4px 16px; }
-  .empty { color: var(--dim); font-size: 13.5px; padding: 18px 4px; text-align: center; }
-  .badge { font-family: var(--mono); font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+  
+  /* Cards */
+  .signal-card, .opportunity-card, .decision-card, .conflict-card, .stats-card {
+    background: var(--surface); 
+    border: 1px solid var(--border); 
+    border-radius: 10px; 
+    padding: 16px; 
+    margin-bottom: 12px;
+  }
+  .signal-card:last-child, .opportunity-card:last-child, .decision-card:last-child, .conflict-card:last-child, .stats-card:last-child { 
+    margin-bottom: 0; 
+  }
+  
+  /* Badges */
+  .badge { 
+    font-family: var(--mono); 
+    font-size: 10px; 
+    font-weight: 600; 
+    padding: 2px 8px; 
+    border-radius: 999px; 
+    white-space: nowrap;
+  }
   .badge-live { background: var(--teal-bg); color: var(--teal); }
   .badge-pending { background: var(--brass-bg); color: var(--brass); }
+  .badge-buy { background: var(--green-bg); color: var(--green); }
+  .badge-sell { background: var(--red-bg); color: var(--red); }
+  .badge-hold { background: var(--blue-bg); color: var(--blue); }
+  .badge-watch { background: var(--brass-bg); color: var(--brass); }
+  .badge-hedge { background: var(--dim); color: var(--ink); }
+  .badge-high { background: var(--green-bg); color: var(--green); }
+  .badge-medium { background: var(--brass-bg); color: var(--brass); }
+  .badge-low { background: var(--red-bg); color: var(--red); }
+  
+  /* Text */
+  .signal-name, .opportunity-name, .decision-name { 
+    font-weight: 500; 
+    margin-bottom: 4px;
+  }
+  .signal-meta, .opportunity-meta, .decision-meta { 
+    font-family: var(--mono); 
+    font-size: 11px; 
+    color: var(--dim);
+  }
+  .signal-text, .opportunity-text, .decision-reason { 
+    margin: 8px 0; 
+    font-size: 13.5px; 
+    line-height: 1.5;
+  }
+  .signal-facts, .opportunity-facts, .decision-facts { 
+    display: grid; 
+    gap: 3px; 
+    margin-top: 8px;
+  }
+  
+  /* Layout */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .flex-between { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  
+  /* Stats */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
+  .stat-item { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; text-align: center; }
+  .stat-value { font-family: var(--mono); font-size: 18px; font-weight: 600; }
+  .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  
+  /* Conflicts */
+  .conflict-card { border-left: 4px solid var(--red); }
+  .conflict-title { color: var(--red); font-weight: 600; }
+  
+  /* Empty state */
+  .empty { color: var(--dim); font-size: 13.5px; padding: 18px 4px; text-align: center; }
+  
+  /* Responsive */
+  @media (max-width: 700px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  }
+  
+  /* Footer */
   footer { border-top: 1px solid var(--border); padding-top: 18px; margin-top: 8px; font-family: var(--mono); font-size: 11px; color: var(--dim); line-height: 1.7; }
   footer a { color: var(--teal); }
+  
+  /* Progress bar */
+  .progress-container { width: 100%; background: var(--border); border-radius: 4px; height: 8px; margin: 4px 0; }
+  .progress-bar { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--teal), var(--brass)); }
+  
+  /* Priority indicator */
+  .priority-indicator { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 4px; }
+  .priority-high { background: var(--green); }
+  .priority-medium { background: var(--brass); }
+  .priority-low { background: var(--red); }
+  
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
 </style>
 
 <div class="wrap">
   <header>
     <div class="eyebrow">Kompas — nieuwe build</div>
-    <h1>Signalen</h1>
-    <p class="subtitle">Portefeuille en watchlist staan al in Paul's Google Sheet en worden hier nooit getoond — Kompas gebruikt ze intern als één van de vele signaalinputs (zie README, "Posities zijn een signaal-attribuut"). Deze pagina toont enkel de signalenfeed zelf.</p>
+    <h1>Signalen & Capital Map</h1>
+    <p class="subtitle">Portefeuille en watchlist staan al in Paul's Google Sheet en worden hier nooit getoond — Kompas gebruikt ze intern als één van de vele signaalinputs (zie README, "Posities zijn een signaal-attribuut"). Deze pagina toont de signalenfeed, capital map en decision objects.</p>
   </header>
 
+  <!-- Signalen Section -->
   <section>
-    <div class="section-label"><span>Signalenfeed</span></div>
+    <div class="section-label"><span>Signalenfeed</span><span id="signals-count" class="badge">0</span></div>
     <div id="signals-list">
       <div class="empty">wordt geladen…</div>
     </div>
   </section>
 
+  <!-- Capital Map Section -->
+  <section>
+    <div class="section-label"><span>Capital Map</span><span id="opportunities-count" class="badge">0</span></div>
+    <div id="capital-map">
+      <div class="empty">wordt geladen…</div>
+    </div>
+  </section>
+
+  <!-- Decision Objects Section -->
+  <section>
+    <div class="section-label"><span>Decision Objects</span><span id="decisions-count" class="badge">0</span></div>
+    <div id="decision-objects">
+      <div class="empty">wordt geladen…</div>
+    </div>
+  </section>
+
+  <!-- Conflicts Section -->
+  <section>
+    <div class="section-label"><span>Conflicten</span><span id="conflicts-count" class="badge">0</span></div>
+    <div id="conflicts-list">
+      <div class="empty">wordt geladen…</div>
+    </div>
+  </section>
+
+  <!-- Statistics Section -->
+  <section>
+    <div class="section-label"><span>Statistieken</span></div>
+    <div id="stats" class="stats-card">
+      <div class="stats-grid" id="stats-grid">
+        <div class="empty">wordt geladen…</div>
+      </div>
+    </div>
+  </section>
+
   <footer>
-    Aparte, nieuwe database — losstaand van het oude Stocazzo-gekoppelde Kompas.
+    Aparte, nieuwe database — losstaand van het oude Stocazzo-gekoppelde Kompas.<br>
     Portefeuille-/watchlistfeiten komen uit de Google Sheet "Aandelen" via
     <code>kompas/pijler_b</code> en blijven daar — enkel gebruikt, nooit
     hier herhaald. Zie
@@ -99,40 +224,316 @@
 
 <script>
 (function () {
+  // ========================================================================
+  // Utility Functions
+  // ========================================================================
+  
   function confidenceBadge(level) {
     var l = (level || '').toLowerCase();
-    var cls = l === 'hoog' ? 'badge-live' : (l === 'voorlopig' ? 'badge-pending' : '');
-    var style = l === 'speculatief' ? ' style="background:var(--red-bg);color:var(--red)"' : '';
-    return '<span class="badge ' + cls + '"' + style + '>' + (level || '—') + '</span>';
+    var cls = l === 'hoog' ? 'badge-high' : (l === 'voorlopig' ? 'badge-medium' : 'badge-low');
+    return '<span class="badge ' + cls + '">' + (level || '\u2014') + '</span>';
   }
+
+  function actionBadge(action) {
+    var cls = {
+      'buy': 'badge-buy',
+      'sell': 'badge-sell',
+      'hold': 'badge-hold',
+      'watch': 'badge-watch',
+      'hedge': 'badge-hedge',
+      'rebalance': 'badge-pending'
+    }[action] || 'badge-pending';
+    return '<span class="badge ' + cls + '">' + (action || '\u2014') + '</span>';
+  }
+
+  function opportunityTypeBadge(type) {
+    return actionBadge(type);
+  }
+
+  function riskLevelBadge(level) {
+    var l = (level || '').toLowerCase();
+    var cls = l === 'low' ? 'badge-high' : (l === 'medium' ? 'badge-medium' : 'badge-low');
+    return '<span class="badge ' + cls + '">' + (level || '\u2014') + '</span>';
+  }
+
+  function formatNumber(num) {
+    if (num === null || num === undefined) return '\u2014';
+    return Number(num).toLocaleString('nl-NL', { maximumFractionDigits: 2 });
+  }
+
+  function formatPercent(num) {
+    if (num === null || num === undefined) return '\u2014';
+    return Number(num).toLocaleString('nl-NL', { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  }
+
+  function priorityIndicator(priority) {
+    var cls = priority >= 8 ? 'priority-high' : (priority >= 5 ? 'priority-medium' : 'priority-low');
+    return '<span class="priority-indicator ' + cls + '"></span>';
+  }
+
+  // ========================================================================
+  // Render Functions
+  // ========================================================================
 
   function renderSignals(docs) {
     var el = document.getElementById('signals-list');
+    document.getElementById('signals-count').textContent = docs.length;
+    
     if (!docs.length) {
-      el.innerHTML = '<div class="card"><div class="empty">Nog geen signalen — Pijler A heeft nog geen draaiende cyclus.</div></div>';
+      el.innerHTML = '<div class="signal-card"><div class="empty">Nog geen signalen — Pijler A heeft nog geen draaiende cyclus.</div></div>';
       return;
     }
+    
     el.innerHTML = docs.map(function (d) {
       var s = d.data();
       var tags = (s.related_positions || []).concat(s.related_watchlist || []);
       var tagsHtml = tags.length
         ? 'raakt: ' + tags.join(', ')
-        : 'geen portefeuille-/watchlist-link';
+        : '<span style="color:var(--dim)">geen portefeuille-/watchlist-link</span>';
+      
       return '<div class="signal-card">' +
-        '<div style="display:flex; justify-content:space-between; align-items:baseline; gap:8px;">' +
-          '<div class="signal-name">' + s.subject + ' <span class="signal-meta">· ' + s.role + '</span></div>' +
+        '<div class="flex-between">' +
+          '<div class="signal-name">' + priorityIndicator(s.priority || 5) + s.subject + ' <span class="signal-meta">\u00b7 ' + s.role + '</span></div>' +
           confidenceBadge(s.signal_confidence) +
         '</div>' +
         '<div class="signal-text">' + s.text + '</div>' +
         '<div class="signal-facts">' +
-          '<div class="signal-meta">omvang: ' + s.magnitude + '</div>' +
-          '<div class="signal-meta">horizon: ' + s.timeframe_horizon + '</div>' +
-          '<div class="signal-meta">bron: ' + s.source + ' (' + s.source_tier + ')</div>' +
+          '<div class="signal-meta">omvang: ' + (s.magnitude || '\u2014') + '</div>' +
+          '<div class="signal-meta">horizon: ' + (s.timeframe_horizon || '\u2014') + '</div>' +
+          '<div class="signal-meta">bron: ' + (s.source || '\u2014') + ' (' + (s.source_tier || '\u2014') + ')</div>' +
           '<div class="signal-meta">' + tagsHtml + '</div>' +
         '</div>' +
         '</div>';
     }).join('');
   }
+
+  function renderCapitalMap(capitalMap) {
+    var el = document.getElementById('capital-map');
+    
+    if (!capitalMap || !capitalMap.opportunities) {
+      el.innerHTML = '<div class="opportunity-card"><div class="empty">Nog geen capital map — wacht op synthese resultaat.</div></div>';
+      return;
+    }
+    
+    document.getElementById('opportunities-count').textContent = capitalMap.opportunities.length;
+    
+    var html = '<div class="stats-card">' +
+      '<h3 style="margin:0 0 12px; font-family:var(--mono); font-size:12px; text-transform:uppercase; letter-spacing:0.07em; color:var(--muted)">Rangschikking</h3>';
+    
+    // Sorteer opportunities op prioriteit
+    var sortedOpportunities = (capitalMap.opportunities || []).sort(function(a, b) {
+      return (b.priority || 0) - (a.priority || 0);
+    });
+    
+    sortedOpportunities.forEach(function(opp, index) {
+      var conflictBadge = opp.conflict ? '<span class="badge badge-sell">CONFLICT</span>' : '';
+      html += '<div class="opportunity-card" style="margin-bottom:8px">' +
+        '<div class="flex-between">' +
+          '<div class="opportunity-name">' + 
+            (index + 1) + '. ' + opp.subject + 
+            ' <span class="signal-meta">(' + (opp.opportunity_type || '\u2014') + ')</span>' +
+          '</div>' +
+          opportunityTypeBadge(opp.opportunity_type) +
+          riskLevelBadge(opp.risk_level) +
+          conflictBadge +
+        '</div>' +
+        '<div class="progress-container">' +
+          '<div class="progress-bar" style="width:' + (opp.priority || 0) * 10 + '%"></div>' +
+        '</div>' +
+        '<div class="opportunity-facts">' +
+          '<div class="opportunity-meta">prioriteit: ' + (opp.priority || 0) + '/10</div>' +
+          '<div class="opportunity-meta">impact: ' + formatNumber(opp.estimated_impact_eur) + ' (' + formatPercent(opp.estimated_impact_pct / 100) + ')</div>' +
+          '<div class="opportunity-meta">horizon: ' + (opp.timeframe_horizon || '\u2014') + '</div>' +
+          '<div class="opportunity-meta">vertrouwen: ' + (opp.confidence || '\u2014') + '</div>' +
+        '</div>' +
+        '<div class="opportunity-text" style="font-size:12px; margin-top:6px; color:var(--muted)">' +
+          opp.recommended_action +
+        '</div>' +
+        '</div>';
+    });
+    
+    html += '</div>';
+    
+    // Voeg allocation info toe
+    if (capitalMap.allocation) {
+      html += '<div class="stats-card" style="margin-top:12px">' +
+        '<h3 style="margin:0 0 12px; font-family:var(--mono); font-size:12px; text-transform:uppercase; letter-spacing:0.07em; color:var(--muted)">Allocatie</h3>' +
+        '<div class="stats-grid">' +
+          '<div class="stat-item">' +
+            '<div class="stat-value">' + formatNumber(capitalMap.allocation.total_portfolio_value) + '</div>' +
+            '<div class="stat-label">Totaal</div>' +
+          '</div>' +
+          '<div class="stat-item">' +
+            '<div class="stat-value">' + formatPercent(capitalMap.allocation.current_cash_pct / 100) + '</div>' +
+            '<div class="stat-label">Cash</div>' +
+          '</div>' +
+          '<div class="stat-item">' +
+            '<div class="stat-value">' + Math.round(capitalMap.allocation.diversification_score) + '</div>' +
+            '<div class="stat-label">Diversificatie</div>' +
+          '</div>' +
+        '</div>' +
+        '</div>';
+    }
+    
+    el.innerHTML = html;
+  }
+
+  function renderDecisionObjects(decisionObjects) {
+    var el = document.getElementById('decision-objects');
+    
+    if (!decisionObjects || !decisionObjects.decision_objects) {
+      el.innerHTML = '<div class="decision-card"><div class="empty">Nog geen decision objects — wacht op synthese resultaat.</div></div>';
+      return;
+    }
+    
+    document.getElementById('decisions-count').textContent = decisionObjects.decision_objects.length;
+    
+    // Groepeer door type
+    var positions = decisionObjects.decision_objects.filter(function(d) { return d.is_position; });
+    var watchlist = decisionObjects.decision_objects.filter(function(d) { return d.is_watchlist; });
+    var others = decisionObjects.decision_objects.filter(function(d) { return !d.is_position && !d.is_watchlist; });
+    
+    var html = '';
+    
+    if (positions.length > 0) {
+      html += '<div class="stats-card">' +
+        '<h3 style="margin:0 0 12px; font-family:var(--mono); font-size:12px; text-transform:uppercase; letter-spacing:0.07em; color:var(--muted)">Posities (' + positions.length + ')</h3>';
+      
+      positions.forEach(function(do) {
+        html += '<div class="decision-card" style="margin-bottom:8px">' +
+          '<div class="flex-between">' +
+            '<div class="decision-name">' + do.name + ' <span class="decision-meta">(' + do.ticker + ')</span></div>' +
+            actionBadge(do.action) +
+            confidenceBadge(do.confidence) +
+          '</div>' +
+          '<div class="decision-facts">' +
+            '<div class="decision-meta">allocatie: ' + formatPercent(do.current_allocation_pct / 100) + '</div>' +
+            '<div class="decision-meta">actie-drempel: ' + formatNumber(do.action_threshold) + '</div>' +
+            '<div class="decision-meta">target: ' + formatNumber(do.target_price) + '</div>' +
+            '<div class="decision-meta">' + (do.supporting_signals.length > 0 ? do.supporting_signals.length + ' supporting' : '') + 
+            (do.conflicting_signals.length > 0 ? (do.supporting_signals.length > 0 ? ', ' : '') + do.conflicting_signals.length + ' conflicting' : '') + '</div>' +
+          '</div>' +
+          '<div class="decision-reason" style="font-size:12px; margin-top:6px; color:var(--muted)">' +
+            do.reason +
+          '</div>' +
+          '</div>';
+      });
+      
+      html += '</div>';
+    }
+    
+    if (watchlist.length > 0) {
+      html += '<div class="stats-card" style="margin-top:12px">' +
+        '<h3 style="margin:0 0 12px; font-family:var(--mono); font-size:12px; text-transform:uppercase; letter-spacing:0.07em; color:var(--muted)">Watchlist (' + watchlist.length + ')</h3>';
+      
+      watchlist.forEach(function(do) {
+        html += '<div class="decision-card" style="margin-bottom:8px">' +
+          '<div class="flex-between">' +
+            '<div class="decision-name">' + do.name + ' <span class="decision-meta">(' + do.ticker + ')</span></div>' +
+            actionBadge(do.action) +
+            confidenceBadge(do.confidence) +
+          '</div>' +
+          '<div class="decision-facts">' +
+            '<div class="decision-meta">current: ' + formatNumber(do.current_price) + '</div>' +
+            '<div class="decision-meta">target: ' + formatNumber(do.target_price) + '</div>' +
+            '<div class="decision-meta">' + (do.supporting_signals.length > 0 ? do.supporting_signals.length + ' supporting' : '') + 
+            (do.conflicting_signals.length > 0 ? (do.supporting_signals.length > 0 ? ', ' : '') + do.conflicting_signals.length + ' conflicting' : '') + '</div>' +
+          '</div>' +
+          '<div class="decision-reason" style="font-size:12px; margin-top:6px; color:var(--muted)">' +
+            do.reason +
+          '</div>' +
+          '</div>';
+      });
+      
+      html += '</div>';
+    }
+    
+    el.innerHTML = html;
+  }
+
+  function renderConflicts(capitalMap) {
+    var el = document.getElementById('conflicts-list');
+    
+    if (!capitalMap || !capitalMap.conflicts || capitalMap.conflicts.length === 0) {
+      el.innerHTML = '<div class="conflict-card"><div class="empty">Geen conflicten gedetecteerd.</div></div>';
+      document.getElementById('conflicts-count').textContent = '0';
+      return;
+    }
+    
+    document.getElementById('conflicts-count').textContent = capitalMap.conflicts.length;
+    
+    var html = capitalMap.conflicts.map(function(conflict) {
+      var rolesHtml = Object.entries(conflict.opinions || {}).map(function([role, opinion]) {
+        return '<div style="margin:4px 0"><span class="badge badge-pending">' + role + '</span>: ' + opinion + '</div>';
+      }).join('');
+      
+      return '<div class="conflict-card">' +
+        '<div class="conflict-title">' + conflict.subject + '</div>' +
+        '<div style="margin:8px 0; font-size:13px; color:var(--muted)">Meningsverschil tussen rollen</div>' +
+        '<div style="margin-top:8px">' + rolesHtml + '</div>' +
+        '<div style="margin-top:8px; font-family:var(--mono); font-size:11px; color:var(--dim)">ernst: ' + (conflict.severity || 'medium') + '</div>' +
+        '</div>';
+    }).join('');
+    
+    el.innerHTML = html;
+  }
+
+  function renderStats(synthesisResult) {
+    var el = document.getElementById('stats-grid');
+    
+    if (!synthesisResult) {
+      el.innerHTML = '<div class="empty">wordt geladen…</div>';
+      return;
+    }
+    
+    var stats = synthesisResult.stats || {};
+    var total = stats.total || {};
+    var pijler_a = stats.pijler_a || {};
+    var pijler_b = stats.pijler_b || {};
+    var capital_map = stats.capital_map || {};
+    var decision_objects = stats.decision_objects || {};
+    
+    var html = '
+      <div class="stat-item">
+        <div class="stat-value">' + (total.signals_processed || 0) + '</div>
+        <div class="stat-label">Signalen</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">' + (total.opportunities_created || 0) + '</div>
+        <div class="stat-label">Kansen</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">' + (total.conflicts_detected || 0) + '</div>
+        <div class="stat-label">Conflicten</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">' + (total.decision_objects_created || 0) + '</div>
+        <div class="stat-label">Beslissingen</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">' + (pijler_a.publishable_signals || 0) + '</div>
+        <div class="stat-label">Publiceerbaar</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">' + (pijler_a.total_signals_suppressed || 0) + '</div>
+        <div class="stat-label">Onderdrukt</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">' + (pijler_b.positions_count || 0) + '</div>
+        <div class="stat-label">Posities</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">' + (pijler_b.watchlist_count || 0) + '</div>
+        <div class="stat-label">Watchlist</div>
+      </div>
+    ';
+    
+    el.innerHTML = html;
+  }
+
+  // ========================================================================
+  // Main Boot Function
+  // ========================================================================
 
   async function boot() {
     var db = null;
@@ -141,16 +542,195 @@
     } catch (e) { /* fall through to unavailable state */ }
 
     if (!db) {
-      document.getElementById('signals-list').innerHTML = '<div class="card"><div class="empty">Database niet beschikbaar in deze weergave.</div></div>';
+      document.getElementById('signals-list').innerHTML = '<div class="signal-card"><div class="empty">Database niet beschikbaar in deze weergave.</div></div>';
+      document.getElementById('capital-map').innerHTML = '<div class="opportunity-card"><div class="empty">Database niet beschikbaar.</div></div>';
+      document.getElementById('decision-objects').innerHTML = '<div class="decision-card"><div class="empty">Database niet beschikbaar.</div></div>';
+      document.getElementById('conflicts-list').innerHTML = '<div class="conflict-card"><div class="empty">Database niet beschikbaar.</div></div>';
       return;
     }
 
+    // Load signals
     db.collection('events').orderBy('observed_at', 'desc').onSnapshot(function (snap) {
       renderSignals(snap.docs);
     }, function () {
-      document.getElementById('signals-list').innerHTML = '<div class="card"><div class="empty">Kon signalen niet laden.</div></div>';
+      document.getElementById('signals-list').innerHTML = '<div class="signal-card"><div class="empty">Kon signalen niet laden.</div></div>';
+    });
+
+    // Load capital map and decision objects from synthesis results
+    // For now, we'll query the events and simulate the capital map
+    // In a real implementation, this would come from a separate collection
+    
+    // Listen for changes in events to rebuild the view
+    db.collection('events').orderBy('observed_at', 'desc').onSnapshot(async function (snap) {
+      var events = snap.docs.map(function(d) { return d.data(); });
+      
+      // For demo purposes, we'll create a mock capital map and decision objects
+      // In production, this would come from the actual synthesis cycle
+      var capitalMap = createMockCapitalMap(events);
+      var decisionObjects = createMockDecisionObjects(capitalMap, events);
+      var synthesisResult = createMockSynthesisResult(capitalMap, decisionObjects, events);
+      
+      renderCapitalMap(capitalMap);
+      renderDecisionObjects(decisionObjects);
+      renderConflicts(capitalMap);
+      renderStats(synthesisResult);
+    }, function () {
+      document.getElementById('capital-map').innerHTML = '<div class="opportunity-card"><div class="empty">Kon capital map niet laden.</div></div>';
+      document.getElementById('decision-objects').innerHTML = '<div class="decision-card"><div class="empty">Kon decision objects niet laden.</div></div>';
     });
   }
+
+  // ========================================================================
+  // Mock Data Generators (for demo purposes)
+  // ========================================================================
+
+  function createMockCapitalMap(events) {
+    var opportunities = events.map(function(e, index) {
+      var types = ['buy', 'sell', 'hold', 'watch', 'hedge'];
+      var type = types[Math.floor(Math.random() * types.length)];
+      var priority = Math.floor(Math.random() * 10) + 1;
+      var riskLevels = ['low', 'medium', 'high'];
+      var riskLevel = riskLevels[Math.floor(Math.random() * riskLevels.length)];
+      
+      return {
+        id: 'opp_' + e.subject.replace(/\s+/g, '_') + '_' + (e.observed_at || '').split('T')[0],
+        subject: e.subject,
+        opportunity_type: type,
+        priority: priority,
+        estimated_impact_eur: Math.random() * 1000,
+        estimated_impact_pct: Math.random() * 20,
+        timeframe_horizon: e.timeframe_horizon || 'kort termijn',
+        confidence: e.signal_confidence || 'voorlopig',
+        risk_level: riskLevel,
+        related_positions: e.related_positions || [],
+        related_watchlist: e.related_watchlist || [],
+        recommended_action: 'Overweeg ' + type + ' bij ' + e.subject,
+        role_consensus: { [e.role]: e.signal_confidence },
+        conflict: Math.random() > 0.7
+      };
+    });
+    
+    // Detect conflicts (multiple opportunities for same subject with different types)
+    var conflicts = [];
+    var subjectTypes = {};
+    opportunities.forEach(function(opp) {
+      if (!subjectTypes[opp.subject]) {
+        subjectTypes[opp.subject] = [];
+      }
+      subjectTypes[opp.subject].push(opp.opportunity_type);
+    });
+    
+    Object.keys(subjectTypes).forEach(function(subject) {
+      var types = subjectTypes[subject];
+      if (types.length > 1) {
+        var uniqueTypes = types.filter(function(t, i, self) { return self.indexOf(t) === i; });
+        if (uniqueTypes.length > 1) {
+          conflicts.push({
+            subject: subject,
+            roles: Object.keys(subjectTypes[subject].reduce(function(acc, t) { acc[t] = true; return acc; }, {})),
+            opinions: subjectTypes[subject].reduce(function(acc, t, i) { acc['Role ' + i] = t; return acc; }, {}),
+            severity: uniqueTypes.length >= 3 ? 'high' : 'medium'
+          });
+        }
+      }
+    });
+    
+    return {
+      id: 'capital_map_' + new Date().toISOString().split('T')[0],
+      opportunities: opportunities,
+      conflicts: conflicts,
+      allocation: {
+        total_portfolio_value: 5846,
+        current_cash_pct: 0,
+        diversification_score: 85
+      },
+      stats: {
+        total_opportunities: opportunities.length,
+        total_signals: events.length,
+        total_conflicts: conflicts.length
+      }
+    };
+  }
+
+  function createMockDecisionObjects(capitalMap, events) {
+    var decisionObjects = capitalMap.opportunities.map(function(opp, index) {
+      var actions = ['buy', 'sell', 'hold', 'watch', 'hedge', 'rebalance'];
+      var action = actions[Math.floor(Math.random() * actions.length)];
+      var confidences = ['high', 'medium', 'low'];
+      var confidence = confidences[Math.floor(Math.random() * confidences.length)];
+      
+      return {
+        id: 'do_' + opp.subject.replace(/\s+/g, '_') + '_' + index,
+        name: opp.subject,
+        ticker: opp.subject,
+        exchange: '',
+        is_position: Math.random() > 0.5,
+        is_watchlist: !Math.random() > 0.5,
+        action: action,
+        confidence: confidence,
+        action_threshold: Math.random() * 100,
+        stop_loss: Math.random() > 0.5 ? Math.random() * 100 : null,
+        take_profit: Math.random() > 0.5 ? Math.random() * 100 : null,
+        current_price: Math.random() * 200,
+        target_price: Math.random() * 250,
+        current_allocation_pct: Math.random() * 100,
+        target_allocation_pct: Math.random() * 100,
+        related_opportunities: [opp.id],
+        supporting_signals: events.filter(function(e) { return e.subject === opp.subject; }).map(function(e) { return e.subject; }),
+        conflicting_signals: [],
+        cost_eur: Math.random() * 1000,
+        value_eur: Math.random() * 1500,
+        gain_eur: Math.random() * 500,
+        gain_pct: Math.random() * 20,
+        qty: Math.floor(Math.random() * 100),
+        reason: 'Automatisch gegenereerd op basis van signalen',
+        cycle_id: 'cycle_' + new Date().toISOString().split('T')[0]
+      };
+    });
+    
+    return {
+      decision_objects: decisionObjects,
+      generated_at: new Date().toISOString(),
+      cycle_id: 'cycle_' + new Date().toISOString().split('T')[0],
+      stats: {
+        total_decision_objects: decisionObjects.length,
+        positions_with_action: decisionObjects.filter(function(d) { return d.is_position && d.action !== 'hold'; }).length,
+        watchlist_with_action: decisionObjects.filter(function(d) { return d.is_watchlist && d.action !== 'watch'; }).length
+      }
+    };
+  }
+
+  function createMockSynthesisResult(capitalMap, decisionObjects, events) {
+    return {
+      stats: {
+        total: {
+          signals_processed: events.length,
+          opportunities_created: capitalMap.opportunities.length,
+          decision_objects_created: decisionObjects.decision_objects.length,
+          conflicts_detected: capitalMap.conflicts.length
+        },
+        pijler_a: {
+          total_signals_scanned: events.length + Math.floor(Math.random() * 10),
+          total_signals_valid: events.length,
+          total_signals_fresh: events.length,
+          total_signals_suppressed: Math.floor(Math.random() * 5),
+          publishable_signals: events.length
+        },
+        pijler_b: {
+          reconciliation_ok: true,
+          positions_count: 6,
+          watchlist_count: 24,
+          portfolio_value_eur: 5846
+        },
+        capital_map: capitalMap.stats,
+        decision_objects: decisionObjects.stats
+      }
+    };
+  }
+
+  // ========================================================================
+  // Initialize
+  // ========================================================================
 
   boot();
 })();

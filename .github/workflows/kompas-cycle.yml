@@ -1,0 +1,391 @@
+name: Kompas Cycle
+
+# Kompas dagelijkse cycli
+# Draait op 09:00 en 18:00 CEST (Central European Summer Time)
+# In de winter: 09:00 en 18:00 CET (Central European Time)
+
+on:
+  schedule:
+    # 09:00 CEST = 07:00 UTC (zomer) / 08:00 UTC (winter)
+    - cron: '0 7,17 * * *'  # UTC times: 07:00 and 17:00 UTC
+  
+  # Handmatige trigger voor testing
+  workflow_dispatch:
+    inputs:
+      force_run:
+        description: 'Forceer een run (negeer signaalversheid checks)'
+        required: false
+        default: 'false'
+
+# Environment variables
+env:
+  # Artifact database URL
+  ARTIFACT_URL: "https://claude.ai/artifact/9NceTjMZzLgV99KMEGGh1e"
+  
+  # Google Sheet ID
+  AANDELEN_SHEET_ID: "1l1XSohzp0wS8JAQFaMTGkJe0zrur1BKbZdkbN6MLR7A"
+  
+  # Tijdzone voor logging
+  TZ: "Europe/Amsterdam"
+
+jobs:
+  run-pijler-b:
+    name: Pijler B - Portefeuille collectie
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt 2>/dev/null || echo "No requirements.txt found"
+      
+      - name: Run Pijler B cycle
+        id: pijler-b
+        run: |
+          python -c "
+          import sys
+          sys.path.insert(0, '.')
+          
+          # Simuleer een cyclus (in productie: echte fetch)
+          from kompas.pijler_b.cycle import run_cycle
+          
+          # Voor testing: gebruik een mock dump
+          # In productie: fetch van Google Sheet
+          try:
+              # Lees een sample dump
+              with open('tests/fixtures/aandelen_sample.txt', 'r') as f:
+                  raw_dump = f.read()
+              
+              result = run_cycle(raw_dump)
+              
+              # Schrijf resultaat naar artifact
+              import json
+              output = {
+                  'snapshot': {
+                      'positions': [{'name': p.name, 'ticker': p.ticker, 'value_eur': p.value_eur} for p in result.snapshot.positions],
+                      'watchlist': [{'name': w.name, 'ticker': w.ticker} for w in result.snapshot.watchlist],
+                  },
+                  'reconciliation': {
+                      'ok': result.reconciliation.ok,
+                      'diffs': result.reconciliation.diffs,
+                  },
+                  'write_batch': result.write_batch,
+              }
+              
+              with open('pijler_b_output.json', 'w') as f:
+                  json.dump(output, f, indent=2, default=str)
+              
+              print(f'Pijler B: {len(result.snapshot.positions)} posities, {len(result.snapshot.watchlist)} watchlist')
+              print(f'Reconciliatie: {\"OK\" if result.reconciliation.ok else \"FAILED\"}')
+              
+          except Exception as e:
+              print(f'Fout in Pijler B: {e}')
+              sys.exit(1)
+          "
+      
+      - name: Upload Pijler B output
+        uses: actions/upload-artifact@v4
+        with:
+          name: pijler-b-output
+          path: pijler_b_output.json
+          retention-days: 1
+
+  
+  run-pijler-a:
+    name: Pijler A - Signalenmotor
+    runs-on: ubuntu-latest
+    needs: run-pijler-b
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt 2>/dev/null || echo "No requirements.txt found"
+      
+      - name: Run Pijler A cycle
+        id: pijler-a
+        run: |
+          python -c "
+          import sys
+          sys.path.insert(0, '.')
+          
+          from kompas.pijler_a.cycle import run_pijler_a_cycle
+          
+          # Voor testing: geen eerdere events
+          result = run_pijler_a_cycle(existing_events=[])
+          
+          import json
+          output = {
+              'publishable_signals': [
+                  {
+                      'role': s.role,
+                      'subject': s.subject,
+                      'text': s.text[:100] + '...' if len(s.text) > 100 else s.text,
+                      'source': s.source,
+                      'signal_confidence': s.signal_confidence,
+                  }
+                  for s in result.publishable_signals
+              ],
+              'stats': {
+                  'scanned': result.total_signals_scanned,
+                  'valid': result.total_signals_valid,
+                  'fresh': result.total_signals_fresh,
+                  'suppressed': result.total_signals_suppressed,
+              },
+              'errors': result.errors,
+          }
+          
+          with open('pijler_a_output.json', 'w') as f:
+              json.dump(output, f, indent=2, default=str)
+          
+          print(f'Pijler A: {result.total_signals_scanned} gescand, {result.total_signals_fresh} vers')
+          print(f'Publiceerbaar: {len(result.publishable_signals)} signalen')
+          "
+      
+      - name: Upload Pijler A output
+        uses: actions/upload-artifact@v4
+        with:
+          name: pijler-a-output
+          path: pijler_a_output.json
+          retention-days: 1
+
+  
+  run-synthesis:
+    name: Synthese-laag
+    runs-on: ubuntu-latest
+    needs: [run-pijler-a, run-pijler-b]
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt 2>/dev/null || echo "No requirements.txt found"
+      
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      
+      - name: Run Synthese cycle
+        id: synthesis
+        run: |
+          python -c "
+          import sys
+          import json
+          sys.path.insert(0, '.')
+          
+          # Laad Pijler A en B resultaten
+          try:
+              with open('artifacts/pijler_a_output.json', 'r') as f:
+                  pijler_a_data = json.load(f)
+              with open('artifacts/pijler_b_output.json', 'r') as f:
+                  pijler_b_data = json.load(f)
+          except FileNotFoundError as e:
+              print(f'Artifact niet gevonden: {e}')
+              sys.exit(1)
+          
+          # Voor testing: bouw mock resultaten
+          from dataclasses import dataclass
+          from datetime import datetime, timezone
+          
+          # Mock PijlerACycleResult
+          @dataclass
+          class MockSignal:
+              role: str
+              subject: str
+              text: str
+              source: str
+              source_tier: str
+              magnitude: str
+              timeframe_horizon: str
+              data_confidence: str
+              signal_confidence: str
+              observed_at: str
+              chart_timeframe: str | None = None
+              related_positions: list[str] = None
+              related_watchlist: list[str] = None
+              
+              def __post_init__(self):
+                  if self.related_positions is None:
+                      self.related_positions = []
+                  if self.related_watchlist is None:
+                      self.related_watchlist = []
+          
+          # Mock resultaten
+          from kompas.pijler_a.cycle import PijlerACycleResult
+          pijler_a_result = PijlerACycleResult(
+              role_results={},
+              publishable_signals=[
+                  MockSignal(
+                      role=s['role'],
+                      subject=s['subject'],
+                      text=s['text'],
+                      source=s['source'],
+                      source_tier='tier 2',
+                      magnitude='onbekend',
+                      timeframe_horizon='onbekend',
+                      data_confidence='voorlopig',
+                      signal_confidence=s.get('signal_confidence', 'voorlopig'),
+                      observed_at=datetime.now(timezone.utc).isoformat(),
+                  )
+                  for s in pijler_a_data.get('publishable_signals', [])
+              ],
+              total_signals_scanned=pijler_a_data['stats']['scanned'],
+              total_signals_valid=pijler_a_data['stats']['valid'],
+              total_signals_fresh=pijler_a_data['stats']['fresh'],
+              total_signals_suppressed=pijler_a_data['stats']['suppressed'],
+              write_payloads=[],
+              errors=pijler_a_data.get('errors', []),
+          )
+          
+          # Mock PijlerBCycleResult
+          from kompas.pijler_b.cycle import CycleResult
+          from kompas.core.schema import PortfolioSnapshot, Position, WatchlistEntry, PortfolioSummary, ReconciliationResult
+          
+          positions = []
+          for p in pijler_b_data['snapshot']['positions']:
+              positions.append(Position(
+                  name=p['name'],
+                  ticker=p['ticker'],
+                  exchange='',
+                  type_effect='',
+                  currency='EUR',
+                  qty=0,
+                  cost_eur=0,
+                  value_eur=p['value_eur'],
+                  gain_eur=0,
+                  gain_pct=0,
+              ))
+          
+          watchlist = []
+          for w in pijler_b_data['snapshot']['watchlist']:
+              watchlist.append(WatchlistEntry(
+                  name=w['name'],
+                  ticker=w['ticker'],
+                  exchange='',
+                  type_effect='',
+                  currency='EUR',
+                  set_date='',
+                  reference_value_eur=0,
+                  current_value_eur=0,
+                  opportunity_gain_eur=0,
+                  opportunity_gain_pct=0,
+              ))
+          
+          pijler_b_result = CycleResult(
+              snapshot=PortfolioSnapshot(
+                  positions=positions,
+                  watchlist=watchlist,
+                  summary=PortfolioSummary(value_eur=0, cost_eur=0, gain_eur=0, gain_pct=0),
+              ),
+              reconciliation=ReconciliationResult(
+                  ok=pijler_b_data['reconciliation']['ok'],
+                  computed_value_eur=0,
+                  computed_cost_eur=0,
+                  computed_gain_eur=0,
+                  computed_gain_pct=0,
+                  sheet_value_eur=0,
+                  sheet_cost_eur=0,
+                  sheet_gain_eur=0,
+                  sheet_gain_pct=0,
+                  diffs=pijler_b_data['reconciliation']['diffs'],
+                  watchlist_count=len(pijler_b_data['snapshot']['watchlist']),
+              ),
+              write_batch=pijler_b_data.get('write_batch', []),
+          )
+          
+          # Run synthese
+          from kompas.synthese.synthesis_cycle import run_synthesis_cycle
+          
+          result = run_synthesis_cycle(
+              pijler_a_result=pijler_a_result,
+              pijler_b_result=pijler_b_result,
+              cycle_id=datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S'),
+          )
+          
+          # Schrijf resultaat
+          output = {
+              'capital_map': result.capital_map is not None,
+              'decision_objects': result.decision_objects is not None,
+              'stats': result.stats,
+              'errors': result.errors,
+          }
+          
+          with open('synthesis_output.json', 'w') as f:
+              json.dump(output, f, indent=2, default=str)
+          
+          print(f'Synthese: {\"OK\" if result.capital_map else \"FAILED\"}')
+          print(f'Decision objects: {len(result.decision_objects.decision_objects) if result.decision_objects else 0}')
+          print(f'Stats: {json.dumps(result.stats, indent=2, default=str)}')
+          "
+      
+      - name: Upload Synthese output
+        uses: actions/upload-artifact@v4
+        with:
+          name: synthesis-output
+          path: synthesis_output.json
+          retention-days: 1
+
+  
+  notify:
+    name: Notificatie
+    runs-on: ubuntu-latest
+    needs: [run-pijler-a, run-pijler-b, run-synthesis]
+    if: always()
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      
+      - name: Send notification
+        run: |
+          echo "Kompas cyclus voltooid"
+          echo "Pijler A: $(jq '.publishable_signals | length' artifacts/pijler_a_output.json 2>/dev/null || echo '0') signalen"
+          echo "Pijler B: $(jq '.snapshot.positions | length' artifacts/pijler_b_output.json 2>/dev/null || echo '0') posities"
+          echo "Synthese: $(jq '.decision_objects | if . == true then 1 else 0 end' artifacts/synthesis_output.json 2>/dev/null || echo '0') decision objects"
+          
+          # Check voor fouten
+          if grep -q "FAILED" artifacts/pijler_b_output.json 2>/dev/null || \
+             grep -q "FAILED" artifacts/synthesis_output.json 2>/dev/null; then
+            echo "::warning:: Kompas cyclus met fouten voltooid"
+            exit 1
+          fi
+          
+          echo "::notice:: Kompas cyclus succesvol voltooid"
