@@ -85,13 +85,20 @@
 <div class="wrap">
   <header>
     <div class="eyebrow">Kompas — nieuwe build</div>
-    <h1>Pijler B — verificatie</h1>
-    <p class="subtitle">Debug-weergave van Pijler B se ruwe output, geen ontwerp voor de uiteindelijke Kompas-pagina. Het echte Kompas leidt met signalen/gebeurtenissen; posities zijn daar een tag op een signaal, geen eigen sectie — zie README, "Posities zijn een signaal-attribuut."</p>
+    <h1>Signalen</h1>
+    <p class="subtitle">Pijler A begint net (één echt signaal, met de hand geschreven ter verificatie — nog geen draaiende cyclus). Posities/watchlist staan lager op deze pagina als debug-weergave van Pijler B, niet als leidende sectie — zie README, "Posities zijn een signaal-attribuut."</p>
   </header>
 
   <section>
+    <div class="section-label"><span>Signalenfeed</span></div>
+    <div class="card" id="signals-list">
+      <div class="empty">wordt geladen…</div>
+    </div>
+  </section>
+
+  <section>
     <div class="section-label">
-      <span>Portefeuille</span>
+      <span>Portefeuille (debug — Pijler B)</span>
       <span id="wallet-refresh">—</span>
     </div>
     <div class="stat-row" id="wallet-stats">
@@ -103,14 +110,14 @@
   </section>
 
   <section>
-    <div class="section-label"><span>Posities</span></div>
+    <div class="section-label"><span>Posities (debug)</span></div>
     <div class="card" id="positions-list">
       <div class="empty">wordt geladen…</div>
     </div>
   </section>
 
   <section>
-    <div class="section-label"><span>Watchlist</span></div>
+    <div class="section-label"><span>Watchlist (debug)</span></div>
     <div class="card" id="watchlist-list">
       <div class="empty">wordt geladen…</div>
     </div>
@@ -192,6 +199,39 @@
     }).join('');
   }
 
+  function confidenceBadge(level) {
+    var l = (level || '').toLowerCase();
+    var cls = l === 'hoog' ? 'badge-live' : (l === 'voorlopig' ? 'badge-pending' : '');
+    var style = l === 'speculatief' ? ' style="background:var(--red-bg);color:var(--red)"' : '';
+    return '<span class="badge ' + cls + '"' + style + '>' + (level || '—') + '</span>';
+  }
+
+  function renderSignals(docs) {
+    var el = document.getElementById('signals-list');
+    if (!docs.length) {
+      el.innerHTML = '<div class="empty">Nog geen signalen — Pijler A heeft nog geen draaiende cyclus.</div>';
+      return;
+    }
+    el.innerHTML = docs.map(function (d) {
+      var s = d.data();
+      var tags = (s.related_positions || []).concat(s.related_watchlist || []);
+      var tagsHtml = tags.length
+        ? '<span class="pos-meta">raakt: ' + tags.join(', ') + '</span>'
+        : '<span class="pos-meta">geen portefeuille-/watchlist-link</span>';
+      return '<div class="pos-row" style="display:block;">' +
+        '<div style="display:flex; justify-content:space-between; align-items:baseline; gap:8px;">' +
+          '<div class="pos-name">' + s.subject + ' <span class="pos-meta">· ' + s.role + '</span></div>' +
+          confidenceBadge(s.signal_confidence) +
+        '</div>' +
+        '<div style="margin:6px 0; font-size:13.5px;">' + s.text + '</div>' +
+        '<div class="pos-meta">omvang: ' + s.magnitude + '</div>' +
+        '<div class="pos-meta">horizon: ' + s.timeframe_horizon + '</div>' +
+        '<div class="pos-meta">bron: ' + s.source + ' (' + s.source_tier + ')</div>' +
+        '<div style="margin-top:4px;">' + tagsHtml + '</div>' +
+        '</div>';
+    }).join('');
+  }
+
   async function boot() {
     var db = null;
     try {
@@ -200,10 +240,17 @@
 
     if (!db) {
       renderWalletMissing();
+      document.getElementById('signals-list').innerHTML = '<div class="empty">Database niet beschikbaar in deze weergave.</div>';
       document.getElementById('positions-list').innerHTML = '<div class="empty">Database niet beschikbaar in deze weergave.</div>';
       document.getElementById('watchlist-list').innerHTML = '<div class="empty">Database niet beschikbaar in deze weergave.</div>';
       return;
     }
+
+    db.collection('events').orderBy('observed_at', 'desc').onSnapshot(function (snap) {
+      renderSignals(snap.docs);
+    }, function () {
+      document.getElementById('signals-list').innerHTML = '<div class="empty">Kon signalen niet laden.</div>';
+    });
 
     db.doc('wallet/state').onSnapshot(function (snap) {
       if (snap.exists) renderWallet(snap.data());

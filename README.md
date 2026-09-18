@@ -677,15 +677,37 @@ decision-journals, ververst vanochtend. Dat is precies het systeem dat
 deze herbouw moest vervangen. Nooit beschreven, nu gecorrigeerd: deze
 build heeft zijn eigen artifact + database, volledig gescheiden.
 
+**Pijler A is gestart** (18/9/2026): `kompas/core/signal.py` legt het
+Poort 1-schema en de harde publicatievoorwaarde vast als code
+(`validate_signal`), `kompas/pijler_a/freshness.py` de
+signaalversheid-lookup, `kompas/db/kompas_db.py` bouwt en valideert het
+schrijf-document voor `events`. 32/32 tests groen (zie
+`tests/test_signal.py`, `test_freshness.py`, `test_signal_event_doc.py`).
+
+**Eén echt signaal geschreven, niet gesimuleerd**, en bewust **niet**
+gekoppeld aan een positie — een live WebSearch naar wat er die dag
+daadwerkelijk gebeurde (niet naar een van Paul's namen) vond de
+BOJ-renteverhoging van 18/9/2026 (+25bp naar 1,25%, hoogste niveau sinds
+1995, stemming 7-2 — CNBC, tier 1). Gevalideerd, gecheckt tegen een lege
+`events`-collectie (dus fris), geschreven naar `events/japan-monetair-beleid-2026-09-18-trend-viewers`.
+Bewust `related_positions`/`related_watchlist` leeg gelaten — geen van
+de 6 ETF's is Japan-/JPY-specifiek, en een tag forceren om het signaal
+"relevanter" te doen lijken zou precies ingaan tegen "Posities zijn een
+signaal-attribuut" hierboven.
+
+`web/index.html` toont deze signalenfeed nu als **eerste, leidende
+sectie** — Portefeuille/Posities/Watchlist staan eronder, expliciet
+gelabeld "(debug)", precies volgens dat principe.
+
 Nog te bouwen, in volgorde: (1) een daadwerkelijk triggermechanisme voor
-de twee dagelijkse cycli (09:00 en 18:00 CEST) — vandaag is de cyclus
+de twee dagelijkse cycli (09:00 en 18:00 CEST) — vandaag is elke cyclus
 eenmalig met de hand gedraaid, niets automatiseert dit nog; besproken
 maar bewust nog niet aangezet (zie de discussie hierboven over
 Routines vs. GitHub Actions — senior-engineer keuze: eerst bewijzen dat
-het de moeite waard is, dan pas automatiseren), (2) een concreet
-documentschema voor `watchlist` (Pijler A moet dit nog verrijken; Pijler
-B's basisschema staat er al, zie hierboven), `events`,
-`capital_map/ranking` in de Kompas-database — nog enkel
-prosa-vormbeschrijving, geen vastgelegde velden, (3) de mockup herbouwen
-op deze geverifieerde, echte data (nu nog fictieve namen/cijfers), (4)
-Pijler A (signalenmotor) en de synthese-laag zijn nog niet aangeraakt.
+het de moeite waard is, dan pas automatiseren), (2) Pijler A uitbreiden
+naar de eigenlijke rollen/sector-specialistenpool als herhaalbaar
+proces (vandaag: één hand-geschreven signaal, geen rol-per-rol-cyclus),
+(3) een concreet documentschema voor `capital_map/ranking` en de
+synthese-laag zelf — nog enkel prosa-vormbeschrijving, (4) de mockup
+herbouwen op deze geverifieerde, echte data en het signaal-leidende
+principe (nu nog fictieve namen/cijfers, positie-centrische structuur).

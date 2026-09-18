@@ -26,7 +26,11 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
+import re
+import unicodedata
+
 from kompas.core.schema import PortfolioSnapshot, Position, ReconciliationResult, WatchlistEntry
+from kompas.core.signal import Signal, validate_signal
 
 AANDELEN_SHEET_ID = "1l1XSohzp0wS8JAQFaMTGkJe0zrur1BKbZdkbN6MLR7A"
 
@@ -100,6 +104,46 @@ def meta_refresh_doc(result: ReconciliationResult, refreshed_at: str) -> dict:
         "diffs": result.diffs,
         "watchlist_count": result.watchlist_count,
         "refreshed_at": refreshed_at,
+    }
+
+
+def _slugify(text: str) -> str:
+    """A signal's doc id: readable, stable, ASCII-safe for the path grammar."""
+    normalized = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode("ascii")
+    slug = re.sub(r"[^A-Za-z0-9]+", "-", normalized).strip("-").lower()
+    return slug or "signal"
+
+
+def signal_event_doc(signal: Signal, *, is_technical: bool = False) -> dict:
+    """Poort 1's write payload for one signal into the `events` collection.
+
+    Raises ValueError if the signal fails validate_signal — this function
+    will not build a payload for a signal that could not be published, the
+    same discipline as build_batch trusting reconciliation.ok: the caller
+    is expected to have validated already, but this is cheap enough and
+    consequential enough (bad data landing in the memory store) to check
+    again here rather than only document the expectation.
+    """
+    result = validate_signal(signal, is_technical=is_technical)
+    if not result.ok:
+        raise ValueError(f"signal failed validation, not writing: {result.errors}")
+
+    doc_id = f"{_slugify(signal.subject)}-{signal.observed_at[:10]}-{_slugify(signal.role)}"
+    return {
+        "path": f"events/{doc_id}",
+        "role": signal.role,
+        "subject": signal.subject,
+        "text": signal.text,
+        "source": signal.source,
+        "source_tier": signal.source_tier,
+        "magnitude": signal.magnitude,
+        "timeframe_horizon": signal.timeframe_horizon,
+        "data_confidence": signal.data_confidence,
+        "signal_confidence": signal.signal_confidence,
+        "chart_timeframe": signal.chart_timeframe,
+        "related_positions": signal.related_positions,
+        "related_watchlist": signal.related_watchlist,
+        "observed_at": signal.observed_at,
     }
 
 
