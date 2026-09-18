@@ -704,6 +704,29 @@ signalenfeed — geen Portefeuille/Posities/Watchlist-sectie meer, ook
 niet als debug-weergave. Die data bestaat en wordt gebruikt, wordt
 alleen nooit meer op de pagina getoond.
 
+**Twee signalen erbij** (18/9/2026, Paul: "maybe my positions are not
+interesting at all nor my watchlist. Think out of the box and use real
+signals from rss feeds") — beide uit de al-geverifieerde RSS-bronnen
+(`docs/kompas-rss-signaalscan.md`), niet uit WebSearch:
+- **VRT NWS** (rechtstreeks RSS-feed): een aangekondigde investering van
+  €1 miljard in een datacenter op de voormalige Sappi-site in Lanaken —
+  een lokaal, Nederlandstalig signaal dat Engelstalige financiële media
+  niet zouden oppikken. Eerlijk gelabeld: geen investeerbare naam
+  geïdentificeerd achter dit specifieke project, het signaal is
+  thematisch (de AI-datacentergolf wordt tastbaar tot in kleine
+  industriesteden).
+- **Investing.com commodities-feed** + verdiepende `WebSearch`: Venezuela
+  zou USD 4 miljard aan goudreserves verhuizen van de Bank of England
+  naar de NY Fed — geopolitiek/edelmetalen-signaal, bewust **niet**
+  getagd aan Wheaton Precious Metals (wél op de watchlist) omdat er geen
+  directe operationele link is, enkel een gedeeld "goud"-thema — te los
+  om als "raakt" te tellen.
+
+Alle drie signalen tot nu toe hebben lege `related_positions`/
+`related_watchlist` — geen enkele is geforceerd gekoppeld aan iets wat
+Paul al bezit of volgt. Dat is het bewijs dat het principe werkt, niet
+een toevallige uitkomst.
+
 Nog te bouwen, in volgorde: (1) een daadwerkelijk triggermechanisme voor
 de twee dagelijkse cycli (09:00 en 18:00 CEST) — vandaag is elke cyclus
 eenmalig met de hand gedraaid, niets automatiseert dit nog; besproken
