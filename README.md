@@ -408,6 +408,45 @@ alle geteste nieuwsbronnen gaf 403 (enkel `feeds.nos.nl` werkte volledig);
 domeinen faalde — moet nog expliciet getest worden op de echte
 RSS-doeldomeinen vóór Pijler A gebouwd wordt.
 
+## Werkelijke portefeuille-structuur (geverifieerd 18/9/2026 — live tegen de sheet)
+
+Eerste keer dat de Google Sheet-verbinding en de vertaallaag écht getest
+zijn deze sessie, in plaats van enkel beschreven. Resultaat: de aanname
+achter de mockup en een deel van dit document klopt niet.
+
+- **PORTEFEUILLE is geen stock-picking boek — het zijn 6 ETF's**, samen
+  ≈ €5.846 waarde (aankoopwaarde €5.731,85, gain €114,20 = 1,99%,
+  gereconcilieerd en exact kloppend met de sheet's eigen samenvattingsrij).
+  Thematisch/factor-based met vaste doelbandbreedtes: 60% MSCI World
+  (IWDA, twee noteringen), 15–20% Value (IWVL), 10% Health Care (HLTW),
+  10% Consumer Staples (COSW), 5–10% Uranium (NUCL). Er zit geen ASML,
+  NVDA, Cameco of Rheinmetall *in de portefeuille* — dat was een verkeerde
+  aanname in de mockup.
+- **Watchlist (24 namen) zijn geen kandidaten om te kopen — het zijn al
+  bestaande, individuele posities** in Bolero- en ME-DIRECT-rekeningen
+  (elk 1 aandeel, met eigen aankoopdatum en berekende gain/verlies): o.a.
+  ASML (+102,75%), NVDA (+3,67%), AMD (+115,64%), TSM, DXCM, Cameco
+  (−8,32%), Rheinmetall (−10,81%), Lockheed Martin, Thales, Saab, Wheaton
+  Precious Metals, Deere, Prysmian, Nexans, Elia, Euronext, e.a. — een
+  brede spreiding over halfgeleiders, defensie, mijnbouw, medtech,
+  industrie en infrastructuur. De naam "Watchlist" is dus misleidend voor
+  wat de synthese-laag ermee moet doen: dit zijn al open posities met een
+  reële kostprijs, geen instapkandidaten.
+- **Impact op het ontwerp:** de "houd/verkoop/bijkoop"-behandeling die
+  eerder enkel voor de 6 "actieve posities" (Pijler B) bedoeld was, geldt
+  dus eigenlijk voor deze 24 watchlist-namen — dat zijn de echte
+  individuele posities. De 6 ETF's in PORTEFEUILLE hebben een ander soort
+  beslissing nodig: bandbreedte-bewaking (zit Uranium nog binnen 5–10%?),
+  geen aandeel-specifieke koop/verkoop-aanbeveling. Dit moet nog verwerkt
+  worden in de synthese-laag-beschrijving en in een herziene mockup — nu
+  enkel vastgelegd als geverifieerd feit, nog niet doorgevoerd.
+- **De reconciliatie-discipline werkt, maar is scherp**: bij het narekenen
+  greep ik zelf eerst de verkeerde "totaalrij" (een ander cumulatief
+  overzicht verderop in de dump) vóór de juiste samenvattingsrij bovenaan
+  bleek te kloppen — exact de valkuil die de vertaallaag-instructies
+  hierboven al beschreven. Bevestigt dat die waarschuwing terecht is, niet
+  theoretisch.
+
 ## Bekende openstaande technische schuld
 
 - `real_holdings.json` (in de Stocazzo-repo) is stale: 26+ dagen oud t.o.v.
@@ -494,6 +533,19 @@ RSS-doeldomeinen vóór Pijler A gebouwd wordt.
 
 ## Status
 
-Nog niets gebouwd. Volgende stap: RSS-feed-URL's per rol ontvangen van
-Paul, dan Pijler B (bestaat grotendeels al) als eerste effectief
-implementeren.
+Nog geen code, geen schema, geen automatisering — enkel ontwerp,
+netwerktoegang-research en één echte verbindingstest (18/9/2026: de
+Google Sheet-connectie en de vertaallaag zijn live geverifieerd, zie
+"Werkelijke portefeuille-structuur" hierboven — dat leverde meteen een
+correctie op de eerdere aannames op). De mockup gebruikt nog steeds
+fictieve namen/cijfers die niet overeenkomen met de echte portefeuille.
+
+Nog te bouwen, in volgorde: (1) Pijler B als werkend script/proces
+(vertaallaag + reconciliatie + schrijven naar `wallet/state` en
+`wallet-positions/<ticker>`), (2) een concreet documentschema voor
+`watchlist`, `events`, `capital_map/ranking` in de Kompas-database — nu
+enkel prosa-vormbeschrijving, geen vastgelegde velden, (3) een
+daadwerkelijk triggermechanisme voor de twee dagelijkse cycli (09:00 en
+18:00 CEST) — vandaag bestaat daar niets voor, geen cron, geen workflow,
+geen Routine; iemand of iets moet een sessie starten die de cyclus
+uitvoert, en dat stuk is nog nooit besproken.
