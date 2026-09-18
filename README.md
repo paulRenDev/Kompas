@@ -221,6 +221,37 @@ op — ze lossen niet het *enkel lezen over eigen namen*-probleem op.
   bevestigingsbias in de bronnenselectie, geen marktfeit) en wordt apart
   gemarkeerd, nooit stil herhaald.
 
+### Posities zijn een signaal-attribuut, nooit de paginastructuur (18/9/2026)
+
+Paul: "in the final output we don't need to see the actual positions.
+the analysts have to take it into account but even there need to
+broaden to the things that actually happen. so these position is just
+one signal amongst many many others." Dit gaat verder dan het
+sectorquotum hierboven — het is een structureel principe voor zowel
+Pijler A als de publicatie:
+
+- **Analisten scannen niet enkel op positie-/watchlist-naam.** "Raakt
+  dit een positie?" is één van de velden op een signaal (net als
+  `omvang`, `tijdshorizon`, …), nooit het filter dat bepaalt of iets
+  gedekt wordt. Een rol die feitelijk alleen maar posities/watchlist
+  afgaat, is precies de bevestigingsbias die hierboven al erkend werd —
+  nu expliciet ook voor Stock watchers en niet enkel voor de
+  sector-specialistenpool.
+- **De gepubliceerde pagina leidt met signalen/gebeurtenissen, niet met
+  een positie- of watchlist-tabel.** Portefeuille-detail stond al niet
+  op de pagina (zie eerder — "ga naar de sheet"); dit trekt het door:
+  ook de watchlist wordt geen eigen, leidende sectie meer. Een signaal
+  dat een positie raakt, toont dat als tag/context ("raakt: ASML,
+  watchlist") — de positie is metadata op het signaal, niet omgekeerd.
+- **Praktisch gevolg voor `web/index.html` (de huidige statuspagina):**
+  die pagina toont vandaag wél de ruwe posities/watchlist als
+  hoofdinhoud — dat is bewust, en blijft voorlopig zo, maar uitsluitend
+  als **verificatie-weergave van Pijler B se ruwe output**, niet als
+  ontwerp voor de uiteindelijke Kompas-pagina. Zodra Pijler A en de
+  synthese-laag bestaan, wordt de echte pagina herbouwd rond een
+  signalenfeed volgens dit principe — de statuspagina blijft daarnaast
+  bestaan als debug-weergave, gelabeld als zodanig.
+
 ## Architectuur — losse, vervangbare componenten (17/9/2026)
 
 Kernidee, rechtstreeks uit de bank-PM review: "het zijn toch altijd
