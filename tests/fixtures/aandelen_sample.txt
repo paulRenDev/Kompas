@@ -1,0 +1,27 @@
+|  |  |  |  |  |  |  |  |  |  |
+| :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: |
+|  |  |  |  |  |  |  |  |  |  |
+|  |  |  |  |  |  | voorspellertje |  |  |  |
+|  |  |  |  |  |  | KPN | AMS |  |  |
+|  |  |  |  |  |  | 4,21 | \-0,14 | % |  |
+|  |  |  |  |  |  |  |  |  |  |
+| valueEUR | aankValueEUR | Rendement | Rendement% |  |  |  |  |  |  |
+| 310,0 | € 300,00 | € 10,00 | 3,33% | \-€ 1,23 |  |  |  |  |  |
+|  |  |  |  |  |  |  |  |  |  |
+|  | PORTEFEUILLE |  |  |  |  |  |  |  |  |
+|  |  |  |  |  |  |  |  |  |  |
+| Name | TICKER | EXCHANGE | Type effect | currency | purchaseDate (min) |  Nbr | totPurValueEUR |  valueEUR |  Rendement(EUR) | Rendement(EUR%) |
+| Sample World S\&P Test ETF - ME-DIRECT | ETF1 | EPA | ETF | EUR | 21-4-2026 | 1 | € 100,00 | € 120,00 | € 20,00 | 20,00% |
+| Sample Value Test ETF - ME-DIRECT | ETF2 | LON | ETF | USD | 27-7-2026 | 2 | € 200,00 | € 190,00 | \-€ 10,00 | \-5,00% |
+|  |  |  |  |  |  |  |  |  |  |  |
+|  |  |  |  |  |  |   | 999,99 | 888,88 |  | 111,11 | 12,50% |
+|  | Watchlist |  |  |  |  |  |  |  |  |
+|  |  |  |  |  |  |  |  |  |  |
+| Name | TICKER | EXCHANGE | Type effect | currency | OPM | setDate (min) |  Nbr | totSetValueEUR |  valueEUR | Rendement(EUR) | Rendement(EUR%) |
+| Sample Watch Corp | WL1 | AMS | Aandeel | EUR |  | 01-01-2026 | 1 | € 50,00 | € 60,00 | € 10,00 | 20,00% |
+| Sample Fade Corp | WL2 | NYSE | Aandeel | USD |  | 15-03-2026 | 1 | € 80,00 | € 72,00 | \-€ 8,00 | \-10,00% |
+|  |  |  |  |  |  |  |  |  |  |  |
+|  |  |  |  |  |  |  |  |  |  |  |
+| PORTEFEUILLE DETAIL |  |  |  |  |  |  |  |  |  |
+| Ticker | ACTIVE | SomethingElse |  |  |  |  |  |  |  |
+| ETF1 | 1 | 42 |  |  |  |  |  |  |  |

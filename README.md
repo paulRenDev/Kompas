@@ -124,11 +124,14 @@ watchlist-namen).
 
 #### Vertaallaag van de Google Sheet-adapter (ruwe dump → Poort 2-vorm)
 
-Onderstaande stappen zetten de ruwe, ongestructureerde pivot-tabeldump van
-de Google Sheet om naar de generieke Poort 2-vorm (naam, aantal, waarde,
-cost, gain, totaalregel). Dit hoort volledig bij deze adapter — een andere
-portefeuillebron (Bolero, een snapshot, een custodian-feed) heeft hier
-niets aan en krijgt zijn eigen, andere vertaallaag of geen enkele.
+**Geïmplementeerd en getest (18/9/2026)** in `kompas/pijler_b/parser.py` —
+onderstaande stappen zijn nu code, geen prosa-instructie meer. Zet de
+ruwe, ongestructureerde pivot-tabeldump van de Google Sheet om naar de
+generieke Poort 2-vorm (naam, aantal, waarde, cost, gain, totaalregel).
+Dit hoort volledig bij deze adapter — een andere portefeuillebron
+(Bolero, een snapshot, een custodian-feed) heeft hier niets aan en krijgt
+zijn eigen, andere vertaallaag of geen enkele. Zie "Code — hoe het gebouwd
+is" verderop voor de volledige module-indeling en hoe de tests te draaien.
 
 1. Roep `mcp__Google_Drive__read_file_content` aan met
    `fileId: "1l1XSohzp0wS8JAQFaMTGkJe0zrur1BKbZdkbN6MLR7A"`. Read-only —
@@ -333,6 +336,66 @@ gebouwd wordt, nooit rechtstreeks door de synthese-laag aangeroepen. Zonder
 die scheiding zou elke latere aanpassing (andere portefeuillebron, ander
 signalenteam) dwars door de synthese-logica moeten; met de scheiding
 verandert alleen de adapter.
+
+## Code — hoe het gebouwd is (18/9/2026, eerste echte implementatie)
+
+Pijler B bestaat nu als werkende, geteste code — niet enkel als ontwerp.
+Modulaire indeling, elk stuk met één verantwoordelijkheid, geen
+vermenging van interpretatie ("intelligence") met vaste logica (Pijler B
+heeft toevallig geen interpretatie — "puur feitelijk" — dus is dit
+volledig deterministische code, precies zoals het hoort):
+
+```
+kompas/
+  core/
+    schema.py       — Poort 2-vormen (Position, WatchlistEntry, …).
+                       Adapter-onafhankelijk: dit is de kern se contract,
+                       niet iets van de Google Sheet-adapter.
+  pijler_b/
+    parser.py        — vertaallaag. Pure functie: ruwe dump-tekst in,
+                        schema-objecten uit. Geen I/O.
+    reconcile.py      — reconciliatie tegen de sheet's eigen totaalrij.
+                        Pure functie, harde ok/niet-ok-poort.
+    cycle.py          — orchestratie: parser → reconcile → (bij ok)
+                        schrijf-payloads bouwen. Neemt ruwe tekst als
+                        input, dus nog steeds test­baar zonder live sessie.
+  db/
+    kompas_db.py      — bouwt de ArtifactData-schrijfpayloads (pure). De
+                        écht MCP-aanroepen (lezen via
+                        mcp__Google_Drive__read_file_content, schrijven
+                        via ArtifactData.batch) staan hier gedocumenteerd
+                        als runbook, niet als code — dat kán geen bare
+                        Python zijn, want die tools bestaan enkel binnen
+                        een levende Claude-sessie. Eerlijk vermeld in de
+                        module-docstring, niet weggemoffeld.
+tests/
+  fixtures/aandelen_sample.txt  — synthetische maar structureel identieke
+                                   dump (dezelfde val-rijen als de echte
+                                   sheet), geen echte portefeuillecijfers
+                                   in git.
+  test_parser.py, test_reconcile.py, test_cycle.py
+```
+
+**Getest, 17/17 groen**, stdlib-only (`unittest`, geen dependency),
+draai vanuit de repo-root: `python3 -m unittest discover -s tests`. De
+fixture-tests coderen de twee echte fouten uit "Werkelijke
+portefeuille-structuur" hierboven als regressietests (een decoy-totaalrij
+die niet gebruikt mag worden; setDate/totSetValueEUR die nooit als
+purchaseDate/totPurValueEUR gelezen mag worden) — niet enkel de
+happy path.
+
+**Ook getest tegen de echte, live sheet** (niet enkel de fixture): zelfde
+uitkomst als de handmatige verificatie eerder deze sessie —
+gereconcilieerd (afwijking €0,05, enkel sheet-afronding, binnen
+tolerantie), 6 posities, 24 watchlist-namen, 32 documenten klaar om te
+schrijven. Dat resultaat staat nergens in git (de echte portefeuillecijfers
+horen daar niet in) — enkel hier gemeld als bewijs dat het werkte.
+
+**Nog niet gedaan:** de twee IO-randen echt uitvoeren binnen een
+levende sessie (fetch + write via ArtifactData) — vandaag bewezen tot
+en met de write-payloads, niet tot en met een echte schrijfactie in de
+Kompas-database. Geen trigger die dit automatisch 2x/dag laat draaien.
+Pijler A (signalenmotor) en de synthese-laag zijn nog niet aangeraakt.
 
 ## Waar de twee pijlers samenkomen
 
@@ -545,19 +608,24 @@ achter de mockup en een deel van dit document klopt niet.
 
 ## Status
 
-Nog geen code, geen schema, geen automatisering — enkel ontwerp,
-netwerktoegang-research en één echte verbindingstest (18/9/2026: de
-Google Sheet-connectie en de vertaallaag zijn live geverifieerd, zie
-"Werkelijke portefeuille-structuur" hierboven — dat leverde meteen een
-correctie op de eerdere aannames op). De mockup gebruikt nog steeds
-fictieve namen/cijfers die niet overeenkomen met de echte portefeuille.
+**Pijler B bestaat als geteste code** (18/9/2026) — vertaallaag,
+reconciliatie en schrijf-payload-opbouw, 17/17 tests groen, geverifieerd
+tegen zowel een synthetische fixture als de echte, live sheet (zie "Code
+— hoe het gebouwd is" hierboven). Dit is het eerste stuk van Kompas dat
+daadwerkelijk werkt, niet enkel beschreven is. De mockup gebruikt nog
+steeds fictieve namen/cijfers die niet overeenkomen met de echte
+portefeuille/watchlist en moet herbouwd worden op de geverifieerde data.
 
-Nog te bouwen, in volgorde: (1) Pijler B als werkend script/proces
-(vertaallaag + reconciliatie + schrijven naar `wallet/state` en
-`wallet-positions/<ticker>`), (2) een concreet documentschema voor
-`watchlist`, `events`, `capital_map/ranking` in de Kompas-database — nu
-enkel prosa-vormbeschrijving, geen vastgelegde velden, (3) een
-daadwerkelijk triggermechanisme voor de twee dagelijkse cycli (09:00 en
-18:00 CEST) — vandaag bestaat daar niets voor, geen cron, geen workflow,
-geen Routine; iemand of iets moet een sessie starten die de cyclus
-uitvoert, en dat stuk is nog nooit besproken.
+Nog te bouwen, in volgorde: (1) de twee IO-randen echt uitvoeren binnen
+een levende sessie — fetch via `mcp__Google_Drive__read_file_content`,
+schrijven via `ArtifactData.batch` met `if_version` — vandaag bewezen tot
+de write-payloads, niet tot een echte schrijfactie, (2) een concreet
+documentschema voor `watchlist`, `events`, `capital_map/ranking` in de
+Kompas-database — nu enkel prosa-vormbeschrijving voor Pijler A's
+collecties, geen vastgelegde velden (Pijler B se schema staat wél al vast
+in `kompas/core/schema.py`), (3) een daadwerkelijk triggermechanisme voor
+de twee dagelijkse cycli (09:00 en 18:00 CEST) — vandaag bestaat daar
+niets voor, geen cron, geen workflow, geen Routine; iemand of iets moet
+een sessie starten die de cyclus uitvoert, en dat stuk is nog nooit
+besproken, (4) Pijler A (signalenmotor) en de synthese-laag zijn nog niet
+aangeraakt.
