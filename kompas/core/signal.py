@@ -37,6 +37,12 @@ class Signal:
     chart_timeframe: str | None = None  # required only for technical signals
     related_positions: list[str] = field(default_factory=list)
     related_watchlist: list[str] = field(default_factory=list)
+    # An editorial call, not a mechanical diff of confidence levels: does
+    # THIS signal genuinely contradict another already-published one on the
+    # same subject (e.g. technical bearish vs. a sector tailwind)? Set by
+    # whoever writes the signal, after reading both texts. None = no known
+    # conflict. See kompas/pijler_a/spotlight.py for why this isn't inferred.
+    conflict_note: str | None = None
 
 
 @dataclass(frozen=True)

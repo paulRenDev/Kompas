@@ -675,6 +675,47 @@ achter de mockup en een deel van dit document klopt niet.
   vastgelegd als te doen, geen ontwerpbeslissing genomen over hoe de twee
   te verzoenen (rijke kaarten + "geen posities tonen" staan niet
   haaks op elkaar, maar zijn nog niet samen uitgewerkt).
+  **Voortgang (18/9/2026)**: de mockup effectief gelezen (`project/Main.dc.html`
+  van het canvas). Drie stukken zijn nu echt gebouwd, tegen echte
+  signalen uit de database (geen mock-data):
+  1. **Sector-spotlight** — `kompas/pijler_a/spotlight.py`
+     (`cross_specialist_subjects`, puur, getest): een onderwerp dat door
+     2+ verschillende rollen geraakt is, krijgt de rijke spotlight-kaart
+     (omvang/horizon/bron-blok, geraakt-tags); één rol op één onderwerp
+     blijft in het compacte rollen-grid. Vandaag heeft geen enkel echt
+     signaal een tweede rol op hetzelfde onderwerp — de sectie toont dus
+     eerlijk een lege staat i.p.v. een verzonnen kruising.
+  2. **Conflict-callout** — bewust NIET mechanisch afgeleid (twee
+     signalen met afwijkende betrouwbaarheid is geen conflict-detectie,
+     dat vereist het lezen van beide teksten). Nieuw optioneel veld
+     `Signal.conflict_note`: een auteur zet dit zelf, na het lezen van
+     een eerder signaal over hetzelfde onderwerp. Nog geen enkel echt
+     signaal heeft dit veld gezet, dus de sectie is nu verborgen
+     (`display:none`) i.p.v. leeg getoond.
+  3. **`web/index.html` herbouwd** in de mockup's visuele taal (IBM Plex
+     Mono/Sans, kaartstijl, spotlight/rollen-grid/conflict-layout) maar
+     volledig data-gedreven vanuit `events`, met behoud van beide
+     thema's (licht/donker) — de mockup zelf was single-theme static.
+  
+  **Nog bewust NIET meegenomen, met reden**: Watchlist-tabel, capital
+  map/ranking, en decision objects. De mockup se decision-objectsectie
+  is expliciet gestructureerd "per positie / watchlist-naam" met een
+  `kernpositie`-label en positiebeheer-acties ("verhoog positie met max.
+  1 satelliet-eenheid") — dat structureert de pagina rond posities,
+  precies wat "Posities zijn een signaal-attribuut, nooit de
+  paginastructuur" verbiedt. Mijn voorstel, niet doorgevoerd zonder
+  Paul se akkoord: (a) Watchlist tonen kán zonder de regel te breken —
+  niet als duplicaat van Paul se privé Google Sheet-watchlist, maar als
+  een eigen, door Kompas se analistenpool gecureerde lijst (nieuwe
+  namen die een signaal opleverden, los van wat al in de Sheet staat) —
+  dit is exact wat Paul zelf voorstelde ("if the tool comes up with
+  other interesting stock ideas, I might add it"); (b) capital
+  map/ranking en decision objects kunnen wel, maar herschreven in
+  signaal-ruimte i.p.v. positie-ruimte: een kansen-score per onderwerp
+  (niet per positie), geen `kernpositie`-label, geen concrete
+  aandelen-/eenheidsacties. Nog niet gebouwd — wacht op Paul se akkoord
+  over deze twee punten specifiek, niet op een volledige nieuwe
+  discussie.
 - [ ] **TODO — standalone `feedparser` + directe Anthropic API als
   alternatieve Poort 1-adapter** (18/9/2026, Paul deelde een
   Python-script: `feedparser` + `Anthropic()`-client, buiten een Claude-

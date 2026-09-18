@@ -143,6 +143,7 @@ def signal_event_doc(signal: Signal, *, is_technical: bool = False) -> dict:
         "chart_timeframe": signal.chart_timeframe,
         "related_positions": signal.related_positions,
         "related_watchlist": signal.related_watchlist,
+        "conflict_note": signal.conflict_note,
         "observed_at": signal.observed_at,
     }
 
