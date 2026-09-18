@@ -422,24 +422,36 @@ achter de mockup en een deel van dit document klopt niet.
   10% Consumer Staples (COSW), 5–10% Uranium (NUCL). Er zit geen ASML,
   NVDA, Cameco of Rheinmetall *in de portefeuille* — dat was een verkeerde
   aanname in de mockup.
-- **Watchlist (24 namen) zijn geen kandidaten om te kopen — het zijn al
-  bestaande, individuele posities** in Bolero- en ME-DIRECT-rekeningen
-  (elk 1 aandeel, met eigen aankoopdatum en berekende gain/verlies): o.a.
-  ASML (+102,75%), NVDA (+3,67%), AMD (+115,64%), TSM, DXCM, Cameco
-  (−8,32%), Rheinmetall (−10,81%), Lockheed Martin, Thales, Saab, Wheaton
-  Precious Metals, Deere, Prysmian, Nexans, Elia, Euronext, e.a. — een
-  brede spreiding over halfgeleiders, defensie, mijnbouw, medtech,
-  industrie en infrastructuur. De naam "Watchlist" is dus misleidend voor
-  wat de synthese-laag ermee moet doen: dit zijn al open posities met een
-  reële kostprijs, geen instapkandidaten.
-- **Impact op het ontwerp:** de "houd/verkoop/bijkoop"-behandeling die
-  eerder enkel voor de 6 "actieve posities" (Pijler B) bedoeld was, geldt
-  dus eigenlijk voor deze 24 watchlist-namen — dat zijn de echte
-  individuele posities. De 6 ETF's in PORTEFEUILLE hebben een ander soort
-  beslissing nodig: bandbreedte-bewaking (zit Uranium nog binnen 5–10%?),
-  geen aandeel-specifieke koop/verkoop-aanbeveling. Dit moet nog verwerkt
-  worden in de synthese-laag-beschrijving en in een herziene mockup — nu
-  enkel vastgelegd als geverifieerd feit, nog niet doorgevoerd.
+- **Watchlist (24 namen) is echt watch-materiaal, geen bezit** (correctie
+  18/9/2026, Paul: "watch list isn't owned its actual watch material" — ik
+  had dit fout gelezen). Kolomnamen in dit blok zijn `setDate` en
+  `totSetValueEUR`, niet `purchaseDate`/`totPurValueEUR` zoals in
+  PORTEFEUILLE — structureel gelijkend blok, andere betekenis: `setDate`
+  is wanneer de naam op de watchlist gezet werd, `totSetValueEUR` de
+  referentiewaarde op dát moment (voor 1 hypothetisch aandeel), en
+  `Rendement(EUR%)` toont dus "wat had ik gewonnen/gemist als ik toen 1
+  aandeel had gekocht" — een conviction-/gemiste-kans-indicator, geen
+  echte P&L. De 24 namen (ASML, NVDA, AMD, TSM, Cameco, Rheinmetall,
+  Lockheed Martin, Thales, Saab, Wheaton Precious Metals, e.a.) zijn dus
+  wél instapkandidaten, zoals oorspronkelijk ontworpen — brede spreiding
+  over halfgeleiders, defensie, mijnbouw, medtech, industrie,
+  infrastructuur.
+  **Zelfcorrectie op de vorige versie van deze sectie:** ik had `setDate`
+  gelezen als een aankoopdatum en de gain als echte P&L, puur omdat het
+  blok dezelfde vorm heeft als PORTEFEUILLE — exact de valkuil die de
+  vertaallaag-instructies beschrijven (nooit een kolomindex/betekenis
+  aannemen, altijd aftellen tegen de headerrij van dát specifieke blok),
+  hier optredend als een *semantische* versie van diezelfde val, niet enkel
+  een positionele.
+- **Impact op het ontwerp:** de oorspronkelijke indeling klopt dus alsnog —
+  de 6 ETF's in PORTEFEUILLE zijn de echte "actieve posities"
+  (houd/verkoop/bijkoop + bandbreedte-bewaking: zit Uranium nog binnen
+  5–10%?), en de 24 watchlist-namen zijn instapkandidaten met een
+  actiedrempel (zoals de decision objects al modelleerden). Wat wél moet
+  worden meegenomen: `Rendement(EUR%) sinds setDate` is een authentiek,
+  bruikbaar gegeven voor de watchlist-weergave (toont hoe lang gewacht
+  wordt en tegen welke kost) — nog niet verwerkt in het ontwerp of de
+  mockup.
 - **De reconciliatie-discipline werkt, maar is scherp**: bij het narekenen
   greep ik zelf eerst de verkeerde "totaalrij" (een ander cumulatief
   overzicht verderop in de dump) vóór de juiste samenvattingsrij bovenaan
