@@ -434,20 +434,35 @@ losse dingen — Kompas doet het eerste altijd, het tweede nooit rechtstreeks.
 
 ### De Kompas-database
 
-Gedeelde database via de `ArtifactData`-tool (apart van de `Artifact`-tool
-zelf). Vaste patronen:
+**Correctie (18/9/2026):** deze sectie verwees eerder naar
+`https://claude.ai/code/artifact/9f6bc549-e4df-4082-874b-cf5907bbaab0` —
+dat is het **oude, Stocazzo-gekoppelde** Kompas-artifact, nog steeds
+actief (het bleek bij een echte schrijfpoging deze sessie live en
+recent bijgewerkt: rijke decision-journals per positie, ververst
+vanochtend 09:00 CEST). Dat is precies het systeem dat deze herbouw
+moest vervangen ("we wanted a new build because the old one wasn't
+serving the purpose") — de vermelding hier was een overname uit het
+oorspronkelijke ontwerpdocument, nooit gecorrigeerd tot dit moment.
+**Nooit naar die url schrijven vanuit deze build.**
 
-- Elke actie vereist de artifact-url:
-  `https://claude.ai/code/artifact/9f6bc549-e4df-4082-874b-cf5907bbaab0`.
+Deze build heeft zijn **eigen, nieuwe** artifact + database:
+`https://claude.ai/artifact/9NceTjMZzLgV99KMEGGh1e` (aangemaakt
+18/9/2026, bevestigd leeg bij aanmaak). Gedeelde database via de
+`ArtifactData`-tool (apart van de `Artifact`-tool zelf). Vaste patronen:
+
+- Elke actie vereist deze artifact-url (zie hierboven).
 - Lezen: `get` (één document), `list` (een collectie), `query` (gefilterd).
 - Schrijven: `set`/`update`/`batch` — gebruik `batch` (tot 50 writes,
   atomisch) zodra meerdere documenten wijzigen in één cyclus.
 - Pin elke write met `if_version`, de versie gezien bij het laatste lezen.
   Een write zonder `if_version` overschrijft blind; een gepinde write die
   niet meer klopt faalt netjes.
-- Bestaande collecties: `wallet/state`, `wallet-positions/<ticker>`,
-  `meta/last_refresh` werken al. `watchlist`, `capital_map/ranking`,
-  `events` staan leeg/bestaan niet — dit moet Pijler A gaan vullen.
+- Collecties (18/9/2026, deze nieuwe database): `wallet/state`,
+  `wallet-positions/<ticker>-<exchange>` (composite id — zie
+  `kompas/db/kompas_db.py`, een bare ticker botst voor IWDA op AMS+LON),
+  `watchlist/<ticker>`, `meta/last_refresh` — allemaal net voor het eerst
+  gevuld door de echte Pijler B-cyclus, zie "Code — hoe het gebouwd is."
+  `capital_map/ranking`, `events` bestaan nog niet — voor Pijler A.
 
 ## Publicatiemechaniek — de validatietrio
 
@@ -608,24 +623,38 @@ achter de mockup en een deel van dit document klopt niet.
 
 ## Status
 
-**Pijler B bestaat als geteste code** (18/9/2026) — vertaallaag,
-reconciliatie en schrijf-payload-opbouw, 17/17 tests groen, geverifieerd
-tegen zowel een synthetische fixture als de echte, live sheet (zie "Code
-— hoe het gebouwd is" hierboven). Dit is het eerste stuk van Kompas dat
-daadwerkelijk werkt, niet enkel beschreven is. De mockup gebruikt nog
-steeds fictieve namen/cijfers die niet overeenkomen met de echte
-portefeuille/watchlist en moet herbouwd worden op de geverifieerde data.
+**Pijler B draait echt, end-to-end, voor het eerst** (18/9/2026). Niet
+enkel code en tests: een volledige, live cyclus is met de hand uitgevoerd
+— sheet gelezen, vertaald, gereconcilieerd, en **32 documenten
+daadwerkelijk geschreven** naar `https://claude.ai/artifact/9NceTjMZzLgV99KMEGGh1e`,
+deze build se eigen, nieuwe database (bevestigd leeg bij aanmaak, dus
+een echte eerste schrijving, geen overschrijving van iets bestaands).
+Een minimale statuspagina (`web/index.html`, ook in de repo) leest die
+database live en toont wat erin staat. 17/17 tests groen, plus deze ene
+echte run als bewijs dat het ook buiten de tests werkt.
 
-Nog te bouwen, in volgorde: (1) de twee IO-randen echt uitvoeren binnen
-een levende sessie — fetch via `mcp__Google_Drive__read_file_content`,
-schrijven via `ArtifactData.batch` met `if_version` — vandaag bewezen tot
-de write-payloads, niet tot een echte schrijfactie, (2) een concreet
-documentschema voor `watchlist`, `events`, `capital_map/ranking` in de
-Kompas-database — nu enkel prosa-vormbeschrijving voor Pijler A's
-collecties, geen vastgelegde velden (Pijler B se schema staat wél al vast
-in `kompas/core/schema.py`), (3) een daadwerkelijk triggermechanisme voor
-de twee dagelijkse cycli (09:00 en 18:00 CEST) — vandaag bestaat daar
-niets voor, geen cron, geen workflow, geen Routine; iemand of iets moet
-een sessie starten die de cyclus uitvoert, en dat stuk is nog nooit
-besproken, (4) Pijler A (signalenmotor) en de synthese-laag zijn nog niet
-aangeraakt.
+Wat dit run zelf nog blootlegde en meteen gefixed is: de sheet houdt
+`IWDA` op twee beurzen (AMS en LON) als aparte posities — een write
+sleutel op enkel de ticker zou de twee laten botsen. Opgelost met een
+`ticker-exchange`-composite-id, met een regressietest die dat specifiek
+reproduceert (zie `test_duplicate_ticker_on_two_exchanges_does_not_collide`).
+
+**Belangrijke correctie deze sessie**: de database-url verwees eerder
+naar het oude, Stocazzo-gekoppelde Kompas-artifact
+(`.../artifact/9f6bc549-...`) — nog steeds actief, met rijke
+decision-journals, ververst vanochtend. Dat is precies het systeem dat
+deze herbouw moest vervangen. Nooit beschreven, nu gecorrigeerd: deze
+build heeft zijn eigen artifact + database, volledig gescheiden.
+
+Nog te bouwen, in volgorde: (1) een daadwerkelijk triggermechanisme voor
+de twee dagelijkse cycli (09:00 en 18:00 CEST) — vandaag is de cyclus
+eenmalig met de hand gedraaid, niets automatiseert dit nog; besproken
+maar bewust nog niet aangezet (zie de discussie hierboven over
+Routines vs. GitHub Actions — senior-engineer keuze: eerst bewijzen dat
+het de moeite waard is, dan pas automatiseren), (2) een concreet
+documentschema voor `watchlist` (Pijler A moet dit nog verrijken; Pijler
+B's basisschema staat er al, zie hierboven), `events`,
+`capital_map/ranking` in de Kompas-database — nog enkel
+prosa-vormbeschrijving, geen vastgelegde velden, (3) de mockup herbouwen
+op deze geverifieerde, echte data (nu nog fictieve namen/cijfers), (4)
+Pijler A (signalenmotor) en de synthese-laag zijn nog niet aangeraakt.

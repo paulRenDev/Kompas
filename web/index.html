@@ -1,0 +1,228 @@
+<title>Kompas</title>
+<meta name="description" content="Portefeuille- en watchlist-status voor Paul, opgebouwd als kern + vervangbare poorten.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Source+Sans+3:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --bg: #F7F3EA;
+    --surface: #FFFFFF;
+    --border: #E2DACB;
+    --ink: #1B1F23;
+    --muted: #6B6455;
+    --dim: #9A9284;
+    --brass: #9C6B1F;
+    --brass-bg: #F0E3C8;
+    --teal: #1F6E68;
+    --teal-bg: #DCEEEC;
+    --red: #A23B2E;
+    --red-bg: #F6E3DF;
+    --display: 'Fraunces', Georgia, serif;
+    --body: 'Source Sans 3', system-ui, sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12181C;
+      --surface: #191F24;
+      --border: #2B333A;
+      --ink: #EDE7DA;
+      --muted: #A8ACAF;
+      --dim: #6E767C;
+      --brass: #D9A54B;
+      --brass-bg: #332A16;
+      --teal: #5FB3AB;
+      --teal-bg: #16302D;
+      --red: #E08A7A;
+      --red-bg: #3A2320;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12181C;
+    --surface: #191F24;
+    --border: #2B333A;
+    --ink: #EDE7DA;
+    --muted: #A8ACAF;
+    --dim: #6E767C;
+    --brass: #D9A54B;
+    --brass-bg: #332A16;
+    --teal: #5FB3AB;
+    --teal-bg: #16302D;
+    --red: #E08A7A;
+    --red-bg: #3A2320;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 40px 16px 64px; }
+  header { border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 28px; }
+  .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--brass); }
+  h1 { font-family: var(--display); font-weight: 600; font-size: clamp(32px, 6vw, 44px); margin: 6px 0 4px; text-wrap: balance; }
+  .subtitle { color: var(--muted); font-size: 14.5px; max-width: 52ch; }
+  section { margin-bottom: 32px; }
+  .section-label { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+  .stat .label { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--dim); }
+  .stat .value { font-family: var(--mono); font-size: 22px; font-weight: 500; margin-top: 6px; font-variant-numeric: tabular-nums; }
+  .stat .sub { font-family: var(--mono); font-size: 11px; color: var(--dim); margin-top: 4px; }
+  .pos-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 11px 0; border-top: 1px solid var(--border); font-size: 14px; }
+  .pos-row:first-child { border-top: none; }
+  .pos-name { font-weight: 500; }
+  .pos-meta { font-family: var(--mono); font-size: 11px; color: var(--dim); }
+  .pos-value { font-family: var(--mono); text-align: right; font-variant-numeric: tabular-nums; }
+  .gain-pos { color: var(--teal); }
+  .gain-neg { color: var(--red); }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 4px 16px; }
+  .empty { color: var(--dim); font-size: 13.5px; padding: 18px 4px; text-align: center; }
+  .badge { font-family: var(--mono); font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 999px; }
+  .badge-live { background: var(--teal-bg); color: var(--teal); }
+  .badge-pending { background: var(--brass-bg); color: var(--brass); }
+  footer { border-top: 1px solid var(--border); padding-top: 18px; margin-top: 8px; font-family: var(--mono); font-size: 11px; color: var(--dim); line-height: 1.7; }
+  footer a { color: var(--teal); }
+  .skel { background: linear-gradient(90deg, var(--border) 25%, var(--surface) 50%, var(--border) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 6px; height: 1em; }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+  @media (prefers-reduced-motion: reduce) { .skel { animation: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Kompas — nieuwe build</div>
+    <h1>Portefeuille &amp; watchlist</h1>
+    <p class="subtitle">Pijler B (feitelijke data) is live. Pijler A (signalenmotor) en de synthese-laag zijn nog niet gebouwd — dit is een status-pagina, geen eindresultaat.</p>
+  </header>
+
+  <section>
+    <div class="section-label">
+      <span>Portefeuille</span>
+      <span id="wallet-refresh">—</span>
+    </div>
+    <div class="stat-row" id="wallet-stats">
+      <div class="stat"><div class="label">Waarde</div><div class="value skel"></div></div>
+      <div class="stat"><div class="label">Cost</div><div class="value skel"></div></div>
+      <div class="stat"><div class="label">Gain</div><div class="value skel"></div></div>
+      <div class="stat"><div class="label">Gain %</div><div class="value skel"></div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-label"><span>Posities</span></div>
+    <div class="card" id="positions-list">
+      <div class="empty">wordt geladen…</div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-label"><span>Watchlist</span></div>
+    <div class="card" id="watchlist-list">
+      <div class="empty">wordt geladen…</div>
+    </div>
+  </section>
+
+  <footer>
+    Aparte, nieuwe database — losstaand van het oude Stocazzo-gekoppelde Kompas.
+    Bron: Google Sheet "Aandelen", vertaald en gereconcilieerd door
+    <code>kompas/pijler_b</code>. Zie
+    <a href="https://github.com/paulRenDev/kompas">paulRenDev/kompas</a>.
+  </footer>
+</div>
+
+<script>
+(function () {
+  function fmtEUR(n) {
+    if (typeof n !== 'number') return '—';
+    return '€ ' + n.toLocaleString('nl-BE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  function fmtPct(n) {
+    if (typeof n !== 'number') return '—';
+    return (n >= 0 ? '+' : '') + n.toFixed(2) + '%';
+  }
+  function gainClass(n) {
+    return typeof n === 'number' && n < 0 ? 'gain-neg' : 'gain-pos';
+  }
+  function fmtTime(iso) {
+    if (!iso) return '—';
+    try {
+      var d = new Date(iso);
+      return d.toLocaleString('nl-BE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+    } catch (e) { return iso; }
+  }
+
+  function renderWalletMissing() {
+    document.getElementById('wallet-stats').innerHTML =
+      '<div class="stat" style="grid-column:1/-1"><div class="empty">Nog geen Pijler B-cyclus geschreven naar deze database.</div></div>';
+    document.getElementById('wallet-refresh').textContent = '';
+  }
+
+  function renderWallet(data) {
+    var el = document.getElementById('wallet-stats');
+    el.innerHTML =
+      '<div class="stat"><div class="label">Waarde</div><div class="value">' + fmtEUR(data.value_eur) + '</div></div>' +
+      '<div class="stat"><div class="label">Cost</div><div class="value">' + fmtEUR(data.cost_eur) + '</div></div>' +
+      '<div class="stat"><div class="label">Gain</div><div class="value ' + gainClass(data.gain_eur) + '">' + fmtEUR(data.gain_eur) + '</div></div>' +
+      '<div class="stat"><div class="label">Gain %</div><div class="value ' + gainClass(data.gain_pct) + '">' + fmtPct(data.gain_pct) + '</div><div class="sub">' + (data.reconciled ? '✓ gereconcilieerd' : '⚠ niet gereconcilieerd') + '</div></div>';
+    document.getElementById('wallet-refresh').innerHTML =
+      '<span class="badge badge-live">' + fmtTime(data.refreshed_at) + '</span>';
+  }
+
+  function renderPositions(docs) {
+    var el = document.getElementById('positions-list');
+    if (!docs.length) {
+      el.innerHTML = '<div class="empty">Nog geen posities geschreven.</div>';
+      return;
+    }
+    el.innerHTML = docs.map(function (d) {
+      var p = d.data();
+      return '<div class="pos-row">' +
+        '<div><div class="pos-name">' + p.name + '</div><div class="pos-meta">' + p.ticker + ' · ' + p.exchange + '</div></div>' +
+        '<div class="pos-value"><div>' + fmtEUR(p.value_eur) + '</div><div class="pos-meta ' + gainClass(p.gain_pct) + '">' + fmtPct(p.gain_pct) + '</div></div>' +
+        '</div>';
+    }).join('');
+  }
+
+  function renderWatchlist(docs) {
+    var el = document.getElementById('watchlist-list');
+    if (!docs.length) {
+      el.innerHTML = '<div class="empty">Leeg — wordt gevuld zodra Pijler A/synthese-laag bestaat.</div>';
+      return;
+    }
+    el.innerHTML = docs.map(function (d) {
+      var w = d.data();
+      return '<div class="pos-row">' +
+        '<div><div class="pos-name">' + w.name + '</div><div class="pos-meta">' + w.ticker + ' · sinds ' + w.set_date + '</div></div>' +
+        '<div class="pos-value"><div class="pos-meta">kans gemist/gewonnen</div><div class="' + gainClass(w.opportunity_gain_pct) + '">' + fmtPct(w.opportunity_gain_pct) + '</div></div>' +
+        '</div>';
+    }).join('');
+  }
+
+  async function boot() {
+    var db = null;
+    try {
+      db = await window.claude?.use?.('db');
+    } catch (e) { /* fall through to unavailable state */ }
+
+    if (!db) {
+      renderWalletMissing();
+      document.getElementById('positions-list').innerHTML = '<div class="empty">Database niet beschikbaar in deze weergave.</div>';
+      document.getElementById('watchlist-list').innerHTML = '<div class="empty">Database niet beschikbaar in deze weergave.</div>';
+      return;
+    }
+
+    db.doc('wallet/state').onSnapshot(function (snap) {
+      if (snap.exists) renderWallet(snap.data());
+      else renderWalletMissing();
+    }, function () { renderWalletMissing(); });
+
+    db.collection('wallet-positions').orderBy('value_eur', 'desc').onSnapshot(function (snap) {
+      renderPositions(snap.docs);
+    }, function () {
+      document.getElementById('positions-list').innerHTML = '<div class="empty">Kon posities niet laden.</div>';
+    });
+
+    db.collection('watchlist').orderBy('name').onSnapshot(function (snap) {
+      renderWatchlist(snap.docs);
+    }, function () {
+      document.getElementById('watchlist-list').innerHTML = '<div class="empty">Kon watchlist niet laden.</div>';
+    });
+  }
+
+  boot();
+})();
+</script>

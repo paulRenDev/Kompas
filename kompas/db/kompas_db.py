@@ -29,7 +29,14 @@ from datetime import datetime, timezone
 from kompas.core.schema import PortfolioSnapshot, Position, ReconciliationResult, WatchlistEntry
 
 AANDELEN_SHEET_ID = "1l1XSohzp0wS8JAQFaMTGkJe0zrur1BKbZdkbN6MLR7A"
-ARTIFACT_URL = "https://claude.ai/code/artifact/9f6bc549-e4df-4082-874b-cf5907bbaab0"
+
+# This Kompas build's own artifact + database — created 18/9/2026,
+# separate from the old Stocazzo-linked Kompas artifact
+# (https://claude.ai/code/artifact/9f6bc549-e4df-4082-874b-cf5907bbaab0).
+# That one is NOT this project's database; an earlier version of this
+# file pointed at it by mistake, carried over from the original design
+# doc's description of the old system. Never write to that URL from here.
+ARTIFACT_URL = "https://claude.ai/artifact/9NceTjMZzLgV99KMEGGh1e"
 
 
 def wallet_state_doc(result: ReconciliationResult, refreshed_at: str) -> dict:
@@ -44,9 +51,16 @@ def wallet_state_doc(result: ReconciliationResult, refreshed_at: str) -> dict:
     }
 
 
+def _position_doc_id(position: Position) -> str:
+    """Ticker alone is not unique: the real portfolio holds IWDA on both
+    AMS and LON as separate positions. Composite id, found by trying to
+    write the real data, not assumed up front."""
+    return f"{position.ticker}-{position.exchange}"
+
+
 def wallet_position_doc(position: Position, refreshed_at: str) -> dict:
     return {
-        "path": f"wallet-positions/{position.ticker}",
+        "path": f"wallet-positions/{_position_doc_id(position)}",
         "name": position.name,
         "ticker": position.ticker,
         "exchange": position.exchange,
@@ -87,6 +101,18 @@ def meta_refresh_doc(result: ReconciliationResult, refreshed_at: str) -> dict:
         "watchlist_count": result.watchlist_count,
         "refreshed_at": refreshed_at,
     }
+
+
+def split_path(path: str) -> tuple[str, str]:
+    """'wallet-positions/IWDA-AMS' -> ('wallet-positions', 'IWDA-AMS').
+
+    ArtifactData's batch writes take `collection` and `doc_id` separately,
+    not one path string — this is the one place that seam is crossed.
+    """
+    collection, _, doc_id = path.rpartition("/")
+    if not collection or not doc_id:
+        raise ValueError(f"not a collection/doc_id path: {path!r}")
+    return collection, doc_id
 
 
 def build_batch(

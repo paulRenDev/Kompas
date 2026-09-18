@@ -1,7 +1,7 @@
 import pathlib
 import unittest
 
-from kompas.db.kompas_db import build_batch
+from kompas.db.kompas_db import build_batch, split_path
 from kompas.pijler_b.cycle import run_cycle
 
 FIXTURE = (pathlib.Path(__file__).parent / "fixtures" / "aandelen_sample.txt").read_text()
@@ -14,11 +14,32 @@ class TestCycle(unittest.TestCase):
         self.assertIsNotNone(result.write_batch)
         paths = {doc["path"] for doc in result.write_batch}
         self.assertIn("wallet/state", paths)
-        self.assertIn("wallet-positions/ETF1", paths)
-        self.assertIn("wallet-positions/ETF2", paths)
+        self.assertIn("wallet-positions/ETF1-EPA", paths)
+        self.assertIn("wallet-positions/ETF2-LON", paths)
         self.assertIn("watchlist/WL1", paths)
         self.assertIn("watchlist/WL2", paths)
         self.assertIn("meta/last_refresh", paths)
+
+    def test_duplicate_ticker_on_two_exchanges_does_not_collide(self):
+        # The real portfolio holds IWDA on both AMS and LON as two
+        # distinct positions -- a bare-ticker doc_id would let one
+        # overwrite the other in the batch. Reproduce that shape here.
+        dup = FIXTURE.replace(
+            "| Sample Value Test ETF - ME-DIRECT | ETF2 | LON |",
+            "| Sample Value Test ETF - ME-DIRECT | ETF1 | LON |",
+        )
+        result = run_cycle(dup)
+        self.assertTrue(result.reconciliation.ok)
+        paths = [doc["path"] for doc in result.write_batch if doc["path"].startswith("wallet-positions/")]
+        self.assertEqual(len(paths), 2)
+        self.assertEqual(len(set(paths)), 2)  # no collision
+        self.assertIn("wallet-positions/ETF1-EPA", paths)
+        self.assertIn("wallet-positions/ETF1-LON", paths)
+
+    def test_split_path(self):
+        self.assertEqual(split_path("wallet-positions/IWDA-AMS"), ("wallet-positions", "IWDA-AMS"))
+        with self.assertRaises(ValueError):
+            split_path("no-slash-here")
 
     def test_reconciliation_failure_blocks_the_write_batch(self):
         broken = FIXTURE.replace("310,0", "999,0")
