@@ -654,6 +654,31 @@ achter de mockup en een deel van dit document klopt niet.
   geïndividualiseerd advies), maar verandert niets aan de juridische
   classificatie zodra het substantieel geïndividualiseerd advies is (bv.
   een bank op een klant se eigen portefeuille) — een label, geen schild.
+- [ ] **TODO — dichter bij de expert-reviewed mockup blijven** (18/9/2026,
+  Paul: "I think you need to keep more to the mockup we made with the
+  experts"). De huidige `web/index.html` is een sterk vereenvoudigde
+  signalenfeed (platte kaarten); de mockup uit de sector-/technical-
+  analyst-reviews had rijkere structuur: sector-spotlightkaarten met
+  omvang/tijdshorizon/bron/vertrouwen in een apart blok, expliciete
+  conflict-callouts tussen rollen, capital map/ranking met scorebalken,
+  decision objects met actiedrempel. Nog niet doorgevoerd — enkel
+  vastgelegd als te doen, geen ontwerpbeslissing genomen over hoe de twee
+  te verzoenen (rijke kaarten + "geen posities tonen" staan niet
+  haaks op elkaar, maar zijn nog niet samen uitgewerkt).
+- [ ] **TODO — standalone `feedparser` + directe Anthropic API als
+  alternatieve Poort 1-adapter** (18/9/2026, Paul deelde een
+  Python-script: `feedparser` + `Anthropic()`-client, buiten een Claude-
+  sessie om). Sluit aan bij de eerdere Routines-vs-GitHub-Actions-
+  discussie: dit is precies het patroon dat portabiliteit zou geven
+  (geen MCP/sessie-afhankelijkheid). Twee concrete gebreken in het
+  gedeelde script, niet doorgevoerd naar productie: (1) de opgegeven
+  URL's (yahoo.com, marketwatch.com, seekingalpha.com) zijn homepages,
+  geen RSS-feed-endpoints — `feedparser` zou hier leeg op teruggeven,
+  (2) het model (`claude-3-5-sonnet-20241022`) is een verouderde,
+  gedateerde snapshot — nu `claude-opus-5` (standaard) of `claude-sonnet-5`
+  (hoger volume/goedkoper). Nog niet beslist of dit pad nu al opgestart
+  wordt of pas bij een latere automatiseringsstap (zie de eerdere
+  senior-engineer-afweging bij Status hieronder).
 
 ## Status
 
