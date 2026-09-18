@@ -1,5 +1,5 @@
 <title>Kompas</title>
-<meta name="description" content="Portefeuille- en watchlist-status voor Paul, opgebouwd als kern + vervangbare poorten.">
+<meta name="description" content="Signalenfeed voor Paul — portefeuille en watchlist staan al in de Google Sheet en worden hier nooit gedupliceerd.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Source+Sans+3:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
   :root {
@@ -58,147 +58,47 @@
   .subtitle { color: var(--muted); font-size: 14.5px; max-width: 52ch; }
   section { margin-bottom: 32px; }
   .section-label { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-  .stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
-  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
-  .stat .label { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--dim); }
-  .stat .value { font-family: var(--mono); font-size: 22px; font-weight: 500; margin-top: 6px; font-variant-numeric: tabular-nums; }
-  .stat .sub { font-family: var(--mono); font-size: 11px; color: var(--dim); margin-top: 4px; }
-  .pos-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 11px 0; border-top: 1px solid var(--border); font-size: 14px; }
-  .pos-row:first-child { border-top: none; }
-  .pos-name { font-weight: 500; }
-  .pos-meta { font-family: var(--mono); font-size: 11px; color: var(--dim); }
-  .pos-value { font-family: var(--mono); text-align: right; font-variant-numeric: tabular-nums; }
-  .gain-pos { color: var(--teal); }
-  .gain-neg { color: var(--red); }
+  .signal-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 12px; }
+  .signal-card:last-child { margin-bottom: 0; }
+  .signal-name { font-weight: 500; }
+  .signal-meta { font-family: var(--mono); font-size: 11px; color: var(--dim); }
+  .signal-text { margin: 8px 0; font-size: 13.5px; line-height: 1.5; }
+  .signal-facts { display: grid; gap: 3px; margin-top: 8px; }
   .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 4px 16px; }
   .empty { color: var(--dim); font-size: 13.5px; padding: 18px 4px; text-align: center; }
-  .badge { font-family: var(--mono); font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 999px; }
+  .badge { font-family: var(--mono); font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
   .badge-live { background: var(--teal-bg); color: var(--teal); }
   .badge-pending { background: var(--brass-bg); color: var(--brass); }
   footer { border-top: 1px solid var(--border); padding-top: 18px; margin-top: 8px; font-family: var(--mono); font-size: 11px; color: var(--dim); line-height: 1.7; }
   footer a { color: var(--teal); }
-  .skel { background: linear-gradient(90deg, var(--border) 25%, var(--surface) 50%, var(--border) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 6px; height: 1em; }
-  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-  @media (prefers-reduced-motion: reduce) { .skel { animation: none; } }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
 </style>
 
 <div class="wrap">
   <header>
     <div class="eyebrow">Kompas — nieuwe build</div>
     <h1>Signalen</h1>
-    <p class="subtitle">Pijler A begint net (één echt signaal, met de hand geschreven ter verificatie — nog geen draaiende cyclus). Posities/watchlist staan lager op deze pagina als debug-weergave van Pijler B, niet als leidende sectie — zie README, "Posities zijn een signaal-attribuut."</p>
+    <p class="subtitle">Portefeuille en watchlist staan al in Paul's Google Sheet en worden hier nooit getoond — Kompas gebruikt ze intern als één van de vele signaalinputs (zie README, "Posities zijn een signaal-attribuut"). Deze pagina toont enkel de signalenfeed zelf.</p>
   </header>
 
   <section>
     <div class="section-label"><span>Signalenfeed</span></div>
-    <div class="card" id="signals-list">
-      <div class="empty">wordt geladen…</div>
-    </div>
-  </section>
-
-  <section>
-    <div class="section-label">
-      <span>Portefeuille (debug — Pijler B)</span>
-      <span id="wallet-refresh">—</span>
-    </div>
-    <div class="stat-row" id="wallet-stats">
-      <div class="stat"><div class="label">Waarde</div><div class="value skel"></div></div>
-      <div class="stat"><div class="label">Cost</div><div class="value skel"></div></div>
-      <div class="stat"><div class="label">Gain</div><div class="value skel"></div></div>
-      <div class="stat"><div class="label">Gain %</div><div class="value skel"></div></div>
-    </div>
-  </section>
-
-  <section>
-    <div class="section-label"><span>Posities (debug)</span></div>
-    <div class="card" id="positions-list">
-      <div class="empty">wordt geladen…</div>
-    </div>
-  </section>
-
-  <section>
-    <div class="section-label"><span>Watchlist (debug)</span></div>
-    <div class="card" id="watchlist-list">
+    <div id="signals-list">
       <div class="empty">wordt geladen…</div>
     </div>
   </section>
 
   <footer>
     Aparte, nieuwe database — losstaand van het oude Stocazzo-gekoppelde Kompas.
-    Bron: Google Sheet "Aandelen", vertaald en gereconcilieerd door
-    <code>kompas/pijler_b</code>. Zie
+    Portefeuille-/watchlistfeiten komen uit de Google Sheet "Aandelen" via
+    <code>kompas/pijler_b</code> en blijven daar — enkel gebruikt, nooit
+    hier herhaald. Zie
     <a href="https://github.com/paulRenDev/kompas">paulRenDev/kompas</a>.
   </footer>
 </div>
 
 <script>
 (function () {
-  function fmtEUR(n) {
-    if (typeof n !== 'number') return '—';
-    return '€ ' + n.toLocaleString('nl-BE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  }
-  function fmtPct(n) {
-    if (typeof n !== 'number') return '—';
-    return (n >= 0 ? '+' : '') + n.toFixed(2) + '%';
-  }
-  function gainClass(n) {
-    return typeof n === 'number' && n < 0 ? 'gain-neg' : 'gain-pos';
-  }
-  function fmtTime(iso) {
-    if (!iso) return '—';
-    try {
-      var d = new Date(iso);
-      return d.toLocaleString('nl-BE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-    } catch (e) { return iso; }
-  }
-
-  function renderWalletMissing() {
-    document.getElementById('wallet-stats').innerHTML =
-      '<div class="stat" style="grid-column:1/-1"><div class="empty">Nog geen Pijler B-cyclus geschreven naar deze database.</div></div>';
-    document.getElementById('wallet-refresh').textContent = '';
-  }
-
-  function renderWallet(data) {
-    var el = document.getElementById('wallet-stats');
-    el.innerHTML =
-      '<div class="stat"><div class="label">Waarde</div><div class="value">' + fmtEUR(data.value_eur) + '</div></div>' +
-      '<div class="stat"><div class="label">Cost</div><div class="value">' + fmtEUR(data.cost_eur) + '</div></div>' +
-      '<div class="stat"><div class="label">Gain</div><div class="value ' + gainClass(data.gain_eur) + '">' + fmtEUR(data.gain_eur) + '</div></div>' +
-      '<div class="stat"><div class="label">Gain %</div><div class="value ' + gainClass(data.gain_pct) + '">' + fmtPct(data.gain_pct) + '</div><div class="sub">' + (data.reconciled ? '✓ gereconcilieerd' : '⚠ niet gereconcilieerd') + '</div></div>';
-    document.getElementById('wallet-refresh').innerHTML =
-      '<span class="badge badge-live">' + fmtTime(data.refreshed_at) + '</span>';
-  }
-
-  function renderPositions(docs) {
-    var el = document.getElementById('positions-list');
-    if (!docs.length) {
-      el.innerHTML = '<div class="empty">Nog geen posities geschreven.</div>';
-      return;
-    }
-    el.innerHTML = docs.map(function (d) {
-      var p = d.data();
-      return '<div class="pos-row">' +
-        '<div><div class="pos-name">' + p.name + '</div><div class="pos-meta">' + p.ticker + ' · ' + p.exchange + '</div></div>' +
-        '<div class="pos-value"><div>' + fmtEUR(p.value_eur) + '</div><div class="pos-meta ' + gainClass(p.gain_pct) + '">' + fmtPct(p.gain_pct) + '</div></div>' +
-        '</div>';
-    }).join('');
-  }
-
-  function renderWatchlist(docs) {
-    var el = document.getElementById('watchlist-list');
-    if (!docs.length) {
-      el.innerHTML = '<div class="empty">Leeg — wordt gevuld zodra Pijler A/synthese-laag bestaat.</div>';
-      return;
-    }
-    el.innerHTML = docs.map(function (d) {
-      var w = d.data();
-      return '<div class="pos-row">' +
-        '<div><div class="pos-name">' + w.name + '</div><div class="pos-meta">' + w.ticker + ' · sinds ' + w.set_date + '</div></div>' +
-        '<div class="pos-value"><div class="pos-meta">kans gemist/gewonnen</div><div class="' + gainClass(w.opportunity_gain_pct) + '">' + fmtPct(w.opportunity_gain_pct) + '</div></div>' +
-        '</div>';
-    }).join('');
-  }
-
   function confidenceBadge(level) {
     var l = (level || '').toLowerCase();
     var cls = l === 'hoog' ? 'badge-live' : (l === 'voorlopig' ? 'badge-pending' : '');
@@ -209,25 +109,27 @@
   function renderSignals(docs) {
     var el = document.getElementById('signals-list');
     if (!docs.length) {
-      el.innerHTML = '<div class="empty">Nog geen signalen — Pijler A heeft nog geen draaiende cyclus.</div>';
+      el.innerHTML = '<div class="card"><div class="empty">Nog geen signalen — Pijler A heeft nog geen draaiende cyclus.</div></div>';
       return;
     }
     el.innerHTML = docs.map(function (d) {
       var s = d.data();
       var tags = (s.related_positions || []).concat(s.related_watchlist || []);
       var tagsHtml = tags.length
-        ? '<span class="pos-meta">raakt: ' + tags.join(', ') + '</span>'
-        : '<span class="pos-meta">geen portefeuille-/watchlist-link</span>';
-      return '<div class="pos-row" style="display:block;">' +
+        ? 'raakt: ' + tags.join(', ')
+        : 'geen portefeuille-/watchlist-link';
+      return '<div class="signal-card">' +
         '<div style="display:flex; justify-content:space-between; align-items:baseline; gap:8px;">' +
-          '<div class="pos-name">' + s.subject + ' <span class="pos-meta">· ' + s.role + '</span></div>' +
+          '<div class="signal-name">' + s.subject + ' <span class="signal-meta">· ' + s.role + '</span></div>' +
           confidenceBadge(s.signal_confidence) +
         '</div>' +
-        '<div style="margin:6px 0; font-size:13.5px;">' + s.text + '</div>' +
-        '<div class="pos-meta">omvang: ' + s.magnitude + '</div>' +
-        '<div class="pos-meta">horizon: ' + s.timeframe_horizon + '</div>' +
-        '<div class="pos-meta">bron: ' + s.source + ' (' + s.source_tier + ')</div>' +
-        '<div style="margin-top:4px;">' + tagsHtml + '</div>' +
+        '<div class="signal-text">' + s.text + '</div>' +
+        '<div class="signal-facts">' +
+          '<div class="signal-meta">omvang: ' + s.magnitude + '</div>' +
+          '<div class="signal-meta">horizon: ' + s.timeframe_horizon + '</div>' +
+          '<div class="signal-meta">bron: ' + s.source + ' (' + s.source_tier + ')</div>' +
+          '<div class="signal-meta">' + tagsHtml + '</div>' +
+        '</div>' +
         '</div>';
     }).join('');
   }
@@ -239,34 +141,14 @@
     } catch (e) { /* fall through to unavailable state */ }
 
     if (!db) {
-      renderWalletMissing();
-      document.getElementById('signals-list').innerHTML = '<div class="empty">Database niet beschikbaar in deze weergave.</div>';
-      document.getElementById('positions-list').innerHTML = '<div class="empty">Database niet beschikbaar in deze weergave.</div>';
-      document.getElementById('watchlist-list').innerHTML = '<div class="empty">Database niet beschikbaar in deze weergave.</div>';
+      document.getElementById('signals-list').innerHTML = '<div class="card"><div class="empty">Database niet beschikbaar in deze weergave.</div></div>';
       return;
     }
 
     db.collection('events').orderBy('observed_at', 'desc').onSnapshot(function (snap) {
       renderSignals(snap.docs);
     }, function () {
-      document.getElementById('signals-list').innerHTML = '<div class="empty">Kon signalen niet laden.</div>';
-    });
-
-    db.doc('wallet/state').onSnapshot(function (snap) {
-      if (snap.exists) renderWallet(snap.data());
-      else renderWalletMissing();
-    }, function () { renderWalletMissing(); });
-
-    db.collection('wallet-positions').orderBy('value_eur', 'desc').onSnapshot(function (snap) {
-      renderPositions(snap.docs);
-    }, function () {
-      document.getElementById('positions-list').innerHTML = '<div class="empty">Kon posities niet laden.</div>';
-    });
-
-    db.collection('watchlist').orderBy('name').onSnapshot(function (snap) {
-      renderWatchlist(snap.docs);
-    }, function () {
-      document.getElementById('watchlist-list').innerHTML = '<div class="empty">Kon watchlist niet laden.</div>';
+      document.getElementById('signals-list').innerHTML = '<div class="card"><div class="empty">Kon signalen niet laden.</div></div>';
     });
   }
 

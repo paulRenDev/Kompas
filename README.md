@@ -243,14 +243,17 @@ Pijler A als de publicatie:
   ook de watchlist wordt geen eigen, leidende sectie meer. Een signaal
   dat een positie raakt, toont dat als tag/context ("raakt: ASML,
   watchlist") — de positie is metadata op het signaal, niet omgekeerd.
-- **Praktisch gevolg voor `web/index.html` (de huidige statuspagina):**
-  die pagina toont vandaag wél de ruwe posities/watchlist als
-  hoofdinhoud — dat is bewust, en blijft voorlopig zo, maar uitsluitend
-  als **verificatie-weergave van Pijler B se ruwe output**, niet als
-  ontwerp voor de uiteindelijke Kompas-pagina. Zodra Pijler A en de
-  synthese-laag bestaan, wordt de echte pagina herbouwd rond een
-  signalenfeed volgens dit principe — de statuspagina blijft daarnaast
-  bestaan als debug-weergave, gelabeld als zodanig.
+- **Definitief besloten voor `web/index.html`** (18/9/2026, Paul: "I
+  want you to use it as 1 of many signals but I don't want to see it. I
+  already have it on my sheets"): geen "debug"-tussenstap — de pagina
+  toont **nooit** posities/watchlist, ook niet tijdelijk. De ruwe
+  Pijler B-data blijft wél volledig bestaan in de database
+  (`wallet/state`, `wallet-positions/<ticker>-<exchange>`,
+  `watchlist/<ticker>`) en wordt door Pijler A/de synthese-laag gebruikt
+  om een signaal te taggen (`related_positions`/`related_watchlist`) —
+  enkel de pagina zelf toont het nooit, want dat staat al in de sheet.
+  `web/index.html` toont sinds deze beslissing uitsluitend de
+  signalenfeed; geen aparte "verificatie"- of debug-sectie meer.
 
 ## Architectuur — losse, vervangbare componenten (17/9/2026)
 
@@ -695,9 +698,11 @@ de 6 ETF's is Japan-/JPY-specifiek, en een tag forceren om het signaal
 "relevanter" te doen lijken zou precies ingaan tegen "Posities zijn een
 signaal-attribuut" hierboven.
 
-`web/index.html` toont deze signalenfeed nu als **eerste, leidende
-sectie** — Portefeuille/Posities/Watchlist staan eronder, expliciet
-gelabeld "(debug)", precies volgens dat principe.
+`web/index.html` toont sinds Paul's definitieve beslissing (zie
+"Posities zijn een signaal-attribuut" hierboven) **uitsluitend** de
+signalenfeed — geen Portefeuille/Posities/Watchlist-sectie meer, ook
+niet als debug-weergave. Die data bestaat en wordt gebruikt, wordt
+alleen nooit meer op de pagina getoond.
 
 Nog te bouwen, in volgorde: (1) een daadwerkelijk triggermechanisme voor
 de twee dagelijkse cycli (09:00 en 18:00 CEST) — vandaag is elke cyclus
