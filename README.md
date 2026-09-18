@@ -598,6 +598,16 @@ achter de mockup en een deel van dit document klopt niet.
   net geblokkeerd waren. Een sector-specialist zonder eigen bereikbare
   feed gebruikt dus `WebSearch` met een sectorspecifieke zoekopdracht per
   cyclus — zie `docs/kompas-rss-signaalscan.md`, Bevinding 4.
+- **Aanvullende bronnenlijst van Paul getest** (18/9/2026): geopolitiek/
+  macro/sector-kandidaten (International Crisis Group, Chatham House,
+  BNP Paribas Economic Research, OilPrice, Ars Technica, FDA) allemaal
+  `EGRESS_BLOCKED` via directe `WebFetch` — zelfde patroon als Bevinding 3,
+  RSS-endpoint of niet maakt geen verschil, het is domeinniveau geblokkeerd.
+  `WebSearch` blijft wél werken op deze domeinen (bv. `crisisgroup.org`
+  live getest, actuele resultaten met bruikbare bronvermelding) — Bevinding
+  4 bevestigd op een bredere set. Conclusie ongewijzigd: sector-specialisten
+  zonder bereikbare feed gebruiken `WebSearch`, geen directe RSS-parse,
+  zolang dit binnen een Claude-sessie draait.
 - [x] **Automatisering vs. menselijke review** (17/9/2026): volledig
   autonoom — geen check-in-moment per signaal vóór de synthese-laag.
 - [x] **Architectuur** (17/9/2026): volledig nieuw artifact + databaseschema
@@ -676,9 +686,22 @@ achter de mockup en een deel van dit document klopt niet.
   geen RSS-feed-endpoints — `feedparser` zou hier leeg op teruggeven,
   (2) het model (`claude-3-5-sonnet-20241022`) is een verouderde,
   gedateerde snapshot — nu `claude-opus-5` (standaard) of `claude-sonnet-5`
-  (hoger volume/goedkoper). Nog niet beslist of dit pad nu al opgestart
-  wordt of pas bij een latere automatiseringsstap (zie de eerdere
-  senior-engineer-afweging bij Status hieronder).
+  (hoger volume/goedkoper).
+  **Beslissing (18/9/2026, "ask the senior developer")**: nu niet bouwen.
+  Twee redenen, geen smaak: (1) de schrijfkant (`ArtifactData`) heeft nog
+  geen externe API — een standalone script zou wél kunnen lezen/analyseren,
+  maar nergens naartoe kunnen schrijven, dus het sluit de lus niet; (2) het
+  script se patroon ("vat deze batch headlines samen" in één niet-agentic
+  call) is een kwaliteitsstap terug tegenover het multi-stap, geverifieerde
+  proces dat de drie echte signalen tot nu toe opleverde (zoek → tweede
+  zoekopdracht ter verificatie → eerlijk relevantie-oordeel over
+  portefeuille-/watchlist-link) — nu automatiseren zou een ondiepere aanpak
+  vastklikken dan wat handmatig al werkt. Zelfde regel als bij de
+  Routines-vs-GitHub-Actions-afweging: geen automatiseringsinfrastructuur
+  vóór het geautomatiseerde proces zijn waarde bewezen heeft. Blijft TODO,
+  heropenen zodra Poort 3 een externe schrijf-API heeft óf het handmatige
+  proces een herhaalbare stap is geworden die effectief te automatiseren
+  valt.
 
 ## Status
 
