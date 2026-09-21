@@ -1,6 +1,6 @@
 import unittest
 
-from kompas.core.signal import Signal, validate_signal
+from kompas.core.signal import CapitalView, Signal, validate_signal
 
 
 def _base_signal(**overrides) -> Signal:
@@ -54,6 +54,45 @@ class TestValidateSignal(unittest.TestCase):
 
     def test_non_technical_signal_does_not_need_chart_timeframe(self):
         result = validate_signal(_base_signal(chart_timeframe=None), is_technical=False)
+        self.assertTrue(result.ok, msg=result.errors)
+
+    def test_no_capital_view_is_fine(self):
+        result = validate_signal(_base_signal(capital_view=None))
+        self.assertTrue(result.ok, msg=result.errors)
+
+    def test_valid_capital_view_passes(self):
+        sig = _base_signal(capital_view=CapitalView(action="wacht", reasoning="Te vroeg, wacht op bevestiging."))
+        result = validate_signal(sig)
+        self.assertTrue(result.ok, msg=result.errors)
+
+    def test_capital_view_bad_action_rejected(self):
+        sig = _base_signal(capital_view=CapitalView(action="sell_everything", reasoning="x"))
+        result = validate_signal(sig)
+        self.assertFalse(result.ok)
+        self.assertTrue(any("capital_view.action" in e for e in result.errors))
+
+    def test_capital_view_empty_reasoning_rejected(self):
+        sig = _base_signal(capital_view=CapitalView(action="wacht", reasoning="   "))
+        result = validate_signal(sig)
+        self.assertFalse(result.ok)
+        self.assertIn("capital_view.reasoning ontbreekt", result.errors)
+
+    def test_verhoog_bestaand_requires_a_real_position_tag(self):
+        sig = _base_signal(
+            capital_view=CapitalView(action="verhoog_bestaand", reasoning="Sterk signaal."),
+            related_positions=[],
+            related_watchlist=["CCJ"],
+        )
+        result = validate_signal(sig)
+        self.assertFalse(result.ok)
+        self.assertTrue(any("verhoog_bestaand" in e for e in result.errors))
+
+    def test_verhoog_bestaand_with_a_real_position_tag_passes(self):
+        sig = _base_signal(
+            capital_view=CapitalView(action="verhoog_bestaand", reasoning="Sterk signaal."),
+            related_positions=["NUCL"],
+        )
+        result = validate_signal(sig)
         self.assertTrue(result.ok, msg=result.errors)
 
 

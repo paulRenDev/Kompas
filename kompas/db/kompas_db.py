@@ -144,6 +144,11 @@ def signal_event_doc(signal: Signal, *, is_technical: bool = False) -> dict:
         "related_positions": signal.related_positions,
         "related_watchlist": signal.related_watchlist,
         "conflict_note": signal.conflict_note,
+        "capital_view": (
+            {"action": signal.capital_view.action, "reasoning": signal.capital_view.reasoning}
+            if signal.capital_view is not None
+            else None
+        ),
         "observed_at": signal.observed_at,
     }
 

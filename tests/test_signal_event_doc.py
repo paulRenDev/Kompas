@@ -1,6 +1,6 @@
 import unittest
 
-from kompas.core.signal import Signal
+from kompas.core.signal import CapitalView, Signal
 from kompas.db.kompas_db import signal_event_doc
 
 
@@ -28,9 +28,20 @@ class TestSignalEventDoc(unittest.TestCase):
         self.assertTrue(doc["path"].startswith("events/uranium-nucleair-2026-09-18-"))
         self.assertEqual(doc["related_watchlist"], ["CCJ"])
         self.assertEqual(doc["related_positions"], [])
+        self.assertIsNone(doc["capital_view"])
+
+    def test_capital_view_serializes_as_a_plain_dict(self):
+        sig = _valid_signal(capital_view=CapitalView(action="wacht", reasoning="Te vroeg."))
+        doc = signal_event_doc(sig)
+        self.assertEqual(doc["capital_view"], {"action": "wacht", "reasoning": "Te vroeg."})
 
     def test_invalid_signal_raises_instead_of_producing_a_bad_doc(self):
         bad = _valid_signal(source="sectorpers")
+        with self.assertRaises(ValueError):
+            signal_event_doc(bad)
+
+    def test_invalid_capital_view_also_raises(self):
+        bad = _valid_signal(capital_view=CapitalView(action="verhoog_bestaand", reasoning="x"))
         with self.assertRaises(ValueError):
             signal_event_doc(bad)
 

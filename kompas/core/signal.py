@@ -21,6 +21,28 @@ from dataclasses import dataclass, field
 
 SIGNAL_CONFIDENCE_LEVELS = ("speculatief", "voorlopig", "hoog")
 
+# Paul's framing: "if I had an uncommitted EUR 100 today, would THIS signal
+# move it?" -- deliberately marginal-money language, never "what should I do
+# with my actual position." nieuwe_positie = a name not currently held or
+# watched at all; verhoog_bestaand = adds conviction to something already
+# HELD (a real position, not just a watchlist name -- see validate_signal);
+# wacht = real signal, not (yet) actionable.
+CAPITAL_VIEW_ACTIONS = ("nieuwe_positie", "verhoog_bestaand", "wacht")
+
+
+@dataclass(frozen=True)
+class CapitalView:
+    """One specialist's marginal-euro judgment on their own signal.
+
+    An attribute of the signal, same standing as related_positions/
+    related_watchlist -- never a separate, position-keyed page section.
+    Optional: a broad macro signal with no single-name angle can honestly
+    have none, rather than a forced opinion.
+    """
+
+    action: str  # one of CAPITAL_VIEW_ACTIONS
+    reasoning: str  # the "because of this and that" -- required, non-empty
+
 
 @dataclass(frozen=True)
 class Signal:
@@ -43,6 +65,7 @@ class Signal:
     # whoever writes the signal, after reading both texts. None = no known
     # conflict. See kompas/pijler_a/spotlight.py for why this isn't inferred.
     conflict_note: str | None = None
+    capital_view: CapitalView | None = None
 
 
 @dataclass(frozen=True)
@@ -100,5 +123,20 @@ def validate_signal(signal: Signal, *, is_technical: bool = False) -> Validation
 
     if is_technical and not (signal.chart_timeframe or "").strip():
         errors.append("timeframe ontbreekt (verplicht voor technische signalen)")
+
+    if signal.capital_view is not None:
+        cv = signal.capital_view
+        if cv.action not in CAPITAL_VIEW_ACTIONS:
+            errors.append(
+                f"capital_view.action {cv.action!r} is geen van {CAPITAL_VIEW_ACTIONS}"
+            )
+        if not cv.reasoning.strip():
+            errors.append("capital_view.reasoning ontbreekt")
+        if cv.action == "verhoog_bestaand" and not signal.related_positions:
+            errors.append(
+                "capital_view 'verhoog_bestaand' vereist een echte related_positions-tag "
+                "-- je kan geen bestaande positie vergroten die er niet is (een "
+                "watchlist-naam is geen positie)"
+            )
 
     return ValidationResult(ok=not errors, errors=errors)
