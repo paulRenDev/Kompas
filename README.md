@@ -206,6 +206,20 @@ tweemaaldaagse Routine-prompt is bijgewerkt om bij elke cyclus expliciet
 ook bestaande speculatieve/lopende signalen op vervolg te checken, niet
 enkel nieuwe onderwerpen te zoeken.
 
+**Bijgesteld, zelfde dag**: de fix hierboven maakte vervolg-checks
+verplicht bij elke cyclus, ongeacht wat er verder gebeurt — Paul corrigeerde
+dat meteen: "perhaps it had developped but other things are more
+important. no need to follow up on venezuela, or the belgian data center
+if other big thing unfold. we want to find opportunities. that's up to
+the specialists to determine." Het doel is opportuniteiten vinden, niet
+een checklist afwerken — vervolg op een bestaand signaal is één mogelijke
+bron van waarde naast nieuwe ontdekkingen, geen verplichting die daarmee
+concurreert. De Routine-prompt is opnieuw bijgesteld: vervolg-checks zijn
+nu een afweging voor de specialisten (verdient dit een plek t.o.v. een
+mogelijk grotere nieuwe opportuniteit?), geen mechanische regel op
+signaalleeftijd. De leeftijdsindicator op de pagina zelf blijft staan —
+dat is pure transparantie (hoe oud is dit?), geen actie-dwang.
+
 ## Verdieping via Claude — geen chat in de tool zelf (bijgesteld 17/9/2026)
 
 Geen chatfunctie in de Kompas-pagina zelf. Wanneer iets op de pagina Paul's
