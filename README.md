@@ -170,6 +170,37 @@ is" verderop voor de volledige module-indeling en hoe de tests te draaien.
    vergelijk met de sheet's eigen totaalrij — bij afwijking stoppen, nooit
    publiceren met een onverklaard verschil.
 
+## Communicatie-exec review — voelt dit gemeend en fris? (21/9/2026)
+
+Paul: "let every time a new update occurs a communication exec go through
+the proposed output. she will be responsible to make sure this document
+feels genuine and fresh." Een nieuwe, verplichte stap in het
+schrijfproces — NA het onderzoeken/verifiëren/valideren van een signaal,
+VOOR het geschreven wordt — gericht op stijl en toon, niet op feiten (die
+horen al bij `validate_signal` en de zoek-verifieer-stap zelf).
+
+Direct getest tegen de 11 signalen die op dat moment live stonden, en de
+echte bevindingen waren niet cosmetisch: elk signaal opende met exact
+dezelfde structuur (Onderwerp-Werkwoord-Cijfer); het woord "--" als
+verbindingsteken kwam in bijna elke zin voor; "expliciet" kwam herhaald
+terug in ongerelateerde signalen; de drie vervolg-signalen begonnen
+allemaal letterlijk met "Update op het signaal van 18/9:". Het zwaarste
+punt: vier verschillende rollen (Stock watchers, Trend viewers, Technical
+stock watchers, een sector-specialist) klonken allemaal identiek — dat
+ondermijnt net de reden om een POOL van specialisten te hebben in plaats
+van één generalist. Alle 11 herschreven (enkel proza/toon, geen enkel
+feit, cijfer, datum of bron gewijzigd) en live gepubliceerd.
+
+Dit is bewust GEEN mechanische regel (geen verboden-woordenlijst, geen
+lint-check op "--") — "fris" is geen eigenschap die een keyword-filter
+zinvol kan afdwingen; dat zou net het soort schijnoplossing zijn die
+"we're not pretending here" moet vermijden. Het blijft een redactionele
+stap die wie een signaal schrijft zelf uitvoert: herlees de tekst en
+`capital_view.reasoning` kritisch vóór het schrijven — klinkt dit als
+gemeende, specifieke analyse, of als een sjabloon met andere cijfers
+erin? Rollen mogen en moeten van elkaar verschillen in stem, niet enkel
+in onderwerp.
+
 ## Signaalversheid — geen herhaling zonder wijziging
 
 Directe les uit de diagnose hierboven: een geheugen dat alleen *kan*
