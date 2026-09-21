@@ -38,10 +38,18 @@ class CapitalView:
     related_watchlist -- never a separate, position-keyed page section.
     Optional: a broad macro signal with no single-name angle can honestly
     have none, rather than a forced opinion.
+
+    "wacht" without a `trigger` is unfalsifiable -- it is always "correct"
+    because nothing was ever claimed. Paul caught this directly: it lets
+    the specialist avoid ever being wrong by never actually saying
+    anything. `trigger` forces every action, "wacht" included, to name the
+    concrete condition that would change it -- a real trend/price/event to
+    watch for, not "not sure yet."
     """
 
     action: str  # one of CAPITAL_VIEW_ACTIONS
     reasoning: str  # the "because of this and that" -- required, non-empty
+    trigger: str  # what would change this stance -- required, non-empty
 
 
 @dataclass(frozen=True)
@@ -132,6 +140,11 @@ def validate_signal(signal: Signal, *, is_technical: bool = False) -> Validation
             )
         if not cv.reasoning.strip():
             errors.append("capital_view.reasoning ontbreekt")
+        if not cv.trigger.strip():
+            errors.append(
+                "capital_view.trigger ontbreekt -- vooral bij 'wacht' verplicht: zonder een "
+                "concrete voorwaarde is 'wacht' nooit fout, en dus geen echt standpunt"
+            )
         if cv.action == "verhoog_bestaand" and not signal.related_positions:
             errors.append(
                 "capital_view 'verhoog_bestaand' vereist een echte related_positions-tag "

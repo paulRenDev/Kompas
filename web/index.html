@@ -228,6 +228,7 @@
       '<div class="capital-view-head"><span class="capital-view-label">EUR 100-vraag:</span>' +
       '<span class="capital-view-action ' + cv.action + '">' + label + '</span></div>' +
       '<div class="capital-view-reasoning">' + cv.reasoning + '</div>' +
+      (cv.trigger ? '<div class="capital-view-reasoning"><span class="capital-view-label">heroverweeg:</span> ' + cv.trigger + '</div>' : '') +
       '</div>';
   }
 

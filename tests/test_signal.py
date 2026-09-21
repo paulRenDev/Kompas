@@ -61,25 +61,36 @@ class TestValidateSignal(unittest.TestCase):
         self.assertTrue(result.ok, msg=result.errors)
 
     def test_valid_capital_view_passes(self):
-        sig = _base_signal(capital_view=CapitalView(action="wacht", reasoning="Te vroeg, wacht op bevestiging."))
+        sig = _base_signal(
+            capital_view=CapitalView(
+                action="wacht", reasoning="Te vroeg, wacht op bevestiging.",
+                trigger="Heroverweeg bij de volgende kwartaalcijfers.",
+            )
+        )
         result = validate_signal(sig)
         self.assertTrue(result.ok, msg=result.errors)
 
     def test_capital_view_bad_action_rejected(self):
-        sig = _base_signal(capital_view=CapitalView(action="sell_everything", reasoning="x"))
+        sig = _base_signal(capital_view=CapitalView(action="sell_everything", reasoning="x", trigger="y"))
         result = validate_signal(sig)
         self.assertFalse(result.ok)
         self.assertTrue(any("capital_view.action" in e for e in result.errors))
 
     def test_capital_view_empty_reasoning_rejected(self):
-        sig = _base_signal(capital_view=CapitalView(action="wacht", reasoning="   "))
+        sig = _base_signal(capital_view=CapitalView(action="wacht", reasoning="   ", trigger="y"))
         result = validate_signal(sig)
         self.assertFalse(result.ok)
         self.assertIn("capital_view.reasoning ontbreekt", result.errors)
 
+    def test_capital_view_empty_trigger_rejected(self):
+        sig = _base_signal(capital_view=CapitalView(action="wacht", reasoning="Te vroeg.", trigger="   "))
+        result = validate_signal(sig)
+        self.assertFalse(result.ok)
+        self.assertTrue(any("capital_view.trigger ontbreekt" in e for e in result.errors))
+
     def test_verhoog_bestaand_requires_a_real_position_tag(self):
         sig = _base_signal(
-            capital_view=CapitalView(action="verhoog_bestaand", reasoning="Sterk signaal."),
+            capital_view=CapitalView(action="verhoog_bestaand", reasoning="Sterk signaal.", trigger="y"),
             related_positions=[],
             related_watchlist=["CCJ"],
         )
@@ -89,7 +100,7 @@ class TestValidateSignal(unittest.TestCase):
 
     def test_verhoog_bestaand_with_a_real_position_tag_passes(self):
         sig = _base_signal(
-            capital_view=CapitalView(action="verhoog_bestaand", reasoning="Sterk signaal."),
+            capital_view=CapitalView(action="verhoog_bestaand", reasoning="Sterk signaal.", trigger="y"),
             related_positions=["NUCL"],
         )
         result = validate_signal(sig)
@@ -97,7 +108,7 @@ class TestValidateSignal(unittest.TestCase):
 
     def test_nieuwe_positie_on_a_speculative_signal_is_rejected(self):
         sig = _base_signal(
-            capital_view=CapitalView(action="nieuwe_positie", reasoning="Veelbelovend."),
+            capital_view=CapitalView(action="nieuwe_positie", reasoning="Veelbelovend.", trigger="y"),
             signal_confidence="speculatief",
         )
         result = validate_signal(sig)
@@ -106,7 +117,7 @@ class TestValidateSignal(unittest.TestCase):
 
     def test_nieuwe_positie_on_a_voorlopig_signal_passes(self):
         sig = _base_signal(
-            capital_view=CapitalView(action="nieuwe_positie", reasoning="Veelbelovend."),
+            capital_view=CapitalView(action="nieuwe_positie", reasoning="Veelbelovend.", trigger="y"),
             signal_confidence="voorlopig",
         )
         result = validate_signal(sig)

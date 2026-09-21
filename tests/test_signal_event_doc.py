@@ -31,9 +31,12 @@ class TestSignalEventDoc(unittest.TestCase):
         self.assertIsNone(doc["capital_view"])
 
     def test_capital_view_serializes_as_a_plain_dict(self):
-        sig = _valid_signal(capital_view=CapitalView(action="wacht", reasoning="Te vroeg."))
+        sig = _valid_signal(capital_view=CapitalView(action="wacht", reasoning="Te vroeg.", trigger="Bij Q4-cijfers."))
         doc = signal_event_doc(sig)
-        self.assertEqual(doc["capital_view"], {"action": "wacht", "reasoning": "Te vroeg."})
+        self.assertEqual(
+            doc["capital_view"],
+            {"action": "wacht", "reasoning": "Te vroeg.", "trigger": "Bij Q4-cijfers."},
+        )
 
     def test_invalid_signal_raises_instead_of_producing_a_bad_doc(self):
         bad = _valid_signal(source="sectorpers")
@@ -41,7 +44,12 @@ class TestSignalEventDoc(unittest.TestCase):
             signal_event_doc(bad)
 
     def test_invalid_capital_view_also_raises(self):
-        bad = _valid_signal(capital_view=CapitalView(action="verhoog_bestaand", reasoning="x"))
+        bad = _valid_signal(capital_view=CapitalView(action="verhoog_bestaand", reasoning="x", trigger="y"))
+        with self.assertRaises(ValueError):
+            signal_event_doc(bad)
+
+    def test_capital_view_without_trigger_also_raises(self):
+        bad = _valid_signal(capital_view=CapitalView(action="wacht", reasoning="x", trigger=""))
         with self.assertRaises(ValueError):
             signal_event_doc(bad)
 
