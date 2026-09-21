@@ -95,6 +95,23 @@ class TestValidateSignal(unittest.TestCase):
         result = validate_signal(sig)
         self.assertTrue(result.ok, msg=result.errors)
 
+    def test_nieuwe_positie_on_a_speculative_signal_is_rejected(self):
+        sig = _base_signal(
+            capital_view=CapitalView(action="nieuwe_positie", reasoning="Veelbelovend."),
+            signal_confidence="speculatief",
+        )
+        result = validate_signal(sig)
+        self.assertFalse(result.ok)
+        self.assertTrue(any("nieuwe_positie" in e for e in result.errors))
+
+    def test_nieuwe_positie_on_a_voorlopig_signal_passes(self):
+        sig = _base_signal(
+            capital_view=CapitalView(action="nieuwe_positie", reasoning="Veelbelovend."),
+            signal_confidence="voorlopig",
+        )
+        result = validate_signal(sig)
+        self.assertTrue(result.ok, msg=result.errors)
+
 
 if __name__ == "__main__":
     unittest.main()

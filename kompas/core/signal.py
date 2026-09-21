@@ -138,5 +138,12 @@ def validate_signal(signal: Signal, *, is_technical: bool = False) -> Validation
                 "-- je kan geen bestaande positie vergroten die er niet is (een "
                 "watchlist-naam is geen positie)"
             )
+        if cv.action == "nieuwe_positie" and sc == "speculatief":
+            errors.append(
+                "capital_view 'nieuwe_positie' kan niet op een speculatief signaal -- "
+                "een nieuwe positie vergt minstens 'voorlopig' signaalbetrouwbaarheid "
+                "(zie de specialisten-review: anders overschat capital_view een signaal "
+                "dat de auteur zelf als onbewezen labelde)"
+            )
 
     return ValidationResult(ok=not errors, errors=errors)

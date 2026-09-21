@@ -657,6 +657,13 @@ achter de mockup en een deel van dit document klopt niet.
   klant gekoppeld) valt daar doorgaans buiten. Geen juridisch advies —
   bij een echte bank-uitrol hoort dit door een jurist bevestigd te worden.
   Voor Paul's persoonlijk gebruik niet van toepassing.
+  **Heropend door de PM-scope-review (21/9/2026)**: `capital_view` (zie
+  Poort 1 hieronder) is de eerste feature die er structureel uitziet als
+  een aanbeveling (nieuwe_positie/verhoog_bestaand/wacht + reden) i.p.v.
+  een plat signaal, ook al is de framing bewust hypothetisch ("als ik
+  EUR 100 vrij had"). Verandert de conclusie niet voor Paul se eigen
+  gebruik, maar dit is het punt om op terug te komen als dit ooit
+  richting een andere gebruiker (bank, derde partij) zou gaan.
 - [x] **Disclaimer** (17/9/2026): standaard, altijd toevoegen — "geen
   beleggingsadvies, enkel ter informatie, doe zelf onderzoek" op elke
   publicatie. Goedkoop, geen reden om het niet te doen. Beschermt het
@@ -716,6 +723,42 @@ achter de mockup en een deel van dit document klopt niet.
   aandelen-/eenheidsacties. Nog niet gebouwd — wacht op Paul se akkoord
   over deze twee punten specifiek, niet op een volledige nieuwe
   discussie.
+- [x] **`Signal.capital_view` — de "EUR 100"-vraag** (21/9/2026, Paul se
+  framing: als ik EUR 100 vrij had, zou dit signaal het (A) in een nieuwe
+  naam zetten, (B) een bestaande positie laten groeien, of (C) wachten op
+  een beter moment?). Optioneel veld, zelfde plaats als
+  `related_positions`/`conflict_note` — nooit een apart, positie-gekeyed
+  sectie zoals de mockup se decision objects. Geen allocatie%, aantal of
+  P&L wordt getoond; `verhoog_bestaand` vereist een echte
+  `related_positions`-tag (`validate_signal` controleert dit — een
+  watchlist-naam is geen positie, kan dus niet "groeien").
+  Toegepast op de 4 signalen van vandaag: alle vier landen eerlijk op
+  "wacht", elk om een andere, in de tekst onderbouwde reden (macro-signaal
+  zonder aandeel-hoek; de HALEU-bron zelf noemt de korte-termijn-impact
+  beperkt; ASML se cijfers en analistenoordeel wijzen niet dezelfde kant
+  uit; ASML se technische plaatje is bullish maar overbought). Geen
+  "nieuwe_positie"/"verhoog_bestaand"-voorbeeld geforceerd om variatie te
+  tonen — dat zou precies het soort verzinsel zijn dat de rest van dit
+  project probeert te vermijden.
+  **Review door specialisten + PM (21/9/2026, op Paul se vraag)** — twee
+  echte bevindingen, geen formaliteit:
+  1. *Specialisten*: niets koppelde `capital_view` aan
+     `signal_confidence`, dus een `speculatief`-signaal kon toch
+     `nieuwe_positie` krijgen — dat overschat een signaal dat de auteur
+     zelf als onbewezen labelde (exact de fout bij het technische
+     ASML-signaal, dat toevallig "wacht" koos, maar de regel dwong dat
+     niet af). **Gefixed**: `validate_signal` verwerpt nu
+     `nieuwe_positie` op een speculatief signaal — minstens "voorlopig"
+     vereist.
+  2. *PM/scope*: `capital_view` ziet er structureel uit als een
+     aanbeveling (actie + reden), ook al is de framing hypothetisch. Geen
+     codewijziging — heropent "Juridisch kader voor autonome
+     aanbevelingen" hierboven met een expliciete verwijzing naar deze
+     feature. Ook genoteerd om te bewaken tijdens de week-test: als
+     "wacht" altijd de uitkomst is, is dit misschien schijn-besluitvorming
+     in plaats van een echte aanvulling — pas op als een reeks signalen
+     met sterke, uiteenlopende bewijslast toch allemaal op "wacht"
+     uitkomt.
 - [ ] **TODO — standalone `feedparser` + directe Anthropic API als
   alternatieve Poort 1-adapter** (18/9/2026, Paul deelde een
   Python-script: `feedparser` + `Anthropic()`-client, buiten een Claude-
@@ -745,6 +788,32 @@ achter de mockup en een deel van dit document klopt niet.
   valt.
 
 ## Status
+
+**Oude Kompas volledig vervangen, geen twee actieve takken meer** (21/9/2026,
+Paul: "this artefact should completely replace the old one. i don't want
+two active branches"). Ontdekt tijdens deze sessie: twee bestaande Routines
+("Kompas ochtendrefresh" en "Kompas avondrefresh", sinds 24/8/2026) draaiden
+al die tijd nog gewoon door, en verversten dagelijks het OUDE
+Stocazzo-gekoppelde Kompas-artifact
+(`https://claude.ai/code/artifact/9f6bc549-e4df-4082-874b-cf5907bbaab0`) —
+precies de url die overal in dit document als "nooit naar schrijven"
+gemarkeerd staat. Beide Routines zijn nu uitgeschakeld (niet verwijderd —
+geschiedenis blijft bewaard, `enabled: false`). Dit build se eigen artifact
+(`https://claude.ai/artifact/9NceTjMZzLgV99KMEGGh1e`) is vanaf nu de enige
+actieve Kompas.
+
+**Pijler A draait nu ook automatisch, week-test gestart** (21/9/2026): een
+nieuwe Routine (`0 7,16 * * *`, elke firing een verse sessie) draait de
+signalencyclus tweemaal daags. Voor het opstarten was de database drie dagen
+lang stil blijven staan op de 3 signalen van 18/9 — de sector-spotlight en
+conflict-callout hadden dus nooit een kans om te vullen, niet omdat de
+mechaniek niet werkt maar omdat de cyclus zelf nooit herhaald werd. Vier
+nieuwe, echte signalen erbij geschreven (Fed-renteverhoging, een
+HALEU-brandstofcontract, en een echte cross-role spotlight op ASML —
+Stock watchers x Technical stock watchers, twee onafhankelijke, niet-
+verzonnen lezingen op hetzelfde onderwerp). Elk signaal kreeg ook een
+`capital_view` (zie Poort 1/Open vragen) — alle vier landen eerlijk op
+"wacht".
 
 **Pijler B draait echt, end-to-end, voor het eerst** (18/9/2026). Niet
 enkel code en tests: een volledige, live cyclus is met de hand uitgevoerd
