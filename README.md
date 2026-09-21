@@ -184,6 +184,28 @@ decoratie. Daarom, vóór elke publicatie van een signaal:
 - Deze check is een harde publicatievoorwaarde, net als de reconciliatie in
   Pijler B — geen los "nice to have".
 
+**Gebroken helft gevonden (21/9/2026, Paul: "is the datacenter item still
+relevant? it was news from last friday. same from japan and venezuela")**:
+signaalversheid voorkomt HERHALING van een onveranderd signaal, maar er was
+niets dat een cyclus dwong om terug te gaan en te CHECKEN of een
+lopend/speculatief signaal intussen ontwikkeld is. Drie signalen van 18/9
+stonden drie dagen ongewijzigd, en alle drie bleken bij echte controle
+verouderd te zijn zonder dat de pagina dat liet zien: het Lanaken-signaal
+had intussen een bedrijfsnaam (Switch Datacenters) die op 18/9 nog
+ontbrak; het BOJ-signaal se eigen lezing (versnellende hikecyclus =
+haviksachtig) werd tegengesproken door de daadwerkelijke marktreactie
+(JGB-yield en yen allebei omlaag, duifachtig); het Venezuela-signaal bleef
+onbevestigd en kreeg er een concrete procedurele blokkade bij (BoE wacht
+op een VK-hofbevel dat nog niet is aangevraagd). Alle drie zijn nu
+bijgewerkt als nieuwe signalen op hetzelfde onderwerp (`find_prior_signals`
+matcht ze correct als vervolg, geen duplicaat). Twee structurele fixes:
+(1) elke kaart toont nu de leeftijd van het signaal (`ageBadge` in
+`web/index.html`), met een visuele marker vanaf 3 dagen ("check op
+vervolg") — leeftijd is nu zichtbaar i.p.v. stilzwijgend; (2) de
+tweemaaldaagse Routine-prompt is bijgewerkt om bij elke cyclus expliciet
+ook bestaande speculatieve/lopende signalen op vervolg te checken, niet
+enkel nieuwe onderwerpen te zoeken.
+
 ## Verdieping via Claude — geen chat in de tool zelf (bijgesteld 17/9/2026)
 
 Geen chatfunctie in de Kompas-pagina zelf. Wanneer iets op de pagina Paul's

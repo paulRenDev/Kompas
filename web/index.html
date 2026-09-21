@@ -202,6 +202,22 @@
     return '<span class="badge ' + cls + '">' + (level || '—') + '</span>';
   }
 
+  function ageLabel(observedAt) {
+    var then = new Date(observedAt).getTime();
+    if (isNaN(then)) return '';
+    var days = Math.floor((Date.now() - then) / 86400000);
+    if (days <= 0) return 'vandaag';
+    if (days === 1) return '1 dag oud';
+    return days + ' dagen oud';
+  }
+
+  function ageBadge(observedAt) {
+    var days = Math.floor((Date.now() - new Date(observedAt).getTime()) / 86400000);
+    var stale = days >= 3;
+    var style = stale ? ' style="color:var(--brass)"' : '';
+    return '<span class="role-item-meta"' + style + '>' + ageLabel(observedAt) + (stale ? ' — check op vervolg' : '') + '</span>';
+  }
+
   function factGrid(s) {
     var html = '<div class="fact-grid">' +
       '<div><div class="fact-label">omvang</div><div class="fact-value">' + s.magnitude + '</div></div>' +
@@ -260,6 +276,7 @@
         items.map(function (s) {
           return '<div class="spotlight-item">' +
             '<div class="item-text">' + s.text + '</div>' +
+            ageBadge(s.observed_at) +
             factGrid(s) +
             tagsRow(s) +
             capitalViewBlock(s) +
@@ -286,6 +303,7 @@
           return '<div class="role-item">' +
             '<div class="role-item-head"><span class="role-item-name">' + s.subject + '</span>' + confidenceBadge(s.signal_confidence) + '</div>' +
             '<div class="role-item-text">' + s.text + '</div>' +
+            ageBadge(s.observed_at) +
             '<div class="role-item-meta">omvang: ' + s.magnitude + '<br>horizon: ' + s.timeframe_horizon + (s.chart_timeframe ? ' · timeframe: ' + s.chart_timeframe : '') + '</div>' +
             '<div class="role-item-meta">bron: ' + s.source + ' (' + s.source_tier + ')</div>' +
             capitalViewBlock(s) +
