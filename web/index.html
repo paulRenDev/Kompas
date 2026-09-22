@@ -73,7 +73,6 @@
   .eyebrow { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; color: var(--teal); }
   h1 { font-weight: 300; font-size: 26px; margin: 4px 0 0; }
   .meta-line { font-family: var(--mono); font-size: 11px; color: var(--dim); margin-top: 6px; }
-  .subtitle { font-family: var(--mono); font-size: 11px; color: var(--dim); margin-bottom: 28px; }
   section { margin-bottom: 32px; }
   .section-label { font-size: 10px; font-family: var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
   .spotlight-card { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--purple); border-radius: 8px; padding: 16px 18px; margin-bottom: 14px; }
@@ -129,11 +128,6 @@
     <h1>Signalen &amp; watchlist</h1>
     <div class="meta-line" id="last-signal-line">laatste signaal: wordt geladen…</div>
   </header>
-  <div class="subtitle">
-    Portefeuille en watchlist staan al in Paul's Google Sheet en worden hier nooit getoond —
-    Kompas gebruikt ze intern als één van de vele signaalinputs (zie README,
-    "Posities zijn een signaal-attribuut"). Deze pagina toont enkel de signalenfeed zelf.
-  </div>
 
   <section>
     <div class="section-label"><span>Sector-specialistenpool — spotlight</span><span>verbanden die je zelf niet meteen ziet</span></div>
@@ -200,6 +194,19 @@
     var l = (level || '').toLowerCase();
     var cls = l === 'hoog' ? 'badge-hoog' : (l === 'voorlopig' ? 'badge-voorlopig' : (l === 'speculatief' ? 'badge-speculatief' : ''));
     return '<span class="badge ' + cls + '">' + (level || '—') + '</span>';
+  }
+
+  var MONTHS_NL = ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
+
+  function formatDateTime(iso) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return iso;
+    var day = d.getDate();
+    var month = MONTHS_NL[d.getMonth()];
+    var year = d.getFullYear();
+    var hh = String(d.getHours()).padStart(2, '0');
+    var mm = String(d.getMinutes()).padStart(2, '0');
+    return day + ' ' + month + ' ' + year + ', ' + hh + ':' + mm;
   }
 
   function ageLabel(observedAt) {
@@ -338,7 +345,7 @@
       return;
     }
     var latest = events.reduce(function (m, e) { return e.observed_at > m ? e.observed_at : m; }, events[0].observed_at);
-    document.getElementById('last-signal-line').textContent = 'laatste signaal: ' + latest;
+    document.getElementById('last-signal-line').textContent = 'laatste signaal: ' + formatDateTime(latest);
     renderSpotlight(events);
     renderRoleGrid(events);
     renderConflicts(events);
