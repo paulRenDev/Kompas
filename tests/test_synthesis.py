@@ -7,7 +7,7 @@ from kompas.core.synthesis import RedTeamChallenge, Synthesis, validate_synthesi
 def _valid_synthesis(**overrides) -> Synthesis:
     defaults = dict(
         subject="AMD",
-        narrative="Desmond en de sectorspecialist zien een reele groeistory; Steffi ziet overbought terrein.",
+        narrative="Naomi en de sectorspecialist zien een reele groeistory; Mila ziet overbought terrein.",
         signal_ids=["amd-2026-09-22-stock-watchers", "amd-2026-09-22-technical-stock-watchers"],
         red_team=RedTeamChallenge(objection="De rally kan sentiment-gedreven zijn, niet fundamenteel.", survives=True),
         capital_view=CapitalView(action="wacht", reasoning="Sterk verhaal, dure entry.", trigger="Heroverweeg bij een correctie."),

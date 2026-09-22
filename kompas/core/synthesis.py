@@ -1,13 +1,17 @@
 """Poort 1 -- combining multiple signals on one subject into one read.
 
 Named after the pattern in the Bracket22 article Paul shared (Kelly's
-four-agent trading desk): Houston (mission controller) pulls the pieces
-together into one narrative; Doocy (red team) tries to tear that
-narrative down before it ships. Kompas already had the equivalent of
-Desmond (fundamentals/news -- Stock watchers + sector specialists) and
-Steffi (technicals -- Technical stock watchers) as independent roles;
-this module is the missing piece that combines their output per subject
-instead of leaving it as unreconciled, side-by-side signals.
+four-agent trading desk), with Paul's own cast: Vera (mission controller)
+pulls the pieces together into one narrative; Farah (red team) tries to
+tear that narrative down before it ships. Kompas already had the
+equivalent of Naomi (fundamentals/news -- Stock watchers + sector
+specialists) and Mila (technicals -- Technical stock watchers) as
+independent roles; this module is the missing piece that combines their
+output per subject instead of leaving it as unreconciled, side-by-side
+signals. All four are modeled as decisive, high-performing specialists,
+Paul's explicit choice -- and it lines up with the actual fix already
+underway in "Het 'wacht'-probleem" (README): balanced conviction, not
+reflexive caution, is the whole point of this module existing.
 
 Synthesis is deliberately NOT a fifth capital_view that averages the
 others away -- see kompas/core/signal.py and the README's
@@ -29,7 +33,7 @@ from kompas.core.signal import CapitalView, CAPITAL_VIEW_ACTIONS
 
 @dataclass(frozen=True)
 class RedTeamChallenge:
-    """Doocy's job: argue against the thesis Houston just built, using the
+    """Farah's job: argue against the thesis Vera just built, using the
     same facts. Not a formality -- if nothing here is a genuine attempt to
     break the thesis, it isn't a red team, it's a rubber stamp."""
 
@@ -40,7 +44,7 @@ class RedTeamChallenge:
 @dataclass(frozen=True)
 class Synthesis:
     subject: str
-    narrative: str  # Houston's combined read -- names where signals agree/disagree
+    narrative: str  # Vera's combined read -- names where signals agree/disagree
     signal_ids: list[str]  # doc_ids of the underlying events this combines (2+)
     red_team: RedTeamChallenge
     capital_view: CapitalView
