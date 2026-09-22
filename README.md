@@ -170,6 +170,38 @@ is" verderop voor de volledige module-indeling en hoe de tests te draaien.
    vergelijk met de sheet's eigen totaalrij — bij afwijking stoppen, nooit
    publiceren met een onverklaard verschil.
 
+## Thematische breedte — niet blijven hangen in datacenters (22/9/2026)
+
+Paul: "please don't stay stuck in datacenters.. there still real wars,
+trade wars, some lunatic presidents." Nagerekend: van de 18 signalen op
+dat moment waren er 9 -- de helft -- rechtstreeks AI/chip/datacenter-
+gethematiseerd (AMD x3, Huawei, Datacenter Lanaken x2, ASML x2, Uranium/
+HALEU). Echte harde geopolitiek (oorlog, handelsoorlog, politieke
+onvoorspelbaarheid) kwam nauwelijks aan bod -- Venezuela (goudbewaring,
+geen oorlog), olie/Iran-diplomatie en het Zweeds defensie-orderboek waren
+het enige dat in de buurt kwam. Geen enkel signaal over de daadwerkelijke
+oorlog in Oekraine, geen handelsoorlog-signaal los van chips.
+
+Zelfde onderliggende patroon als "Het 'wacht'-probleem" hieronder, nu
+thematisch in plaats van per-headline: AI/chips is het dominante
+financiele verhaal van 2026, dus een brede zoekopdracht blijft daar
+vanzelf in hangen, ook al is de instructie om "breed te zoeken" op zich
+gevolgd. Twee echte, nieuwe signalen geschreven als tegenwicht: Oekraine
+se aanhoudende drone-campagne tegen Russische olieraffinaderijen (~40%
+van de raffinagecapaciteit verstoord op het hoogtepunt -- een fysiek,
+gemeten oorlogseffect, geen diplomatieke aankondiging), en de aparte
+VS-Canada-handelsoorlog rond Section 338-tarieven (wederzijds 50% op
+elk USD 27,6 miljard), die losstaat van de veel besproken VS-China-
+verhoudingen en daardoor makkelijk wordt overgekeken.
+
+**Nieuwe vaste pool-toevoeging**: `Sector specialist – Geopolitiek`
+(oorlog, conflict, sancties, politieke onvoorspelbaarheid) staat er nu
+expliciet naast de bestaande sectorspecialisten -- niet als eenmalige
+uitzondering, maar als structureel onderdeel van de pool, zodat dit niet
+opnieuw wegzakt. De Routine-prompt is bijgewerkt om elke cyclus expliciet
+te wegen of de AI/chip-thematiek weer domineert, en zo ja, bewust
+elders te zoeken.
+
 ## Het "wacht"-probleem — waarom bijna elk signaal daar landt (22/9/2026)
 
 Paul, bot: "maar het lukt nog niet echt he?" Nagerekend in plaats van
