@@ -105,6 +105,14 @@
   .conflict-card { background: var(--brass-bg); border: 1px solid var(--brass); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
   .conflict-head { font-family: var(--mono); font-size: 10px; font-weight: 700; color: var(--brass); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
   .conflict-body { font-size: 13px; color: var(--ink); line-height: 1.5; }
+  .synthesis-card { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--teal); border-radius: 8px; padding: 16px 18px; margin-bottom: 14px; }
+  .synthesis-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 8px; }
+  .synthesis-subject { font-weight: 600; font-size: 15px; }
+  .synthesis-block-label { font-family: var(--mono); font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--dim); margin: 10px 0 4px; }
+  .synthesis-narrative { font-size: 13.5px; color: var(--ink); line-height: 1.6; }
+  .red-team-box { background: var(--red-bg); border: 1px solid var(--red); border-radius: 6px; padding: 10px 12px; margin-top: 4px; }
+  .red-team-box .synthesis-block-label { color: var(--red); margin-top: 0; }
+  .red-team-verdict { font-family: var(--mono); font-size: 10px; font-weight: 700; margin-top: 6px; }
   .capital-view { border-left: 3px solid var(--border2); padding: 6px 0 6px 10px; margin-top: 8px; }
   .capital-view-head { display: flex; align-items: baseline; gap: 6px; margin-bottom: 3px; }
   .capital-view-label { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--dim); }
@@ -129,6 +137,11 @@
     <div class="meta-line" id="last-signal-line">laatste signaal: wordt geladen…</div>
     <div class="meta-line" id="capital-view-ratio"></div>
   </header>
+
+  <section id="synthesis-section" style="display:none;">
+    <div class="section-label"><span>Synthese — samengebracht, dan aangevallen</span><span>Houston verzamelt, Doocy probeert het onderuit te halen</span></div>
+    <div id="synthesis-list"></div>
+  </section>
 
   <section>
     <div class="section-label"><span>Sector-specialistenpool — spotlight</span><span>verbanden die je zelf niet meteen ziet</span></div>
@@ -332,6 +345,31 @@
     }).join('');
   }
 
+  function renderSynthesis(syntheses) {
+    var section = document.getElementById('synthesis-section');
+    var el = document.getElementById('synthesis-list');
+    if (!syntheses.length) {
+      section.style.display = 'none';
+      return;
+    }
+    section.style.display = '';
+    el.innerHTML = syntheses.map(function (s) {
+      var rt = s.red_team;
+      var verdictLabel = rt.survives ? 'these overleeft de tegenwerping' : 'tegenwerping haalt de these onderuit';
+      return '<div class="synthesis-card">' +
+        '<div class="synthesis-head"><span class="synthesis-subject">' + s.subject + '</span></div>' +
+        '<div class="synthesis-narrative">' + s.narrative + '</div>' +
+        '<div class="red-team-box">' +
+          '<div class="synthesis-block-label">Doocy — tegenwerping</div>' +
+          '<div class="synthesis-narrative">' + rt.objection + '</div>' +
+          '<div class="red-team-verdict" style="color:' + (rt.survives ? 'var(--teal)' : 'var(--red)') + '">' + verdictLabel + '</div>' +
+        '</div>' +
+        capitalViewBlock(s) +
+        tagsRow(s) +
+        '</div>';
+    }).join('');
+  }
+
   function renderCapitalViewRatio(events) {
     var el = document.getElementById('capital-view-ratio');
     var withView = events.filter(function (e) { return e.capital_view; });
@@ -377,6 +415,10 @@
     }, function () {
       document.getElementById('spotlight-list').innerHTML = '<div class="card"><div class="empty">Kon signalen niet laden.</div></div>';
     });
+
+    db.collection('synthesis').orderBy('observed_at', 'desc').onSnapshot(function (snap) {
+      renderSynthesis(snap.docs.map(function (d) { return d.data(); }));
+    }, function () { /* synthesis is additive; a load failure there shouldn't blank the rest of the page */ });
   }
 
   boot();

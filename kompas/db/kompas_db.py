@@ -31,6 +31,7 @@ import unicodedata
 
 from kompas.core.schema import PortfolioSnapshot, Position, ReconciliationResult, WatchlistEntry
 from kompas.core.signal import Signal, validate_signal
+from kompas.core.synthesis import Synthesis, validate_synthesis
 
 AANDELEN_SHEET_ID = "1l1XSohzp0wS8JAQFaMTGkJe0zrur1BKbZdkbN6MLR7A"
 
@@ -154,6 +155,38 @@ def signal_event_doc(signal: Signal, *, is_technical: bool = False) -> dict:
             else None
         ),
         "observed_at": signal.observed_at,
+    }
+
+
+def synthesis_doc(synthesis: Synthesis) -> dict:
+    """Poort 1's write payload for one Synthesis into the `synthesis`
+    collection -- a separate collection from `events` on purpose: this
+    combines existing signals by reference (signal_ids), it never
+    duplicates or replaces them. Same validate-before-build discipline as
+    signal_event_doc.
+    """
+    result = validate_synthesis(synthesis)
+    if not result.ok:
+        raise ValueError(f"synthesis failed validation, not writing: {result.errors}")
+
+    doc_id = f"{_slugify(synthesis.subject)}-{synthesis.observed_at[:10]}"
+    return {
+        "path": f"synthesis/{doc_id}",
+        "subject": synthesis.subject,
+        "narrative": synthesis.narrative,
+        "signal_ids": synthesis.signal_ids,
+        "red_team": {
+            "objection": synthesis.red_team.objection,
+            "survives": synthesis.red_team.survives,
+        },
+        "capital_view": {
+            "action": synthesis.capital_view.action,
+            "reasoning": synthesis.capital_view.reasoning,
+            "trigger": synthesis.capital_view.trigger,
+        },
+        "related_positions": synthesis.related_positions,
+        "related_watchlist": synthesis.related_watchlist,
+        "observed_at": synthesis.observed_at,
     }
 
 
