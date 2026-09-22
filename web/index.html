@@ -127,6 +127,7 @@
     <div class="eyebrow">KOMPAS</div>
     <h1>Signalen &amp; watchlist</h1>
     <div class="meta-line" id="last-signal-line">laatste signaal: wordt geladen…</div>
+    <div class="meta-line" id="capital-view-ratio"></div>
   </header>
 
   <section>
@@ -331,15 +332,30 @@
     }).join('');
   }
 
+  function renderCapitalViewRatio(events) {
+    var el = document.getElementById('capital-view-ratio');
+    var withView = events.filter(function (e) { return e.capital_view; });
+    if (!withView.length) {
+      el.textContent = '';
+      return;
+    }
+    var counts = { wacht: 0, verhoog_bestaand: 0, nieuwe_positie: 0 };
+    withView.forEach(function (e) { counts[e.capital_view.action] = (counts[e.capital_view.action] || 0) + 1; });
+    var actie = counts.verhoog_bestaand + counts.nieuwe_positie;
+    el.textContent = 'capital view: ' + counts.wacht + ' wacht · ' + actie + ' actie (van ' + withView.length + ')';
+  }
+
   function renderAll(events) {
     if (!events.length) {
       document.getElementById('spotlight-list').innerHTML = '<div class="empty">Nog geen signalen — Pijler A heeft nog geen draaiende cyclus.</div>';
       document.getElementById('role-grid').innerHTML = '';
       document.getElementById('last-signal-line').textContent = 'laatste signaal: nog geen';
+      document.getElementById('capital-view-ratio').textContent = '';
       return;
     }
     var latest = events.reduce(function (m, e) { return e.observed_at > m ? e.observed_at : m; }, events[0].observed_at);
     document.getElementById('last-signal-line').textContent = 'laatste signaal: ' + formatDateTime(latest);
+    renderCapitalViewRatio(events);
     renderSpotlight(events);
     renderRoleGrid(events);
     renderConflicts(events);

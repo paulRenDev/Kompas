@@ -170,6 +170,53 @@ is" verderop voor de volledige module-indeling en hoe de tests te draaien.
    vergelijk met de sheet's eigen totaalrij — bij afwijking stoppen, nooit
    publiceren met een onverklaard verschil.
 
+## Het "wacht"-probleem — waarom bijna elk signaal daar landt (22/9/2026)
+
+Paul, bot: "maar het lukt nog niet echt he?" Nagerekend in plaats van
+verdedigd: van de 14 signalen met een `capital_view` zeggen 13 "wacht".
+De enige uitzondering is IWDA — een indexfonds bijkopen na een dip, de
+minst onderscheidende belegging die bestaat. Geen enkel individueel
+aandeel-signaal heeft ooit tot een `nieuwe_positie` geleid.
+
+**Eerste, te snelle diagnose**: "wacht" is gratis — een specialist kan
+nooit ongelijk krijgen door te wachten, terwijl een overtuigde
+`nieuwe_positie` zichtbaar fout kan blijken. Waar. Maar de scherpere
+diagnose, na het echt doorlezen van de 13 wacht-redenen: bijna elke
+technische lezing citeert "overbought" als reden (AMD RSI 80,7, ASML RSI
+73,8, Cameco's eigen "Strong Sell"-label) — en dat is geen toeval. AMD op
+USD 1.000 miljard marktkapitalisatie, Huawei tegen Nvidia, de
+Fed-renteverhoging: dit zijn de grootste financiële krantenkoppen van de
+dag op het moment dat Kompas ze vindt. Iets dat al de topheadline is, is
+per definitie meestal al gelopen — vandaar overbought, vandaar wacht. Dit
+is dezelfde "voor de hand liggende naam"-bias die al eerder opdook bij
+ASML (zie Open vragen, feedparser-discussie) — ze is niet verdwenen, enkel
+verschoven van "bekend aandeel" naar "vandaag se grootste headline".
+
+**De fix is niet: de lat voor "nieuwe_positie" verlagen.** Kopen in
+extreme, reeds gelopen momentum is een eigen fout, niet de oplossing voor
+overmatige voorzichtigheid. De fix zit vroeger in de keten: bronnen
+zoeken VOOR iets een headline wordt, niet erna. Twee concrete
+aanpassingen, doorgevoerd in de Routine-prompt:
+
+1. **Vroeg zoeken, niet de grootste headline achterna**: expliciete
+   waarschuwing tegen het patroon "grootste financiële headline van de
+   dag" — sectorvakpers, bedrijfsspecifieke persberichten en
+   nichebronnen leveren vaker een signaal op VOOR de markt het al
+   verwerkt heeft, wat de enige manier is om ooit tot een geloofwaardige
+   `nieuwe_positie` te komen zonder in extended momentum te kopen.
+2. **Trigger-verantwoording**: een vervolg op een bestaand "wacht"-signaal
+   moet expliciet ingaan op de eigen `trigger` van het vorige signaal —
+   is die voorwaarde intussen vervuld? Zo ja, is een nieuwe reflexmatige
+   "wacht" niet genoeg; er moet een echte heroverweging staan, ook als de
+   uitkomst opnieuw wacht is. Dit voorkomt dat een trigger een lege
+   belofte blijft die nooit wordt ingelost.
+
+Geen enkel bestaand signaal is met terugwerkende kracht omgezet naar een
+ander standpunt — dat zou precies het soort verzinsel zijn dat dit hele
+document probeert te vermijden. De verhouding wacht/actie is nu ook
+zichtbaar op de pagina zelf (`web/index.html`), zodat dit patroon niet
+verborgen blijft in de details van individuele signalen.
+
 ## Communicatie-exec review — voelt dit gemeend en fris? (21/9/2026)
 
 Paul: "let every time a new update occurs a communication exec go through
