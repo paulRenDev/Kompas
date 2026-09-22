@@ -170,6 +170,42 @@ is" verderop voor de volledige module-indeling en hoe de tests te draaien.
    vergelijk met de sheet's eigen totaalrij — bij afwijking stoppen, nooit
    publiceren met een onverklaard verschil.
 
+## Materialiteitsdrempel voor macro-only signalen (22/9/2026)
+
+Paul, over het Japan-monetair-beleid-signaal (het origineel van 18/9 én
+het vervolg van 21/9): "remove the last japan paragraph. monetary
+polici. i don't know how it passes every filter." Terecht nagekeken in
+plaats van gewoon verwijderd: beide documenten hadden
+`related_positions: []` en `related_watchlist: []` -- geen enkele link
+naar iets dat Paul bezit of volgt. Het vervolgsignaal erkende dat zelfs
+zelf, in zijn eigen `capital_view.reasoning`: "wordt pas een positie
+waard zodra er een concreet Japan-blootgesteld signaal bijkomt" -- en
+werd toch gepubliceerd. `validate_signal` checkt of een signaal goed
+onderbouwd en compleet is (bron, omvang, tijdshorizon, betrouwbaarheid),
+nooit of het uberhaupt relevant is. Dat is het echte gat: een macro-
+signaal zonder positie-/watchlist-link en zonder verband met iets anders
+kan elke kwaliteitscheck perfect doorstaan en toch pure ruis zijn.
+
+**Nieuwe publicatiedrempel voor een macro/trend-signaal zonder
+related_positions/related_watchlist-tag**: het moet op zichzelf ofwel
+(a) een werkelijk zeldzaam of ongewoon groot gebeuren zijn, geen
+routineuze, geplande centrale-bank-vergadering (de Fed-hike van 16/9
+kwalificeert -- eerste verhoging in 3+ jaar; een gewone BOJ-vergadering
+met een incrementele hike niet), ofwel (b) expliciet de onderbouwing
+leveren voor een ANDER, wel actionable signaal (zoals de Fed-hike de
+IWDA-`verhoog_bestaand`-call draagt), ofwel (c) zelf reeds gekwantificeerde,
+ongewone inzet hebben (een oorlogseffect van 40% verstoorde
+raffinagecapaciteit, een tarievenoorlog van USD 27,6 miljard) ook zonder
+directe positielink -- "breed zoeken buiten de portefeuille" blijft
+expliciet toegestaan, maar het signaal moet op eigen kracht substantieel
+zijn, niet enkel netjes ingevuld. Dit is bewust GEEN mechanische regel in
+`validate_signal` -- "is dit uberhaupt de moeite" is een oordeel dat
+begrip vereist (was dit de eerste hike in 3 jaar, of een routineuze
+vergadering?), geen keyword-check. Het blijft een verplichte afweging in
+het schrijfproces zelf, gedocumenteerd hier en in de Routine-prompt.
+
+Beide Japan-documenten (18/9 en 21/9) zijn verwijderd uit `events`.
+
 ## Thematische breedte — niet blijven hangen in datacenters (22/9/2026)
 
 Paul: "please don't stay stuck in datacenters.. there still real wars,
