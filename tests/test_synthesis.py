@@ -1,6 +1,5 @@
 import unittest
 
-from kompas.core.signal import CapitalView
 from kompas.core.synthesis import RedTeamChallenge, Synthesis, validate_synthesis
 
 
@@ -10,7 +9,6 @@ def _valid_synthesis(**overrides) -> Synthesis:
         narrative="Naomi en de sectorspecialist zien een reele groeistory; Mila ziet overbought terrein.",
         signal_ids=["amd-2026-09-22-stock-watchers", "amd-2026-09-22-technical-stock-watchers"],
         red_team=RedTeamChallenge(objection="De rally kan sentiment-gedreven zijn, niet fundamenteel.", survives=True),
-        capital_view=CapitalView(action="wacht", reasoning="Sterk verhaal, dure entry.", trigger="Heroverweeg bij een correctie."),
         observed_at="2026-09-22T09:00:00+00:00",
     )
     defaults.update(overrides)
@@ -37,20 +35,18 @@ class TestValidateSynthesis(unittest.TestCase):
         self.assertFalse(result.ok)
         self.assertTrue(any("red_team.objection" in e for e in result.errors))
 
-    def test_verhoog_bestaand_requires_a_real_position_tag(self):
-        result = validate_synthesis(_valid_synthesis(
-            capital_view=CapitalView(action="verhoog_bestaand", reasoning="x", trigger="y"),
-            related_positions=[],
-            related_watchlist=["AMD"],
-        ))
-        self.assertFalse(result.ok)
-        self.assertTrue(any("verhoog_bestaand" in e for e in result.errors))
+    def test_relevant_by_default(self):
+        s = _valid_synthesis()
+        self.assertTrue(s.relevant)
+        self.assertIsNone(s.closed_reason)
 
-    def test_verhoog_bestaand_with_a_real_position_tag_passes(self):
-        result = validate_synthesis(_valid_synthesis(
-            capital_view=CapitalView(action="verhoog_bestaand", reasoning="x", trigger="y"),
-            related_positions=["NUCL"],
-        ))
+    def test_not_relevant_without_closed_reason_rejected(self):
+        result = validate_synthesis(_valid_synthesis(relevant=False))
+        self.assertFalse(result.ok)
+        self.assertTrue(any("closed_reason" in e for e in result.errors))
+
+    def test_not_relevant_with_closed_reason_passes(self):
+        result = validate_synthesis(_valid_synthesis(relevant=False, closed_reason="Top afgerond."))
         self.assertTrue(result.ok, msg=result.errors)
 
     def test_default_related_lists_are_independent_empty_lists(self):

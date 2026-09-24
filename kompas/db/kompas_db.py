@@ -29,6 +29,7 @@ from datetime import datetime, timezone
 import re
 import unicodedata
 
+from kompas.core.capital_call import CapitalCall, validate_capital_call
 from kompas.core.schema import PortfolioSnapshot, Position, ReconciliationResult, WatchlistEntry
 from kompas.core.signal import Signal, validate_signal
 from kompas.core.synthesis import Synthesis, validate_synthesis
@@ -145,15 +146,8 @@ def signal_event_doc(signal: Signal, *, is_technical: bool = False) -> dict:
         "related_positions": signal.related_positions,
         "related_watchlist": signal.related_watchlist,
         "conflict_note": signal.conflict_note,
-        "capital_view": (
-            {
-                "action": signal.capital_view.action,
-                "reasoning": signal.capital_view.reasoning,
-                "trigger": signal.capital_view.trigger,
-            }
-            if signal.capital_view is not None
-            else None
-        ),
+        "relevant": signal.relevant,
+        "closed_reason": signal.closed_reason,
         "observed_at": signal.observed_at,
     }
 
@@ -179,14 +173,35 @@ def synthesis_doc(synthesis: Synthesis) -> dict:
             "objection": synthesis.red_team.objection,
             "survives": synthesis.red_team.survives,
         },
-        "capital_view": {
-            "action": synthesis.capital_view.action,
-            "reasoning": synthesis.capital_view.reasoning,
-            "trigger": synthesis.capital_view.trigger,
-        },
         "related_positions": synthesis.related_positions,
         "related_watchlist": synthesis.related_watchlist,
+        "relevant": synthesis.relevant,
+        "closed_reason": synthesis.closed_reason,
         "observed_at": synthesis.observed_at,
+    }
+
+
+def capital_call_doc(call: CapitalCall) -> dict:
+    """Poort 1's write payload for the cycle's ONE EUR 100 answer -- its
+    own `capital_calls` collection, one document per cycle, never per
+    signal or per synthesis. See kompas/core/capital_call.py for why this
+    replaced the old per-item capital_view.
+    """
+    result = validate_capital_call(call)
+    if not result.ok:
+        raise ValueError(f"capital call failed validation, not writing: {result.errors}")
+
+    doc_id = _slugify(call.observed_at)
+    return {
+        "path": f"capital_calls/{doc_id}",
+        "subject": call.subject,
+        "considered": call.considered,
+        "capital_view": {
+            "action": call.capital_view.action,
+            "reasoning": call.capital_view.reasoning,
+            "trigger": call.capital_view.trigger,
+        },
+        "observed_at": call.observed_at,
     }
 
 

@@ -135,8 +135,13 @@
     <div class="eyebrow">KOMPAS</div>
     <h1>Signalen &amp; watchlist</h1>
     <div class="meta-line" id="last-signal-line">laatste signaal: wordt geladen…</div>
-    <div class="meta-line" id="capital-view-ratio"></div>
+    <div class="meta-line" id="capital-call-ratio"></div>
   </header>
+
+  <section id="capital-call-section" style="display:none;">
+    <div class="section-label"><span>Het team se EUR 100-vraag</span><span>Paul beslist zelf of hij dit volgt</span></div>
+    <div id="capital-call-card"></div>
+  </section>
 
   <section id="synthesis-section" style="display:none;">
     <div class="section-label"><span>Synthese — samengebracht, dan aangevallen</span><span>Vera verzamelt, Farah probeert het onderuit te halen</span></div>
@@ -251,15 +256,17 @@
     wacht: 'wacht'
   };
 
-  function capitalViewBlock(s) {
-    var cv = s.capital_view;
-    if (!cv) return '';
+  function capitalCallBlock(c) {
+    var cv = c.capital_view;
     var label = CAPITAL_VIEW_LABELS[cv.action] || cv.action;
     return '<div class="capital-view">' +
       '<div class="capital-view-head"><span class="capital-view-label">EUR 100-vraag:</span>' +
-      '<span class="capital-view-action ' + cv.action + '">' + label + '</span></div>' +
+      '<span class="capital-view-action ' + cv.action + '">' + label + '</span>' +
+      (c.subject ? '<span class="spotlight-subject">' + c.subject + '</span>' : '') + '</div>' +
       '<div class="capital-view-reasoning">' + cv.reasoning + '</div>' +
       (cv.trigger ? '<div class="capital-view-reasoning"><span class="capital-view-label">heroverweeg:</span> ' + cv.trigger + '</div>' : '') +
+      (c.considered && c.considered.length ? '<div class="role-item-meta" style="margin-top:6px;">afgewogen: ' + c.considered.join(', ') + '</div>' : '') +
+      '<div class="role-item-meta" style="margin-top:4px;">' + formatDateTime(c.observed_at) + ' — Paul beslist zelf of hij dit volgt.</div>' +
       '</div>';
   }
 
@@ -294,7 +301,6 @@
             ageBadge(s.observed_at) +
             factGrid(s) +
             tagsRow(s) +
-            capitalViewBlock(s) +
             '</div>';
         }).join('') +
         '</div>';
@@ -321,7 +327,6 @@
             ageBadge(s.observed_at) +
             '<div class="role-item-meta">omvang: ' + s.magnitude + '<br>horizon: ' + s.timeframe_horizon + (s.chart_timeframe ? ' · timeframe: ' + s.chart_timeframe : '') + '</div>' +
             '<div class="role-item-meta">bron: ' + s.source + ' (' + s.source_tier + ')</div>' +
-            capitalViewBlock(s) +
             '</div>';
         }).join('') +
         '</div>';
@@ -348,12 +353,13 @@
   function renderSynthesis(syntheses) {
     var section = document.getElementById('synthesis-section');
     var el = document.getElementById('synthesis-list');
-    if (!syntheses.length) {
+    var shown = syntheses.filter(function (s) { return s.relevant !== false; });
+    if (!shown.length) {
       section.style.display = 'none';
       return;
     }
     section.style.display = '';
-    el.innerHTML = syntheses.map(function (s) {
+    el.innerHTML = shown.map(function (s) {
       var rt = s.red_team;
       var verdictLabel = rt.survives ? 'these overleeft de tegenwerping' : 'tegenwerping haalt de these onderuit';
       return '<div class="synthesis-card">' +
@@ -364,23 +370,32 @@
           '<div class="synthesis-narrative">' + rt.objection + '</div>' +
           '<div class="red-team-verdict" style="color:' + (rt.survives ? 'var(--teal)' : 'var(--red)') + '">' + verdictLabel + '</div>' +
         '</div>' +
-        capitalViewBlock(s) +
         tagsRow(s) +
         '</div>';
     }).join('');
   }
 
-  function renderCapitalViewRatio(events) {
-    var el = document.getElementById('capital-view-ratio');
-    var withView = events.filter(function (e) { return e.capital_view; });
-    if (!withView.length) {
+  function renderCapitalCall(calls) {
+    var section = document.getElementById('capital-call-section');
+    var el = document.getElementById('capital-call-card');
+    if (!calls.length) {
+      section.style.display = 'none';
+      return;
+    }
+    section.style.display = '';
+    el.innerHTML = '<div class="card">' + capitalCallBlock(calls[0]) + '</div>';
+  }
+
+  function renderCapitalCallRatio(calls) {
+    var el = document.getElementById('capital-call-ratio');
+    if (!calls.length) {
       el.textContent = '';
       return;
     }
     var counts = { wacht: 0, verhoog_bestaand: 0, nieuwe_positie: 0 };
-    withView.forEach(function (e) { counts[e.capital_view.action] = (counts[e.capital_view.action] || 0) + 1; });
+    calls.forEach(function (c) { counts[c.capital_view.action] = (counts[c.capital_view.action] || 0) + 1; });
     var actie = counts.verhoog_bestaand + counts.nieuwe_positie;
-    el.textContent = 'capital view: ' + counts.wacht + ' wacht · ' + actie + ' actie (van ' + withView.length + ')';
+    el.textContent = 'EUR 100-calls tot nu toe: ' + counts.wacht + ' wacht · ' + actie + ' actie (van ' + calls.length + ')';
   }
 
   function renderAll(events) {
@@ -388,12 +403,10 @@
       document.getElementById('spotlight-list').innerHTML = '<div class="empty">Nog geen signalen — Pijler A heeft nog geen draaiende cyclus.</div>';
       document.getElementById('role-grid').innerHTML = '';
       document.getElementById('last-signal-line').textContent = 'laatste signaal: nog geen';
-      document.getElementById('capital-view-ratio').textContent = '';
       return;
     }
     var latest = events.reduce(function (m, e) { return e.observed_at > m ? e.observed_at : m; }, events[0].observed_at);
     document.getElementById('last-signal-line').textContent = 'laatste signaal: ' + formatDateTime(latest);
-    renderCapitalViewRatio(events);
     renderSpotlight(events);
     renderRoleGrid(events);
     renderConflicts(events);
@@ -411,7 +424,11 @@
     }
 
     db.collection('events').orderBy('observed_at', 'desc').onSnapshot(function (snap) {
-      renderAll(snap.docs.map(function (d) { return d.data(); }));
+      var all = snap.docs.map(function (d) { return d.data(); });
+      // Recap lifecycle: a signal stays in the database forever, but drops
+      // out of the recap once its own story is no longer relevant — see
+      // README, "Twee megaverhalen, niet meer thema's" / Signal.relevant.
+      renderAll(all.filter(function (e) { return e.relevant !== false; }));
     }, function () {
       document.getElementById('spotlight-list').innerHTML = '<div class="card"><div class="empty">Kon signalen niet laden.</div></div>';
     });
@@ -419,6 +436,12 @@
     db.collection('synthesis').orderBy('observed_at', 'desc').onSnapshot(function (snap) {
       renderSynthesis(snap.docs.map(function (d) { return d.data(); }));
     }, function () { /* synthesis is additive; a load failure there shouldn't blank the rest of the page */ });
+
+    db.collection('capital_calls').orderBy('observed_at', 'desc').onSnapshot(function (snap) {
+      var calls = snap.docs.map(function (d) { return d.data(); });
+      renderCapitalCall(calls);
+      renderCapitalCallRatio(calls);
+    }, function () { /* additive, same as synthesis */ });
   }
 
   boot();

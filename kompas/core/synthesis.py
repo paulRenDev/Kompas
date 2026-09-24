@@ -18,17 +18,21 @@ others away -- see kompas/core/signal.py and the README's
 "Conflict zichtbaar gehouden, niet gemiddeld" principle. It sits on top
 of the underlying signals (referenced by id, never duplicated) and adds
 one thing they don't have on their own: a combined narrative that says
-plainly where the angles agree and where they don't, followed by a red
-team pass and only then a final stance. Kelly still pulls the trigger
-himself ("the meat in the seat") -- so does Paul; capital_view here is
-exactly as hypothetical/non-executing as it is on a single Signal.
+plainly where the angles agree and where they don't, followed by a real
+red team pass.
+
+Synthesis used to end in its own capital_view -- one per subject. Paul
+caught the same repetition here as on individual signals ("you can't
+just keep repeating to wait"): three syntheses each landing on "wacht"
+is still three repeated non-answers, just one level up. The final
+euro-call moved out of here entirely, into kompas/core/capital_call.py --
+ONE answer per cycle, built after weighing everything (signals AND
+syntheses) together, never one per subject.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-
-from kompas.core.signal import CapitalView, CAPITAL_VIEW_ACTIONS
 
 
 @dataclass(frozen=True)
@@ -47,10 +51,13 @@ class Synthesis:
     narrative: str  # Vera's combined read -- names where signals agree/disagree
     signal_ids: list[str]  # doc_ids of the underlying events this combines (2+)
     red_team: RedTeamChallenge
-    capital_view: CapitalView
     observed_at: str  # RFC3339
     related_positions: list[str] = field(default_factory=list)
     related_watchlist: list[str] = field(default_factory=list)
+    # Same recap lifecycle as Signal.relevant/closed_reason -- see
+    # kompas/core/signal.py for why this exists and why it's never a delete.
+    relevant: bool = True
+    closed_reason: str | None = None
 
 
 @dataclass(frozen=True)
@@ -73,17 +80,7 @@ def validate_synthesis(synthesis: Synthesis) -> SynthesisValidationResult:
     if not synthesis.red_team.objection.strip():
         errors.append("red_team.objection ontbreekt -- geen rubber stamp zonder een echte tegenwerping")
 
-    cv = synthesis.capital_view
-    if cv.action not in CAPITAL_VIEW_ACTIONS:
-        errors.append(f"capital_view.action {cv.action!r} is geen van {CAPITAL_VIEW_ACTIONS}")
-    if not cv.reasoning.strip():
-        errors.append("capital_view.reasoning ontbreekt")
-    if not cv.trigger.strip():
-        errors.append("capital_view.trigger ontbreekt")
-    if cv.action == "verhoog_bestaand" and not synthesis.related_positions:
-        errors.append(
-            "capital_view 'verhoog_bestaand' vereist een echte related_positions-tag "
-            "-- een watchlist-naam is geen positie"
-        )
+    if not synthesis.relevant and not (synthesis.closed_reason or "").strip():
+        errors.append("closed_reason ontbreekt -- een niet langer relevante synthese moet zeggen waarom")
 
     return SynthesisValidationResult(ok=not errors, errors=errors)

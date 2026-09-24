@@ -13,6 +13,15 @@ decision object, so the synthesis layer would have nothing to build on.
 a filter: see README, "Posities zijn een signaal-attribuut, nooit de
 paginastructuur." A signal about something Paul doesn't own is exactly as
 valid as one about something he does.
+
+`capital_view` used to live here, one per Signal (and one per Synthesis).
+Paul: "you can't just keep repeating to wait... make it a separate line."
+A recap with 12 signals showed 12 near-identical "wacht" verdicts -- each
+individually honest, numbing in aggregate. It moved to
+kompas/core/capital_call.py as ONE answer per cycle instead -- see that
+module for why. CapitalView (the action/reasoning/trigger shape) stays
+here since capital_call.py still uses it; it just no longer lives on a
+Signal.
 """
 
 from __future__ import annotations
@@ -25,26 +34,22 @@ SIGNAL_CONFIDENCE_LEVELS = ("speculatief", "voorlopig", "hoog")
 # move it?" -- deliberately marginal-money language, never "what should I do
 # with my actual position." nieuwe_positie = a name not currently held or
 # watched at all; verhoog_bestaand = adds conviction to something already
-# HELD (a real position, not just a watchlist name -- see validate_signal);
-# wacht = real signal, not (yet) actionable.
+# HELD (a real position, not just a watchlist name); wacht = real signal,
+# not (yet) actionable. See kompas/core/capital_call.py.
 CAPITAL_VIEW_ACTIONS = ("nieuwe_positie", "verhoog_bestaand", "wacht")
 
 
 @dataclass(frozen=True)
 class CapitalView:
-    """One specialist's marginal-euro judgment on their own signal.
-
-    An attribute of the signal, same standing as related_positions/
-    related_watchlist -- never a separate, position-keyed page section.
-    Optional: a broad macro signal with no single-name angle can honestly
-    have none, rather than a forced opinion.
+    """The marginal-euro judgment shape: action/reasoning/trigger.
 
     "wacht" without a `trigger` is unfalsifiable -- it is always "correct"
     because nothing was ever claimed. Paul caught this directly: it lets
     the specialist avoid ever being wrong by never actually saying
     anything. `trigger` forces every action, "wacht" included, to name the
     concrete condition that would change it -- a real trend/price/event to
-    watch for, not "not sure yet."
+    watch for, not "not sure yet." Used by kompas/core/capital_call.py,
+    once per cycle -- not an attribute of an individual Signal any more.
     """
 
     action: str  # one of CAPITAL_VIEW_ACTIONS
@@ -73,7 +78,16 @@ class Signal:
     # whoever writes the signal, after reading both texts. None = no known
     # conflict. See kompas/pijler_a/spotlight.py for why this isn't inferred.
     conflict_note: str | None = None
-    capital_view: CapitalView | None = None
+    # Recap lifecycle, not a quality judgment: is this story still live?
+    # Paul: "drop items when not relevant... only when the story is still
+    # relevant keep it, otherwise move on. it's a daily recap." A signal is
+    # never deleted (see README materiality-bar section for why the DB stays
+    # an honest record) -- it just stops being shown once its own story has
+    # concluded, been superseded, or lost the relevance it had when written.
+    # Default True: a signal starts relevant and is closed explicitly, never
+    # implicitly by age alone.
+    relevant: bool = True
+    closed_reason: str | None = None  # required once relevant=False -- why it no longer belongs in the recap
 
 
 @dataclass(frozen=True)
@@ -132,31 +146,11 @@ def validate_signal(signal: Signal, *, is_technical: bool = False) -> Validation
     if is_technical and not (signal.chart_timeframe or "").strip():
         errors.append("timeframe ontbreekt (verplicht voor technische signalen)")
 
-    if signal.capital_view is not None:
-        cv = signal.capital_view
-        if cv.action not in CAPITAL_VIEW_ACTIONS:
-            errors.append(
-                f"capital_view.action {cv.action!r} is geen van {CAPITAL_VIEW_ACTIONS}"
-            )
-        if not cv.reasoning.strip():
-            errors.append("capital_view.reasoning ontbreekt")
-        if not cv.trigger.strip():
-            errors.append(
-                "capital_view.trigger ontbreekt -- vooral bij 'wacht' verplicht: zonder een "
-                "concrete voorwaarde is 'wacht' nooit fout, en dus geen echt standpunt"
-            )
-        if cv.action == "verhoog_bestaand" and not signal.related_positions:
-            errors.append(
-                "capital_view 'verhoog_bestaand' vereist een echte related_positions-tag "
-                "-- je kan geen bestaande positie vergroten die er niet is (een "
-                "watchlist-naam is geen positie)"
-            )
-        if cv.action == "nieuwe_positie" and sc == "speculatief":
-            errors.append(
-                "capital_view 'nieuwe_positie' kan niet op een speculatief signaal -- "
-                "een nieuwe positie vergt minstens 'voorlopig' signaalbetrouwbaarheid "
-                "(zie de specialisten-review: anders overschat capital_view een signaal "
-                "dat de auteur zelf als onbewezen labelde)"
-            )
+    if not signal.relevant and not (signal.closed_reason or "").strip():
+        errors.append(
+            "closed_reason ontbreekt -- een niet langer relevant signaal moet zeggen "
+            "waarom het verhaal is afgerond of achterhaald, anders is 'niet relevant' "
+            "zelf net zo goedkoop als een ongefundeerde 'wacht' was"
+        )
 
     return ValidationResult(ok=not errors, errors=errors)

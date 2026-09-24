@@ -1,6 +1,6 @@
 import unittest
 
-from kompas.core.signal import CapitalView, Signal
+from kompas.core.signal import Signal
 from kompas.db.kompas_db import signal_event_doc
 
 
@@ -28,28 +28,22 @@ class TestSignalEventDoc(unittest.TestCase):
         self.assertTrue(doc["path"].startswith("events/uranium-nucleair-2026-09-18-"))
         self.assertEqual(doc["related_watchlist"], ["CCJ"])
         self.assertEqual(doc["related_positions"], [])
-        self.assertIsNone(doc["capital_view"])
+        self.assertTrue(doc["relevant"])
+        self.assertIsNone(doc["closed_reason"])
 
-    def test_capital_view_serializes_as_a_plain_dict(self):
-        sig = _valid_signal(capital_view=CapitalView(action="wacht", reasoning="Te vroeg.", trigger="Bij Q4-cijfers."))
+    def test_closed_signal_serializes_relevant_and_reason(self):
+        sig = _valid_signal(relevant=False, closed_reason="Top afgerond, geen vervolg meer.")
         doc = signal_event_doc(sig)
-        self.assertEqual(
-            doc["capital_view"],
-            {"action": "wacht", "reasoning": "Te vroeg.", "trigger": "Bij Q4-cijfers."},
-        )
+        self.assertFalse(doc["relevant"])
+        self.assertEqual(doc["closed_reason"], "Top afgerond, geen vervolg meer.")
 
     def test_invalid_signal_raises_instead_of_producing_a_bad_doc(self):
         bad = _valid_signal(source="sectorpers")
         with self.assertRaises(ValueError):
             signal_event_doc(bad)
 
-    def test_invalid_capital_view_also_raises(self):
-        bad = _valid_signal(capital_view=CapitalView(action="verhoog_bestaand", reasoning="x", trigger="y"))
-        with self.assertRaises(ValueError):
-            signal_event_doc(bad)
-
-    def test_capital_view_without_trigger_also_raises(self):
-        bad = _valid_signal(capital_view=CapitalView(action="wacht", reasoning="x", trigger=""))
+    def test_not_relevant_without_reason_also_raises(self):
+        bad = _valid_signal(relevant=False)
         with self.assertRaises(ValueError):
             signal_event_doc(bad)
 

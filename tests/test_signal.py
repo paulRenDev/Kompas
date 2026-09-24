@@ -1,6 +1,6 @@
 import unittest
 
-from kompas.core.signal import CapitalView, Signal, validate_signal
+from kompas.core.signal import Signal, validate_signal
 
 
 def _base_signal(**overrides) -> Signal:
@@ -56,71 +56,18 @@ class TestValidateSignal(unittest.TestCase):
         result = validate_signal(_base_signal(chart_timeframe=None), is_technical=False)
         self.assertTrue(result.ok, msg=result.errors)
 
-    def test_no_capital_view_is_fine(self):
-        result = validate_signal(_base_signal(capital_view=None))
-        self.assertTrue(result.ok, msg=result.errors)
+    def test_relevant_by_default(self):
+        sig = _base_signal()
+        self.assertTrue(sig.relevant)
+        self.assertIsNone(sig.closed_reason)
 
-    def test_valid_capital_view_passes(self):
-        sig = _base_signal(
-            capital_view=CapitalView(
-                action="wacht", reasoning="Te vroeg, wacht op bevestiging.",
-                trigger="Heroverweeg bij de volgende kwartaalcijfers.",
-            )
-        )
-        result = validate_signal(sig)
-        self.assertTrue(result.ok, msg=result.errors)
-
-    def test_capital_view_bad_action_rejected(self):
-        sig = _base_signal(capital_view=CapitalView(action="sell_everything", reasoning="x", trigger="y"))
-        result = validate_signal(sig)
+    def test_not_relevant_without_closed_reason_rejected(self):
+        result = validate_signal(_base_signal(relevant=False))
         self.assertFalse(result.ok)
-        self.assertTrue(any("capital_view.action" in e for e in result.errors))
+        self.assertTrue(any("closed_reason" in e for e in result.errors))
 
-    def test_capital_view_empty_reasoning_rejected(self):
-        sig = _base_signal(capital_view=CapitalView(action="wacht", reasoning="   ", trigger="y"))
-        result = validate_signal(sig)
-        self.assertFalse(result.ok)
-        self.assertIn("capital_view.reasoning ontbreekt", result.errors)
-
-    def test_capital_view_empty_trigger_rejected(self):
-        sig = _base_signal(capital_view=CapitalView(action="wacht", reasoning="Te vroeg.", trigger="   "))
-        result = validate_signal(sig)
-        self.assertFalse(result.ok)
-        self.assertTrue(any("capital_view.trigger ontbreekt" in e for e in result.errors))
-
-    def test_verhoog_bestaand_requires_a_real_position_tag(self):
-        sig = _base_signal(
-            capital_view=CapitalView(action="verhoog_bestaand", reasoning="Sterk signaal.", trigger="y"),
-            related_positions=[],
-            related_watchlist=["CCJ"],
-        )
-        result = validate_signal(sig)
-        self.assertFalse(result.ok)
-        self.assertTrue(any("verhoog_bestaand" in e for e in result.errors))
-
-    def test_verhoog_bestaand_with_a_real_position_tag_passes(self):
-        sig = _base_signal(
-            capital_view=CapitalView(action="verhoog_bestaand", reasoning="Sterk signaal.", trigger="y"),
-            related_positions=["NUCL"],
-        )
-        result = validate_signal(sig)
-        self.assertTrue(result.ok, msg=result.errors)
-
-    def test_nieuwe_positie_on_a_speculative_signal_is_rejected(self):
-        sig = _base_signal(
-            capital_view=CapitalView(action="nieuwe_positie", reasoning="Veelbelovend.", trigger="y"),
-            signal_confidence="speculatief",
-        )
-        result = validate_signal(sig)
-        self.assertFalse(result.ok)
-        self.assertTrue(any("nieuwe_positie" in e for e in result.errors))
-
-    def test_nieuwe_positie_on_a_voorlopig_signal_passes(self):
-        sig = _base_signal(
-            capital_view=CapitalView(action="nieuwe_positie", reasoning="Veelbelovend.", trigger="y"),
-            signal_confidence="voorlopig",
-        )
-        result = validate_signal(sig)
+    def test_not_relevant_with_closed_reason_passes(self):
+        result = validate_signal(_base_signal(relevant=False, closed_reason="Top afgerond, geen nieuwe ontwikkeling."))
         self.assertTrue(result.ok, msg=result.errors)
 
 

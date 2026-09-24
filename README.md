@@ -238,6 +238,63 @@ opnieuw wegzakt. De Routine-prompt is bijgewerkt om elke cyclus expliciet
 te wegen of de AI/chip-thematiek weer domineert, en zo ja, bewust
 elders te zoeken.
 
+## EUR 100-vraag: één antwoord per cyclus, niet één per item (24/9/2026)
+
+Paul, direct na het megaverhalen-onderzoek hierboven: "you can't just
+keep repeating to wait. make it a separate line. If we (and by we i
+mean the team) had 100 to spend, take this. in the end i will decide if
+i follow. so remove it from every item and add one new item with what
+you'd do with 100 eur." En, apart: "i think you should also drop items
+when not relevant. only when the story is still relevant keep it
+otherwise move on. its a daily recap."
+
+Twee echte architectuurwijzigingen, geen extra regels op de bestaande
+structuur:
+
+**1. `capital_view` verhuisde van elk item naar één ding per cyclus.**
+Elke Signal en elke Synthesis droeg tot nu toe zijn eigen `capital_view`
+-- vandaar de 12-op-12 "wacht" uit het megaverhalen-onderzoek hierboven,
+en drie afzonderlijke "wacht"-oordelen op zowel MP Materials als
+Oekraine in plaats van één samengebrachte lezing. `capital_view` is
+volledig verwijderd van `Signal` en `Synthesis` (`kompas/core/signal.py`,
+`kompas/core/synthesis.py`). In de plaats: `kompas/core/capital_call.py`,
+een nieuw `CapitalCall`-object -- exact één per cyclus, gebouwd NA alle
+signalen en syntheses van die cyclus, dat alles samen afweegt (`considered`
+noemt wat er afgewogen is) en één keer antwoord geeft op "als het team
+vandaag 100 euro had, wat zou het doen." Weggeschreven naar een eigen
+`capital_calls`-collectie (`capital_call_doc` in `kompas_db.py`), nooit
+naar `events` of `synthesis`. Een echte "wacht" zonder specifiek subject
+blijft een geldig antwoord -- dit dwingt geen actie af, het dwingt enkel
+dat er nog maar ÉÉN keer per cyclus geantwoord wordt, niet N keer.
+`web/index.html` toont deze ene call in een eigen sectie boven de
+Synthese-sectie ("Het team se EUR 100-vraag"), met Paul's eigen
+formulering erbij: "Paul beslist zelf of hij dit volgt." De oude
+wacht/actie-verhouding in de headerregel is meeverhuisd, nu berekend over
+de `capital_calls`-geschiedenis in plaats van over losse signalen.
+
+**2. Recap-levenscyclus: `relevant` + `closed_reason` op Signal en Synthesis.**
+Een signaal wordt nooit verwijderd (zie de materialiteitsdrempel-sectie
+hierboven voor waarom de database een eerlijk archief blijft) -- maar
+het hoeft niet permanent in de dagelijkse recap te blijven staan zodra
+het eigen verhaal is afgerond, achterhaald, of overtroffen door iets
+anders. Nieuw veld `relevant: bool = True` plus `closed_reason: str |
+None`, verplicht ingevuld zodra `relevant=False` (dezelfde discipline als
+elk ander veld: "niet relevant" zonder reden is even goedkoop als een
+ongefundeerde "wacht" was). De live pagina filtert nu op `relevant !==
+false` voor zowel `events` als `synthesis` voordat er iets gegroepeerd
+of getoond wordt -- een gesloten signaal verdwijnt uit de recap, blijft
+gewoon bestaan in de database. De Routine-cyclus moet dit expliciet
+beoordelen (zie de bijgewerkte Routine-prompt): bij elke cyclus nagaan
+of een nog-relevant verhaal daadwerkelijk nog relevant is, en zo niet,
+sluiten met een echte reden via een `update`-write op het bestaande
+document (nooit door het te herschrijven met signal_event_doc, en nooit
+door het te verwijderen).
+
+Geen enkel bestaand signaal of synthese-document is met terugwerkende
+kracht aangepast door deze wijziging -- oude `capital_view`-velden in
+al gepubliceerde documenten blijven gewoon staan als historisch record;
+alleen nieuwe schrijfacties volgen het nieuwe model.
+
 ## Twee megaverhalen, niet meer thema's — de "themes don't change" klacht (24/9/2026)
 
 Paul: "the themes dont change at all." Eerst nagerekend in plaats van
