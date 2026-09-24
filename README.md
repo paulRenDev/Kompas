@@ -238,6 +238,74 @@ opnieuw wegzakt. De Routine-prompt is bijgewerkt om elke cyclus expliciet
 te wegen of de AI/chip-thematiek weer domineert, en zo ja, bewust
 elders te zoeken.
 
+## Twee megaverhalen, niet meer thema's — de "themes don't change" klacht (24/9/2026)
+
+Paul: "the themes dont change at all." Eerst nagerekend in plaats van
+verdedigd: van de laatste 12 signalen (22-24/9, na de vorige thematische-
+breedte-fix) zijn er wel degelijk vijf echte categorieen aanwezig --
+oorlog/geopolitiek (Oekraine x3, Taiwan), handelsoorlog/grondstoffen (MP
+Materials x3, VS-Canada), energie (Elia, Europese gasvoorraden),
+defensie-tech (Thales) en chips (Huawei-vervolg). Op categorieniveau is
+de vorige fix dus wel degelijk blijven staan.
+
+Maar dieper kijken laat iets anders zien: 8 van de 12 signalen zijn geen
+5 onafhankelijke verhalen, het zijn herhaalde check-ins op precies TWEE
+lopende megaverhalen -- de Trump-Xi-top (Huawei, MP Materials x3, Taiwan
+= 5 signalen) en het Oekraiense staakt-het-vuren-voorstel (Oekraine x3).
+En van diezelfde 12 signalen heeft letterlijk elk exemplaar
+`capital_view.action = "wacht"` -- geen enkele uitzondering sinds IWDA
+(21/9). Hetzelfde patroon als "Het wacht-probleem" hieronder, alleen is
+het onderwerp verschoven van "AI/chips" naar "vandaag se grootste
+geopolitieke ontwikkeling" -- de instructie om breed te zoeken wordt
+gevolgd, maar de instructie om niet op EEN verhaal te blijven hangen
+kennelijk niet, ook al staat die er al sinds 22/9.
+
+**Waarom dit keer geen nieuwe alinea in de Routine-prompt**: drie eerdere
+ronden prosaregels (vroeg zoeken i.p.v. headline-achterna, trigger-
+verantwoording, thematische breedte) losten elk hun eigen specifieke
+symptoom op, maar het onderliggende patroon -- vasthouden aan het
+grootste lopende verhaal van het moment -- overleefde alle drie. Nog een
+alinea uitleg is voorspelbaar even makkelijk te rationaliseren als de
+vorige drie. In plaats daarvan een mechanische regel, geen oordeelsvraag:
+
+**Nieuwe harde eis**: elke cyclus met 3+ nieuwe of vervolgde signalen
+moet minstens 1 signaal bevatten over een subject dat nog geen enkele
+eerdere entry heeft in `events` -- een echt nieuw onderwerp, geen
+vervolg op iets dat al loopt. Dit is mechanisch controleerbaar (query
+`events` op `subject`, tel of er minstens 1 subject bij zit met 0
+eerdere hits) en kan dus niet weg-geredeneerd worden zoals een "zoek
+breed"-instructie dat wel kan. Vervolgsignalen op lopende megaverhalen
+(Trump-Xi, Oekraine-staakt-het-vuren) blijven toegestaan en gewenst
+zolang trigger-verantwoording (zie hieronder) echt is -- deze regel
+verbiedt niet het volgen van een groot verhaal, ze verbiedt dat het de
+ENIGE bron van signalen wordt per cyclus.
+
+Derde, geverifieerde bevinding: de `synthesis`-collectie bevat na drie
+dagen precies EEN document (AMD, 22/9). MP Materials en Oekraine kregen
+elk drie signalen over drie cycli (22-24/9) -- exact het "2+ signalen
+over hetzelfde subject"-criterium dat de Routine-prompt al sinds 22/9
+verplicht een Synthesis voorschrijft -- maar geen van beide kreeg er een.
+Ze bleven drie losse, herhaalde "wacht"-oordelen per subject in plaats
+van een door Vera samengevoegde, door Farah tegengesproken lezing. Dat
+verklaart een deel van het "voelt herhaald aan"-gevoel los van het
+megaverhaal-probleem hierboven: dezelfde vaststelling drie keer na
+elkaar herformuleren leest als stilstand, ook als de synthese-stap zelf
+die stilstand zou doorbreken of expliciet bevestigen. De Synthesis-regel
+was dus niet verkeerd, hij werd gewoon niet uitgevoerd -- vandaar
+hieronder een expliciete, niet-overslaanbare check in plaats van een
+voorwaardelijke "indien van toepassing"-formulering.
+
+Dat lost het topic-deel op. Het lost het wacht-deel niet op, en dat
+blijft na deze sessie een open vraag: is 12/12 wacht een
+uitvoeringsprobleem (nog steeds te voorzichtig) of een reeel feit (alle
+12 situaties zijn werkelijk nog onopgelost)? Bij lezing van de
+individuele reasoning-velden lijkt het merendeel oprecht onopgelost (top
+nog niet afgerond, staakt-het-vuren onbevestigd) -- maar dat is dezelfde
+conclusie die drie weken geleden ook plausibel klonk voor AMD/ASML, en
+toen bleek de onderliggende oorzaak wel degelijk een bias. Geen
+verzonnen fix hiervoor totdat er echt bewijs is; blijft expliciet
+openstaan.
+
 ## Het "wacht"-probleem — waarom bijna elk signaal daar landt (22/9/2026)
 
 Paul, bot: "maar het lukt nog niet echt he?" Nagerekend in plaats van
