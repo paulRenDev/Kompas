@@ -281,6 +281,12 @@ EUR 100-call van die avond -- die weet als enige de slotkoersen en de
 doelverdeling. Pijler A schrijft daarom enkel nog 's ochtends een
 capital call.
 
+**Openstaand bij aanmaak**: de Routine (`trig_014TxpQ79uMX6CmD3yEKJJxp`)
+kon vanuit de bouwsessie geen Google Drive-connector meekrijgen. Zonder
+die connector stopt elke run bij stap 1 en schrijft niets -- bewust, want
+een round-up op verouderde cijfers is erger dan geen. De connector moet
+eenmalig toegevoegd worden in de Routines-instellingen op claude.ai.
+
 ## EUR 100-vraag: één antwoord per cyclus, niet één per item (24/9/2026)
 
 Paul, direct na het megaverhalen-onderzoek hierboven: "you can't just

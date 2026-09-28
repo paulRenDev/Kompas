@@ -1,5 +1,5 @@
 <title>Kompas</title>
-<meta name="description" content="Signalenfeed voor Paul — portefeuille en watchlist staan al in de Google Sheet en worden hier nooit gedupliceerd.">
+<meta name="description" content="Signalenfeed en avondupdate voor Paul — posities komen uit de Google Sheet; de watchlist wordt hier nooit getoond.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap">
 <style>
   :root {
@@ -122,6 +122,21 @@
   .capital-view-action.wacht { background: var(--border2); color: var(--muted); }
   .capital-view-reasoning { font-size: 12px; color: var(--muted); line-height: 1.5; }
   .empty { color: var(--dim); font-size: 13px; padding: 4px 0; }
+  .pf-totals { display: flex; flex-wrap: wrap; gap: 6px 18px; font-family: var(--mono); font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+  .pf-totals strong { color: var(--ink); font-weight: 600; }
+  .pf-roundup { font-size: 13.5px; line-height: 1.6; color: var(--ink); margin: 0 0 14px; }
+  .pf-table-wrap { overflow-x: auto; }
+  .pf-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .pf-table th { font-family: var(--mono); font-size: 9px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; color: var(--dim); text-align: right; padding: 0 0 6px 10px; }
+  .pf-table th:first-child, .pf-table td:first-child { text-align: left; padding-left: 0; }
+  .pf-table td { text-align: right; padding: 7px 0 7px 10px; border-top: 1px solid var(--border2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .pf-table td:first-child { white-space: normal; }
+  .pf-name { font-weight: 500; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  @media (max-width: 560px) { .pf-val { display: none; } .pf-table { font-size: 12px; } .pf-table th, .pf-table td { padding-left: 8px; } }
+  .pf-sub { font-family: var(--mono); font-size: 9.5px; color: var(--dim); }
+  .pos { color: var(--teal); }
+  .neg { color: var(--red); }
+  .pf-targets { font-family: var(--mono); font-size: 10px; color: var(--dim); margin-top: 10px; line-height: 1.6; }
   .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px; }
   footer { border-top: 1px solid var(--border); padding-top: 18px; margin-top: 8px; font-family: var(--mono); font-size: 11px; color: var(--dim); line-height: 1.7; }
   footer a { color: var(--teal); }
@@ -141,6 +156,16 @@
   <section id="capital-call-section" style="display:none;">
     <div class="section-label"><span>Het team se EUR 100-vraag</span><span>Paul beslist zelf of hij dit volgt</span></div>
     <div id="capital-call-card"></div>
+  </section>
+
+  <section id="portfolio-section" style="display:none;">
+    <div class="section-label"><span>Portefeuille — avondupdate</span><span id="portfolio-stamp"></span></div>
+    <div class="card">
+      <div class="pf-totals" id="portfolio-totals"></div>
+      <p class="pf-roundup" id="portfolio-roundup" style="display:none;"></p>
+      <div class="pf-table-wrap"><table class="pf-table" id="portfolio-table"></table></div>
+      <div class="pf-targets" id="portfolio-targets"></div>
+    </div>
   </section>
 
   <section id="synthesis-section" style="display:none;">
@@ -398,6 +423,54 @@
     el.textContent = 'EUR 100-calls tot nu toe: ' + counts.wacht + ' wacht · ' + actie + ' actie (van ' + calls.length + ')';
   }
 
+  function eur(n, signed) {
+    if (n === null || n === undefined || isNaN(n)) return '—';
+    var s = '€ ' + Math.abs(n).toLocaleString('nl-BE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (!signed) return n < 0 ? '−' + s : s;
+    return (n > 0 ? '+' : n < 0 ? '−' : '') + s;
+  }
+
+  function pct(n) {
+    if (n === null || n === undefined || isNaN(n)) return '—';
+    return (n > 0 ? '+' : n < 0 ? '−' : '') + Math.abs(n).toLocaleString('nl-BE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%';
+  }
+
+  function tone(n) { return n > 0 ? 'pos' : (n < 0 ? 'neg' : ''); }
+
+  var portfolio = { positions: [], state: null, targets: [], roundup: null };
+
+  function renderPortfolio() {
+    var section = document.getElementById('portfolio-section');
+    if (!portfolio.positions.length) { section.style.display = 'none'; return; }
+    section.style.display = '';
+    var st = portfolio.state;
+    if (st) {
+      document.getElementById('portfolio-totals').innerHTML =
+        '<span>waarde <strong>' + eur(st.value_eur) + '</strong></span>' +
+        '<span>vandaag <strong class="' + tone(st.day_change_eur) + '">' + eur(st.day_change_eur, true) + '</strong></span>' +
+        '<span>totaal <strong class="' + tone(st.gain_eur) + '">' + eur(st.gain_eur, true) + ' (' + pct(st.gain_pct) + ')</strong></span>';
+      document.getElementById('portfolio-stamp').textContent = 'slot ' + formatDateTime(st.refreshed_at);
+    }
+    var ru = document.getElementById('portfolio-roundup');
+    if (portfolio.roundup) { ru.textContent = portfolio.roundup.text; ru.style.display = ''; } else { ru.style.display = 'none'; }
+    var rows = portfolio.positions.slice().sort(function (a, b) { return (b.weight_pct || 0) - (a.weight_pct || 0); });
+    document.getElementById('portfolio-table').innerHTML =
+      '<tr><th>positie</th><th>gewicht</th><th>vandaag</th><th>resultaat</th><th class="pf-val">waarde</th></tr>' +
+      rows.map(function (p) {
+        var name = (p.name || '').replace(/\s*-\s*ME-DIRECT\s*$/, '');
+        return '<tr><td><div class="pf-name">' + name + '</div><div class="pf-sub">' + p.ticker + ' · ' + p.exchange + '</div></td>' +
+          '<td>' + (p.weight_pct != null ? p.weight_pct.toLocaleString('nl-BE', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%' : '—') + '</td>' +
+          '<td class="' + tone(p.day_change_pct) + '">' + pct(p.day_change_pct) + '</td>' +
+          '<td class="' + tone(p.gain_pct) + '">' + pct(p.gain_pct) + '</td>' +
+          '<td class="pf-val">' + eur(p.value_eur) + '</td></tr>';
+      }).join('');
+    document.getElementById('portfolio-targets').textContent = portfolio.targets.length
+      ? 'jouw doelverdeling: ' + portfolio.targets.map(function (t) {
+          return (t.low_pct === t.high_pct ? t.low_pct : t.low_pct + '–' + t.high_pct) + '% ' + t.label;
+        }).join(' · ')
+      : '';
+  }
+
   function renderAll(events) {
     if (!events.length) {
       document.getElementById('spotlight-list').innerHTML = '<div class="empty">Nog geen signalen — Pijler A heeft nog geen draaiende cyclus.</div>';
@@ -436,6 +509,26 @@
     db.collection('synthesis').orderBy('observed_at', 'desc').onSnapshot(function (snap) {
       renderSynthesis(snap.docs.map(function (d) { return d.data(); }));
     }, function () { /* synthesis is additive; a load failure there shouldn't blank the rest of the page */ });
+
+    // Positions only -- the watchlist collection is deliberately never read here.
+    db.collection('wallet-positions').onSnapshot(function (snap) {
+      portfolio.positions = snap.docs.map(function (d) { return d.data(); });
+      renderPortfolio();
+    }, function () { /* additive */ });
+
+    db.collection('wallet').onSnapshot(function (snap) {
+      snap.docs.forEach(function (d) {
+        var data = d.data();
+        if (Array.isArray(data.targets)) portfolio.targets = data.targets;
+        else if (data.value_eur !== undefined) portfolio.state = data;
+      });
+      renderPortfolio();
+    }, function () { /* additive */ });
+
+    db.collection('portfolio_roundups').orderBy('observed_at', 'desc').onSnapshot(function (snap) {
+      portfolio.roundup = snap.docs.length ? snap.docs[0].data() : null;
+      renderPortfolio();
+    }, function () { /* additive */ });
 
     db.collection('capital_calls').orderBy('observed_at', 'desc').onSnapshot(function (snap) {
       var calls = snap.docs.map(function (d) { return d.data(); });
