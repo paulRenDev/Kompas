@@ -14,7 +14,7 @@ from dataclasses import dataclass
 
 from kompas.core.schema import PortfolioSnapshot, ReconciliationResult
 from kompas.db.kompas_db import build_batch
-from kompas.pijler_b.parser import parse_aandelen_dump
+from kompas.pijler_b.parser import parse_aandelen_csv, parse_aandelen_dump
 from kompas.pijler_b.reconcile import reconcile
 
 
@@ -26,7 +26,14 @@ class CycleResult:
 
 
 def run_cycle(raw_dump_text: str) -> CycleResult:
-    snapshot = parse_aandelen_dump(raw_dump_text)
+    return _run(parse_aandelen_dump(raw_dump_text))
+
+
+def run_cycle_csv(csv_text: str) -> CycleResult:
+    return _run(parse_aandelen_csv(csv_text))
+
+
+def _run(snapshot: PortfolioSnapshot) -> CycleResult:
     result = reconcile(snapshot)
     batch = build_batch(snapshot, result) if result.ok else None
     return CycleResult(snapshot=snapshot, reconciliation=result, write_batch=batch)

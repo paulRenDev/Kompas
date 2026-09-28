@@ -238,6 +238,49 @@ opnieuw wegzakt. De Routine-prompt is bijgewerkt om elke cyclus expliciet
 te wegen of de AI/chip-thematiek weer domineert, en zo ja, bewust
 elders te zoeken.
 
+## Avondupdate portefeuille (28/9/2026)
+
+Paul: "an update end of day of my positions would be nice, as would a
+short round up like this would do good in the evening update" -- na een
+portefeuille-analyse waarin hij er ook op wees: "don't take into account
+my watchlist. these are not positions."
+
+**Regelwijziging, op Paul se eigen vraag.** "Posities zijn een
+signaal-attribuut, nooit de paginastructuur" blijft gelden voor de
+signalenfeed: signalen worden nooit per positie gegroepeerd of gefilterd.
+Maar de pagina krijgt nu wel één eigen, afgebakende sectie met de
+posities zelf (waarde, gewicht, dagbeweging, resultaat) en een korte
+avond-round-up. De watchlist verschijnt daar nooit -- die blijft enkel
+een tag-bron voor signalen.
+
+**Wat de analyse blootlegde: Pijler B stond al tien dagen stil.**
+`mcp__Google_Drive__read_file_content` geeft sinds september 2026 enkel
+nog een steekproef per tabblad terug, geen volledige rijen -- de oude
+parser vond zijn headers niet meer en er draaide ook geen automatische
+Pijler B-cyclus. De database stond nog op 18/9 en miste de Clean
+Energy-ETF (INRE, gekocht 21/9) en 4 IWDA-stukken van dezelfde dag.
+Fix: een CSV-adapter (`parse_aandelen_csv`) op de export van het
+"live"-tabblad via `download_file_content(exportMimeType="text/csv")`.
+Beide formaten gaan door dezelfde rij-gebaseerde header-regels; eerste
+echte run reconcilieert tot op €0,04 (afronding, binnen tolerantie).
+
+**Paul se eigen doelverdeling staat in de sheet** ("60% MSCI World",
+"15–20% World Value", "10% Health Care", "10% Consumer Staples",
+"5–10% Uranium") en wordt nu mee geparsed naar `wallet/targets`. Het
+koppelen van een label aan een positie is leeswerk voor de round-up, geen
+string-matching: "MSCI World" staat ook in de naam van de Health
+Care-ETF.
+
+**Aparte Routine, weekdagen na de Europese slotbel** (`45 16 * * 1-5`:
+18:45 CEST nu, 17:45 CET na de wintertijd -- beide na de sluiting van
+Euronext om 17:30). Pijler B blijft zo los van Pijler A, zoals vanaf dag
+1 vereist. De Routine ververst de posities (inclusief het verwijderen van
+verkochte posities via `stale_position_doc_ids`), schrijft een round-up
+(`kompas/core/roundup.py`, max 900 tekens, enkel posities) en de
+EUR 100-call van die avond -- die weet als enige de slotkoersen en de
+doelverdeling. Pijler A schrijft daarom enkel nog 's ochtends een
+capital call.
+
 ## EUR 100-vraag: één antwoord per cyclus, niet één per item (24/9/2026)
 
 Paul, direct na het megaverhalen-onderzoek hierboven: "you can't just

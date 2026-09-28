@@ -9,15 +9,19 @@ below) rather than performing the write itself.
 
 The runbook for a real cycle, executed by whatever Claude session is
 running it:
-    1. Call mcp__Google_Drive__read_file_content(fileId=AANDELEN_SHEET_ID),
-       extract .fileContent.
-    2. snapshot = parser.parse_aandelen_dump(file_content)
+    1. Call mcp__Google_Drive__download_file_content(fileId=AANDELEN_SHEET_ID,
+       exportMimeType="text/csv"), base64-decode .content (UTF-8). This
+       exports the "live" tab only, which holds everything Pijler B needs.
+       (read_file_content no longer returns complete rows — see parser.py.)
+    2. snapshot = parser.parse_aandelen_csv(csv_text)
     3. result  = reconcile.reconcile(snapshot)
     4. if not result.ok: stop, do not write, report the diff.
     5. else: build_batch(snapshot, result) -> pass the returned list
        straight to the ArtifactData `batch` call, with `if_version` filled
        in from whatever `get`/`list` returned for each doc just before
        writing (never write blind — see README, "De Kompas-database").
+       Also delete every doc stale_position_doc_ids() names — a sold
+       position must not linger in wallet-positions.
 
 Everything below this point is pure and unit-tested against the fixture.
 """
@@ -30,7 +34,8 @@ import re
 import unicodedata
 
 from kompas.core.capital_call import CapitalCall, validate_capital_call
-from kompas.core.schema import PortfolioSnapshot, Position, ReconciliationResult, WatchlistEntry
+from kompas.core.roundup import PortfolioRoundup, validate_roundup
+from kompas.core.schema import AllocationTarget, PortfolioSnapshot, Position, ReconciliationResult, WatchlistEntry
 from kompas.core.signal import Signal, validate_signal
 from kompas.core.synthesis import Synthesis, validate_synthesis
 
@@ -45,14 +50,25 @@ AANDELEN_SHEET_ID = "1l1XSohzp0wS8JAQFaMTGkJe0zrur1BKbZdkbN6MLR7A"
 ARTIFACT_URL = "https://claude.ai/artifact/9NceTjMZzLgV99KMEGGh1e"
 
 
-def wallet_state_doc(result: ReconciliationResult, refreshed_at: str) -> dict:
+def wallet_state_doc(
+    result: ReconciliationResult, refreshed_at: str, day_change_eur: float | None = None
+) -> dict:
     return {
         "path": "wallet/state",
         "value_eur": result.computed_value_eur,
         "cost_eur": result.computed_cost_eur,
         "gain_eur": result.computed_gain_eur,
         "gain_pct": result.computed_gain_pct,
+        "day_change_eur": day_change_eur,
         "reconciled": result.ok,
+        "refreshed_at": refreshed_at,
+    }
+
+
+def wallet_targets_doc(targets: list[AllocationTarget], refreshed_at: str) -> dict:
+    return {
+        "path": "wallet/targets",
+        "targets": [{"label": t.label, "low_pct": t.low_pct, "high_pct": t.high_pct} for t in targets],
         "refreshed_at": refreshed_at,
     }
 
@@ -64,7 +80,8 @@ def _position_doc_id(position: Position) -> str:
     return f"{position.ticker}-{position.exchange}"
 
 
-def wallet_position_doc(position: Position, refreshed_at: str) -> dict:
+def wallet_position_doc(position: Position, refreshed_at: str, total_value_eur: float | None = None) -> dict:
+    weight = round(position.value_eur / total_value_eur * 100, 2) if total_value_eur else None
     return {
         "path": f"wallet-positions/{_position_doc_id(position)}",
         "name": position.name,
@@ -77,8 +94,18 @@ def wallet_position_doc(position: Position, refreshed_at: str) -> dict:
         "value_eur": position.value_eur,
         "gain_eur": position.gain_eur,
         "gain_pct": position.gain_pct,
+        "day_change_pct": position.day_change_pct,
+        "weight_pct": weight,
         "refreshed_at": refreshed_at,
     }
+
+
+def stale_position_doc_ids(existing_doc_ids: list[str], snapshot: PortfolioSnapshot) -> list[str]:
+    """wallet-positions docs that no longer match a live position (sold, or
+    moved exchange). build_batch only sets current positions, so without
+    this a sold position would keep showing up forever."""
+    current = {_position_doc_id(p) for p in snapshot.positions}
+    return sorted(d for d in existing_doc_ids if d not in current)
 
 
 def watchlist_doc(entry: WatchlistEntry, refreshed_at: str) -> dict:
@@ -205,6 +232,26 @@ def capital_call_doc(call: CapitalCall) -> dict:
     }
 
 
+def portfolio_roundup_doc(roundup: PortfolioRoundup) -> dict:
+    """The evening round-up -- `portfolio_roundups/{date}`, one per evening
+    (a rerun the same evening overwrites it). Carries its own copy of the
+    evening's totals because wallet/state is overwritten every refresh and
+    the round-up should keep saying what it was written against."""
+    result = validate_roundup(roundup)
+    if not result.ok:
+        raise ValueError(f"roundup failed validation, not writing: {result.errors}")
+
+    return {
+        "path": f"portfolio_roundups/{roundup.observed_at[:10]}",
+        "text": roundup.text,
+        "value_eur": roundup.value_eur,
+        "day_change_eur": roundup.day_change_eur,
+        "gain_eur": roundup.gain_eur,
+        "gain_pct": roundup.gain_pct,
+        "observed_at": roundup.observed_at,
+    }
+
+
 def split_path(path: str) -> tuple[str, str]:
     """'wallet-positions/IWDA-AMS' -> ('wallet-positions', 'IWDA-AMS').
 
@@ -229,8 +276,11 @@ def build_batch(
     function should silently guard.
     """
     refreshed_at = refreshed_at or datetime.now(timezone.utc).isoformat()
-    docs = [wallet_state_doc(result, refreshed_at)]
-    docs += [wallet_position_doc(p, refreshed_at) for p in snapshot.positions]
+    day_change = snapshot.summary.day_change_eur if snapshot.summary else None
+    docs = [wallet_state_doc(result, refreshed_at, day_change)]
+    docs += [wallet_position_doc(p, refreshed_at, result.computed_value_eur) for p in snapshot.positions]
     docs += [watchlist_doc(w, refreshed_at) for w in snapshot.watchlist]
+    if snapshot.targets:
+        docs.append(wallet_targets_doc(snapshot.targets, refreshed_at))
     docs.append(meta_refresh_doc(result, refreshed_at))
     return docs

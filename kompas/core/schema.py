@@ -23,6 +23,7 @@ class Position:
     value_eur: float
     gain_eur: float
     gain_pct: float
+    day_change_pct: float | None = None  # vs. previous close; None when the source doesn't carry it
 
 
 @dataclass(frozen=True)
@@ -56,6 +57,19 @@ class PortfolioSummary:
     cost_eur: float
     gain_eur: float
     gain_pct: float
+    day_change_eur: float | None = None
+
+
+@dataclass(frozen=True)
+class AllocationTarget:
+    """One line of Paul's own target allocation, as he wrote it in the sheet
+    ("60% MSCI World", "15–20% World Value"). The label is kept verbatim --
+    mapping it to a position is a reading task for whoever writes the
+    round-up, not something to guess with string matching here."""
+
+    label: str
+    low_pct: float
+    high_pct: float
 
 
 @dataclass(frozen=True)
@@ -63,6 +77,7 @@ class PortfolioSnapshot:
     positions: list[Position] = field(default_factory=list)
     watchlist: list[WatchlistEntry] = field(default_factory=list)
     summary: PortfolioSummary | None = None
+    targets: list[AllocationTarget] = field(default_factory=list)
 
 
 @dataclass(frozen=True)

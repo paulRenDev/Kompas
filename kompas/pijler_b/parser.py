@@ -1,9 +1,17 @@
 """Google Sheet adapter — vertaallaag.
 
-Pure functions: raw pipe-table dump text in, kompas.core.schema objects out.
-No I/O here — fetching the raw text (mcp__Google_Drive__read_file_content)
-and writing results out (kompas/db/kompas_db.py) are separate, thin layers.
-Keeping this file pure is what makes it testable without a live session.
+Pure functions: sheet text in, kompas.core.schema objects out. No I/O here
+— fetching and writing are separate, thin layers. Keeping this file pure is
+what makes it testable without a live session.
+
+Two input formats, one set of parsing rules: the old pipe-table dump from
+mcp__Google_Drive__read_file_content (parse_aandelen_dump), and the CSV
+export of the "live" tab via mcp__Google_Drive__download_file_content with
+exportMimeType="text/csv" (parse_aandelen_csv). The CSV path exists because
+read_file_content changed format in September 2026 and now returns only a
+sampled summary of each tab — no complete PORTEFEUILLE rows — which silently
+froze the portfolio data at 18/9. Both paths reduce to rows of cells first,
+so the header-matching rules below apply identically to either.
 
 Two real bugs were made against this exact data before this file existed
 (see README, "Werkelijke portefeuille-structuur"), and both are encoded
@@ -22,9 +30,12 @@ here as the rule that caused them, not just fixed in the output:
 
 from __future__ import annotations
 
+import csv
+import io
 import re
 
 from kompas.core.schema import (
+    AllocationTarget,
     PortfolioSnapshot,
     PortfolioSummary,
     Position,
@@ -80,11 +91,22 @@ def parse_number(raw: str) -> float | None:
     return -value if negative else value
 
 
-def _find_row(lines: list[str], predicate) -> int:
-    for i, line in enumerate(lines):
-        if predicate(_split_row(line)):
+def _find_row(rows: list[list[str]], predicate) -> int:
+    for i, cells in enumerate(rows):
+        if predicate(cells):
             return i
     return -1
+
+
+def _optional_col_index(header_cells: list[str], name: str) -> int | None:
+    try:
+        return _col_index(header_cells, name)
+    except ParseError:
+        return None
+
+
+def _cell(cells: list[str], i: int | None) -> str:
+    return cells[i] if i is not None and i < len(cells) else ""
 
 
 def _col_index(header_cells: list[str], name: str) -> int:
@@ -94,31 +116,35 @@ def _col_index(header_cells: list[str], name: str) -> int:
     raise ParseError(f"column {name!r} not found in header {header_cells!r}")
 
 
-def parse_portfolio_summary(lines: list[str]) -> PortfolioSummary:
+def parse_portfolio_summary(rows: list[list[str]]) -> PortfolioSummary:
     header_idx = _find_row(
-        lines,
+        rows,
         lambda cells: cells[:4] == PORTFOLIO_SUMMARY_HEADER,
     )
     if header_idx == -1:
         raise ParseError("portfolio summary header row not found — sheet layout may have changed")
-    data_cells = _split_row(lines[header_idx + 1])
+    data_cells = rows[header_idx + 1]
     value = parse_number(data_cells[0])
     cost = parse_number(data_cells[1])
     gain = parse_number(data_cells[2])
     gain_pct = parse_number(data_cells[3])
     if None in (value, cost, gain, gain_pct):
         raise ParseError(f"portfolio summary row had an unparseable cell: {data_cells[:4]!r}")
-    return PortfolioSummary(value_eur=value, cost_eur=cost, gain_eur=gain, gain_pct=gain_pct)
+    # The unlabelled fifth cell is the day's change in EUR ("-€ 34,17").
+    day_change = parse_number(_cell(data_cells, 4))
+    return PortfolioSummary(
+        value_eur=value, cost_eur=cost, gain_eur=gain, gain_pct=gain_pct, day_change_eur=day_change
+    )
 
 
-def parse_positions(lines: list[str]) -> list[Position]:
+def parse_positions(rows: list[list[str]]) -> list[Position]:
     header_idx = _find_row(
-        lines,
+        rows,
         lambda cells: cells[: len(PORTFOLIO_TABLE_HEADER_PREFIX)] == PORTFOLIO_TABLE_HEADER_PREFIX,
     )
     if header_idx == -1:
         raise ParseError("PORTEFEUILLE table header not found")
-    header = _split_row(lines[header_idx])
+    header = rows[header_idx]
     i_name = _col_index(header, "Name")
     i_ticker = _col_index(header, "TICKER")
     i_exchange = _col_index(header, "EXCHANGE")
@@ -129,10 +155,10 @@ def parse_positions(lines: list[str]) -> list[Position]:
     i_value = _col_index(header, "valueEUR")
     i_gain = _col_index(header, "Rendement(EUR)")
     i_gain_pct = _col_index(header, "Rendement(EUR%)")
+    i_day = _optional_col_index(header, "Change(vsYday%)")
 
     positions: list[Position] = []
-    for line in lines[header_idx + 1 :]:
-        cells = _split_row(line)
+    for cells in rows[header_idx + 1 :]:
         if _is_blank_row(cells) or len(cells) <= i_gain_pct:
             break
         name = cells[i_name]
@@ -150,19 +176,20 @@ def parse_positions(lines: list[str]) -> list[Position]:
                 value_eur=parse_number(cells[i_value]) or 0.0,
                 gain_eur=parse_number(cells[i_gain]) or 0.0,
                 gain_pct=parse_number(cells[i_gain_pct]) or 0.0,
+                day_change_pct=parse_number(_cell(cells, i_day)),
             )
         )
     return positions
 
 
-def parse_watchlist(lines: list[str]) -> list[WatchlistEntry]:
+def parse_watchlist(rows: list[list[str]]) -> list[WatchlistEntry]:
     header_idx = _find_row(
-        lines,
+        rows,
         lambda cells: cells[: len(WATCHLIST_TABLE_HEADER_PREFIX)] == WATCHLIST_TABLE_HEADER_PREFIX,
     )
     if header_idx == -1:
         raise ParseError("Watchlist table header not found")
-    header = _split_row(lines[header_idx])
+    header = rows[header_idx]
     i_name = _col_index(header, "Name")
     i_ticker = _col_index(header, "TICKER")
     i_exchange = _col_index(header, "EXCHANGE")
@@ -175,8 +202,7 @@ def parse_watchlist(lines: list[str]) -> list[WatchlistEntry]:
     i_gain_pct = _col_index(header, "Rendement(EUR%)")
 
     entries: list[WatchlistEntry] = []
-    for line in lines[header_idx + 1 :]:
-        cells = _split_row(line)
+    for cells in rows[header_idx + 1 :]:
         if _is_blank_row(cells) or len(cells) <= i_gain_pct:
             break
         name = cells[i_name]
@@ -199,9 +225,38 @@ def parse_watchlist(lines: list[str]) -> list[WatchlistEntry]:
     return entries
 
 
+_TARGET_RE = re.compile(r"^(\d+(?:[.,]\d+)?)\s*(?:[–-]\s*(\d+(?:[.,]\d+)?))?\s*%\s+(\S.*)$")
+
+
+def parse_targets(rows: list[list[str]]) -> list[AllocationTarget]:
+    """Paul's own target allocation: cells like "60% MSCI World" or
+    "15–20% World Value" anywhere in the sheet. A bare "39,27%" (a weight
+    column) never matches — a label after the percentage is required."""
+    targets: list[AllocationTarget] = []
+    for cells in rows:
+        for cell in cells:
+            m = _TARGET_RE.match(cell.strip())
+            if not m:
+                continue
+            low = float(m.group(1).replace(",", "."))
+            high = float(m.group(2).replace(",", ".")) if m.group(2) else low
+            targets.append(AllocationTarget(label=m.group(3).strip(), low_pct=low, high_pct=high))
+    return targets
+
+
+def _snapshot_from_rows(rows: list[list[str]]) -> PortfolioSnapshot:
+    return PortfolioSnapshot(
+        positions=parse_positions(rows),
+        watchlist=parse_watchlist(rows),
+        summary=parse_portfolio_summary(rows),
+        targets=parse_targets(rows),
+    )
+
+
 def parse_aandelen_dump(raw_text: str) -> PortfolioSnapshot:
-    lines = raw_text.splitlines()
-    summary = parse_portfolio_summary(lines)
-    positions = parse_positions(lines)
-    watchlist = parse_watchlist(lines)
-    return PortfolioSnapshot(positions=positions, watchlist=watchlist, summary=summary)
+    return _snapshot_from_rows([_split_row(line) for line in raw_text.splitlines()])
+
+
+def parse_aandelen_csv(csv_text: str) -> PortfolioSnapshot:
+    rows = [[c.strip() for c in row] for row in csv.reader(io.StringIO(csv_text))]
+    return _snapshot_from_rows(rows)
