@@ -27,27 +27,20 @@ class TestParseAandelenCsv(unittest.TestCase):
     def test_ampersand_needs_no_unescaping_in_csv(self):
         self.assertEqual(self.snapshot.positions[1].name, "Sample S&P Staples ETF - ME-DIRECT")
 
-    def test_targets_parsed_with_ranges_and_decimal_commas(self):
-        got = [(t.label, t.low_pct, t.high_pct) for t in self.snapshot.targets]
-        self.assertEqual(got, [("MSCI World", 60.0, 60.0), ("World Value", 15.0, 20.0), ("Staples", 7.5, 7.5)])
-
-    def test_weight_column_percentages_are_not_mistaken_for_targets(self):
-        self.assertNotIn("", [t.label for t in self.snapshot.targets])
-
     def test_watchlist_kept_separate_from_positions(self):
         self.assertEqual([w.ticker for w in self.snapshot.watchlist], ["WL1"])
         self.assertNotIn("WL1", [p.ticker for p in self.snapshot.positions])
 
 
 class TestCsvCycle(unittest.TestCase):
-    def test_reconciles_and_builds_weights_and_targets(self):
+    def test_reconciles_and_builds_weights(self):
         result = run_cycle_csv(FIXTURE)
         self.assertTrue(result.reconciliation.ok, result.reconciliation.diffs)
         docs = {d["path"]: d for d in result.write_batch}
         self.assertEqual(docs["wallet-positions/CORE-AMS"]["weight_pct"], 65.71)
         self.assertEqual(docs["wallet-positions/STPL-EPA"]["day_change_pct"], 1.5)
         self.assertEqual(docs["wallet/state"]["day_change_eur"], -4.5)
-        self.assertEqual(len(docs["wallet/targets"]["targets"]), 3)
+        self.assertNotIn("wallet/targets", docs)
 
     def test_stale_position_ids_names_sold_positions_only(self):
         snapshot = parse_aandelen_csv(FIXTURE)

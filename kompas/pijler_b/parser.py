@@ -35,7 +35,6 @@ import io
 import re
 
 from kompas.core.schema import (
-    AllocationTarget,
     PortfolioSnapshot,
     PortfolioSummary,
     Position,
@@ -225,31 +224,11 @@ def parse_watchlist(rows: list[list[str]]) -> list[WatchlistEntry]:
     return entries
 
 
-_TARGET_RE = re.compile(r"^(\d+(?:[.,]\d+)?)\s*(?:[–-]\s*(\d+(?:[.,]\d+)?))?\s*%\s+(\S.*)$")
-
-
-def parse_targets(rows: list[list[str]]) -> list[AllocationTarget]:
-    """Paul's own target allocation: cells like "60% MSCI World" or
-    "15–20% World Value" anywhere in the sheet. A bare "39,27%" (a weight
-    column) never matches — a label after the percentage is required."""
-    targets: list[AllocationTarget] = []
-    for cells in rows:
-        for cell in cells:
-            m = _TARGET_RE.match(cell.strip())
-            if not m:
-                continue
-            low = float(m.group(1).replace(",", "."))
-            high = float(m.group(2).replace(",", ".")) if m.group(2) else low
-            targets.append(AllocationTarget(label=m.group(3).strip(), low_pct=low, high_pct=high))
-    return targets
-
-
 def _snapshot_from_rows(rows: list[list[str]]) -> PortfolioSnapshot:
     return PortfolioSnapshot(
         positions=parse_positions(rows),
         watchlist=parse_watchlist(rows),
         summary=parse_portfolio_summary(rows),
-        targets=parse_targets(rows),
     )
 
 

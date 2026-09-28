@@ -33,9 +33,10 @@ from datetime import datetime, timezone
 import re
 import unicodedata
 
+from kompas.core.allocation import AllocationView, validate_allocation
 from kompas.core.capital_call import CapitalCall, validate_capital_call
 from kompas.core.roundup import PortfolioRoundup, validate_roundup
-from kompas.core.schema import AllocationTarget, PortfolioSnapshot, Position, ReconciliationResult, WatchlistEntry
+from kompas.core.schema import PortfolioSnapshot, Position, ReconciliationResult, WatchlistEntry
 from kompas.core.signal import Signal, validate_signal
 from kompas.core.synthesis import Synthesis, validate_synthesis
 
@@ -64,13 +65,6 @@ def wallet_state_doc(
         "refreshed_at": refreshed_at,
     }
 
-
-def wallet_targets_doc(targets: list[AllocationTarget], refreshed_at: str) -> dict:
-    return {
-        "path": "wallet/targets",
-        "targets": [{"label": t.label, "low_pct": t.low_pct, "high_pct": t.high_pct} for t in targets],
-        "refreshed_at": refreshed_at,
-    }
 
 
 def _position_doc_id(position: Position) -> str:
@@ -252,6 +246,26 @@ def portfolio_roundup_doc(roundup: PortfolioRoundup) -> dict:
     }
 
 
+def allocation_view_doc(view: AllocationView) -> dict:
+    """The team's allocation view -- `allocation_views/{date}`; the newest
+    one is the current view, older ones stay as the record of how the
+    team's steering changed and why."""
+    result = validate_allocation(view)
+    if not result.ok:
+        raise ValueError(f"allocation view failed validation, not writing: {result.errors}")
+    return {
+        "path": f"allocation_views/{view.observed_at[:10]}",
+        "sleeves": [
+            {"name": s.name, "low_pct": s.low_pct, "high_pct": s.high_pct, "holdings": s.holdings, "reasoning": s.reasoning}
+            for s in view.sleeves
+        ],
+        "narrative": view.narrative,
+        "red_team": {"objection": view.red_team.objection, "survives": view.red_team.survives},
+        "trigger": view.trigger,
+        "observed_at": view.observed_at,
+    }
+
+
 def split_path(path: str) -> tuple[str, str]:
     """'wallet-positions/IWDA-AMS' -> ('wallet-positions', 'IWDA-AMS').
 
@@ -280,7 +294,5 @@ def build_batch(
     docs = [wallet_state_doc(result, refreshed_at, day_change)]
     docs += [wallet_position_doc(p, refreshed_at, result.computed_value_eur) for p in snapshot.positions]
     docs += [watchlist_doc(w, refreshed_at) for w in snapshot.watchlist]
-    if snapshot.targets:
-        docs.append(wallet_targets_doc(snapshot.targets, refreshed_at))
     docs.append(meta_refresh_doc(result, refreshed_at))
     return docs

@@ -3,8 +3,8 @@
 Paul, 28/9/2026: "an update end of day of my positions would be nice, as
 would a short round up like this would do good in the evening update."
 "Like this" was a portfolio-wide read: what the positions add up to, how
-that compares with his own target allocation in the sheet, what today's
-signals mean for what he actually holds -- and one EUR 100 answer (which
+that compares with the team's allocation view (kompas/core/allocation.py),
+what today's signals mean for what he actually holds -- and one EUR 100 answer (which
 is written separately, as that evening's CapitalCall, never repeated here).
 
 Positions only. Paul, same day: "don't take into account my watchlist.

@@ -238,48 +238,63 @@ opnieuw wegzakt. De Routine-prompt is bijgewerkt om elke cyclus expliciet
 te wegen of de AI/chip-thematiek weer domineert, en zo ja, bewust
 elders te zoeken.
 
-## Avondupdate portefeuille (28/9/2026)
+## Avondupdate portefeuille en teamverdeling (28/9/2026)
 
 Paul: "an update end of day of my positions would be nice, as would a
 short round up like this would do good in the evening update" -- na een
 portefeuille-analyse waarin hij er ook op wees: "don't take into account
-my watchlist. these are not positions."
+my watchlist. these are not positions." Diezelfde avond bijgestuurd:
+"don't repeat the actual wallet i have it in sheets. look at it to
+evaluate next to the other signals", en: "hou niet vast aan de
+doelstellingen % verdeling die zijn oud. ik wil dat het team me stuurt
+en energy transition maakt er natuurlijk ook deel van uit."
 
-**Regelwijziging, op Paul se eigen vraag.** "Posities zijn een
-signaal-attribuut, nooit de paginastructuur" blijft gelden voor de
-signalenfeed: signalen worden nooit per positie gegroepeerd of gefilterd.
-Maar de pagina krijgt nu wel één eigen, afgebakende sectie met de
-posities zelf (waarde, gewicht, dagbeweging, resultaat) en een korte
-avond-round-up. De watchlist verschijnt daar nooit -- die blijft enkel
-een tag-bron voor signalen.
+**De portefeuille wordt gelezen, niet herhaald.** "Posities zijn een
+signaal-attribuut, nooit de paginastructuur" blijft dus volledig
+gelden: de pagina toont geen positielijst, geen bedragen per positie.
+Wel het oordeel van het team erover: een korte avond-round-up
+(`kompas/core/roundup.py`, max 900 tekens) en de teamverdeling per
+sleeve (marge, huidig gewicht, onder/binnen/boven). De watchlist speelt
+hierin nooit mee -- die blijft enkel een tag-bron voor signalen.
 
-**Wat de analyse blootlegde: Pijler B stond al tien dagen stil.**
-`mcp__Google_Drive__read_file_content` geeft sinds september 2026 enkel
-nog een steekproef per tabblad terug, geen volledige rijen -- de oude
-parser vond zijn headers niet meer en er draaide ook geen automatische
-Pijler B-cyclus. De database stond nog op 18/9 en miste de Clean
-Energy-ETF (INRE, gekocht 21/9) en 4 IWDA-stukken van dezelfde dag.
-Fix: een CSV-adapter (`parse_aandelen_csv`) op de export van het
-"live"-tabblad via `download_file_content(exportMimeType="text/csv")`.
-Beide formaten gaan door dezelfde rij-gebaseerde header-regels; eerste
-echte run reconcilieert tot op €0,04 (afronding, binnen tolerantie).
+**De teamverdeling vervangt de doelpercentages uit de sheet**
+(`kompas/core/allocation.py`, collectie `allocation_views`, de nieuwste
+geldt). Sleeves met een marge, een reden per sleeve, Vera se narratief
+en Farah se tegenwerping -- zelfde discipline als een Synthesis. Eerste
+versie (28/9): kern wereldwijd 55–60% (IWDA), energietransitie 15–20%
+(NUCL + INRE, de enige sleeve die bewust groeit, hard plafond 20%),
+waarde 10–15% (IWVL), defensief 10–15% (HLTW + COSW); geen opkomende
+markten voorlopig (TSMC- en China/Taiwan-risico). Sturen gebeurt enkel
+met nieuw geld, nooit via verkopen. Stabiel op zich: een nieuwe versie
+komt er alleen als de eigen trigger afgaat of er een positie bij komt of
+verdwijnt -- sturing die elke dag verschuift, is geen sturing. Een
+positie die geen sleeve claimt, is op zich al een reden om te herzien.
 
-**Paul se eigen doelverdeling staat in de sheet** ("60% MSCI World",
-"15–20% World Value", "10% Health Care", "10% Consumer Staples",
-"5–10% Uranium") en wordt nu mee geparsed naar `wallet/targets`. Het
-koppelen van een label aan een positie is leeswerk voor de round-up, geen
-string-matching: "MSCI World" staat ook in de naam van de Health
-Care-ETF.
+**Signalen van 4 dagen of ouder verdwijnen van de pagina** ("4 dagen oud
+en meer is nogal veel he. misschien losslaten."). Een verhaal dat na
+drie dagen nog loopt, blijft zichtbaar via een vers vervolgsignaal, niet
+via het oude. Dit is een weergaveregel op de pagina; de database houdt
+alles.
+
+**Pijler B stond tien dagen stil.** `mcp__Google_Drive__read_file_content`
+geeft sinds september 2026 enkel nog een steekproef per tabblad terug,
+geen volledige rijen -- de oude parser vond zijn headers niet meer en er
+draaide geen automatische Pijler B-cyclus. De database stond nog op 18/9
+en miste de Clean Energy-ETF (INRE, gekocht 21/9) en 4 IWDA-stukken van
+dezelfde dag. Fix: een CSV-adapter (`parse_aandelen_csv`) op de export
+van het "live"-tabblad via
+`download_file_content(exportMimeType="text/csv")`. Beide formaten gaan
+door dezelfde rij-gebaseerde header-regels; eerste echte run
+reconcilieert tot op €0,04 (afronding, binnen tolerantie).
 
 **Aparte Routine, weekdagen na de Europese slotbel** (`45 16 * * 1-5`:
 18:45 CEST nu, 17:45 CET na de wintertijd -- beide na de sluiting van
 Euronext om 17:30). Pijler B blijft zo los van Pijler A, zoals vanaf dag
 1 vereist. De Routine ververst de posities (inclusief het verwijderen van
-verkochte posities via `stale_position_doc_ids`), schrijft een round-up
-(`kompas/core/roundup.py`, max 900 tekens, enkel posities) en de
-EUR 100-call van die avond -- die weet als enige de slotkoersen en de
-doelverdeling. Pijler A schrijft daarom enkel nog 's ochtends een
-capital call.
+verkochte posities via `stale_position_doc_ids`), schrijft de round-up en
+de EUR 100-call van die avond -- die weet als enige de slotkoersen en de
+stand tegenover de teamverdeling. Pijler A schrijft daarom enkel nog 's
+ochtends een capital call, ook tegen de teamverdeling gewogen.
 
 **Openstaand bij aanmaak**: de Routine (`trig_014TxpQ79uMX6CmD3yEKJJxp`)
 kon vanuit de bouwsessie geen Google Drive-connector meekrijgen. Zonder
