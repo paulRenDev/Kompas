@@ -8,9 +8,13 @@ a reason per sleeve, Vera's narrative, and Farah's red team -- the same
 discipline as a Synthesis, because an allocation nobody tried to break is
 just a guess with decimals.
 
-Steering happens with new money only: a sleeve under its range is where the
-next euro goes, a sleeve above it gets nothing new. Nothing here ever says
-"sell" -- selling to rebalance costs tax and fees, and it's Paul's call.
+The sleeves are guardrails, not a to-do list (Paul, 30/9/2026: "if the
+team will always only advice on the weight dispersion of the existing
+stocks then I will always have to rebalance every position. It's a never
+ending story."). The EUR 100 call picks the best opportunity now, wherever
+it is; the allocation only answers "would this push a theme past its cap?".
+A sleeve under its minimum is information, not an order. Nothing here ever
+says "sell" -- selling to rebalance costs tax and fees, and it's Paul's call.
 
 Stable on purpose. A new view is written only when its own `trigger` fires
 or something structural changes (a new position, a sold one), never as a
@@ -104,19 +108,19 @@ def sleeve_status(view: AllocationView, value_by_ticker: dict[str, float]) -> tu
     return out, unassigned
 
 
-def steer_target(view: AllocationView, value_by_ticker: dict[str, float]) -> tuple[str, str]:
-    """Where the next euro goes -- one fixed rule, so calls can't invent a
-    new stopping point each time (they did: "until ~17%", then "until the
-    midpoint", while Paul kept buying).
-
-    1. A sleeve under its minimum: the one furthest under it.
-    2. Otherwise: the sleeve furthest below the middle of its range.
-    Returns (sleeve name, reason in plain Dutch)."""
-    status, _ = sleeve_status(view, value_by_ticker)
-    under = [s for s in status if s.weight_pct < s.low_pct]
-    if under:
-        s = max(under, key=lambda s: s.low_pct - s.weight_pct)
-        return s.name, f"{s.name} staat op {s.weight_pct:.1f}%, onder het minimum van {s.low_pct:g}%"
-    s = max(status, key=lambda s: (s.low_pct + s.high_pct) / 2 - s.weight_pct)
-    mid = (s.low_pct + s.high_pct) / 2
-    return s.name, f"alles binnen de marges; {s.name} zit het verst onder het midden ({s.weight_pct:.1f}% tegenover {mid:g}%)"
+def cap_check(view: AllocationView, value_by_ticker: dict[str, float], ticker: str, amount_eur: float) -> tuple[bool, str]:
+    """Guardrail for an opportunity call: would adding `amount_eur` to
+    `ticker` push its sleeve past the sleeve's maximum? It never picks
+    the ticker -- the opportunity does. A ticker no sleeve claims is a new
+    position: allowed, and a reason to revisit the view once it's bought.
+    Returns (allowed, reason in plain Dutch)."""
+    sleeve = next((s for s in view.sleeves if ticker in s.holdings), None)
+    if sleeve is None:
+        return True, f"{ticker} valt buiten de huidige sleeves -- nieuwe positie, de verdeling wordt na aankoop herzien"
+    after = dict(value_by_ticker)
+    after[ticker] = after.get(ticker, 0.0) + amount_eur
+    total = sum(after.values())
+    w = sum(after.get(t, 0.0) for t in sleeve.holdings) / total * 100 if total else 0.0
+    if w > sleeve.high_pct:
+        return False, f"{sleeve.name} zou op {w:.1f}% komen, boven het plafond van {sleeve.high_pct:g}%"
+    return True, f"{sleeve.name} komt op {w:.1f}%, onder het plafond van {sleeve.high_pct:g}%"

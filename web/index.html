@@ -127,8 +127,8 @@
   .sleeve-name { font-weight: 500; font-size: 13px; }
   .sleeve-range, .sleeve-now { font-family: var(--mono); font-size: 11px; color: var(--muted); text-align: right; white-space: nowrap; }
   .sleeve-why { grid-column: 1 / -1; font-size: 12px; color: var(--muted); line-height: 1.5; }
-  .st-onder { color: var(--brass); }
-  .st-boven { color: var(--blue); }
+  .st-onder { color: var(--muted); }
+  .st-boven { color: var(--brass); }
   .st-binnen { color: var(--teal); }
   .pf-targets { font-family: var(--mono); font-size: 10px; color: var(--dim); margin-top: 10px; line-height: 1.6; }
   .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px; }
@@ -148,7 +148,7 @@
   </header>
 
   <section id="capital-call-section" style="display:none;">
-    <div class="section-label"><span>Het team se EUR 100-vraag</span><span>Paul beslist zelf of hij dit volgt</span></div>
+    <div class="section-label"><span>Als het team vandaag EUR 100 had</span><span>Paul beslist zelf of hij dit volgt</span></div>
     <div id="capital-call-card"></div>
   </section>
 
@@ -158,7 +158,8 @@
       <p class="pf-roundup" id="portfolio-roundup" style="display:none;"></p>
       <div class="pf-targets" id="portfolio-freshness"></div>
       <div id="allocation-block" style="display:none;">
-        <div class="synthesis-block-label">Teamverdeling — sturen met nieuw geld</div>
+        <div class="synthesis-block-label">Teamverdeling — vangrail, geen takenlijst</div>
+        <p class="pf-roundup" id="allocation-narrative"></p>
         <div id="allocation-sleeves"></div>
         <div class="pf-targets" id="allocation-trigger"></div>
       </div>
@@ -466,12 +467,16 @@
     document.getElementById('allocation-sleeves').innerHTML = view.sleeves.map(function (sl) {
       var v = sl.holdings.reduce(function (m, t) { claimed[t] = true; return m + (byTicker[t] || 0); }, 0);
       var w = total ? v / total * 100 : 0;
+      // Guardrail, not a to-do list: only "boven plafond" matters for the
+      // EUR 100 call; "onder marge" is information, never an order to top up.
       var st = w < sl.low_pct ? 'onder' : (w > sl.high_pct ? 'boven' : 'binnen');
+      var stText = st === 'boven' ? 'boven plafond' : (st === 'onder' ? 'onder marge' : 'binnen');
       return '<div class="sleeve"><span class="sleeve-name">' + sl.name + '</span>' +
         '<span class="sleeve-range">team ' + sl.low_pct + '–' + sl.high_pct + '%</span>' +
-        '<span class="sleeve-now">nu ' + fmtPct(w) + ' · <span class="st-' + st + '">' + st + '</span></span>' +
+        '<span class="sleeve-now">nu ' + fmtPct(w) + ' · <span class="st-' + st + '">' + stText + '</span></span>' +
         '<span class="sleeve-why">' + sl.reasoning + '</span></div>';
     }).join('');
+    document.getElementById('allocation-narrative').textContent = view.narrative || '';
     var loose = Object.keys(byTicker).filter(function (t) { return !claimed[t]; });
     document.getElementById('allocation-trigger').textContent =
       (loose.length ? 'nog niet ingedeeld: ' + loose.join(', ') + ' — ' : '') + 'herzien: ' + view.trigger;

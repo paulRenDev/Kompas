@@ -20,6 +20,19 @@ Paul; this is exactly as hypothetical/non-executing as the old
 per-signal capital_view was. A genuine "wacht" with no standout subject
 is still a real answer and needs no `subject` -- this must never be
 forced into naming something just to look decisive.
+
+30/9/2026 -- what the question is. Paul: "The idea of the 100 eur move
+is that my team feels opportunities and when asked what would you invest
+your 100 eur now, what investment would that be." For two days the call
+had drifted into rebalancing ("top up the sleeve that's furthest under
+its range"), which turns every call into chasing the weights of what he
+already owns -- a never-ending story. The call answers the opportunity
+question: which investment, anywhere (an existing position, a name he
+watches, or something new), is the best use of EUR 100 today, and why
+now. The team's allocation (kompas/core/allocation.py) is only a
+guardrail: `cap_check` can veto a call that pushes a theme past its cap,
+it never picks the call. "wacht" stays legitimate only when a specific,
+dated event is days away and the call names it.
 """
 
 from __future__ import annotations

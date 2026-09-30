@@ -238,6 +238,54 @@ opnieuw wegzakt. De Routine-prompt is bijgewerkt om elke cyclus expliciet
 te wegen of de AI/chip-thematiek weer domineert, en zo ja, bewust
 elders te zoeken.
 
+## EUR 100-vraag = de beste kans nu, de verdeling is een vangrail (30/9/2026)
+
+Paul: "if the team will always only advice on the weight dispersion of the
+existing stocks then I will always have to rebalance every position. It's
+a never ending story. The idea of the 100 eur move is that my team feels
+opportunities and when asked what would you invest your 100 eur now, what
+investment would that be."
+
+Hij heeft gelijk, en de fout zat in het ontwerp, niet in één call. Sinds
+de teamverdeling van 28/9 stuurde elke EUR 100-call naar "de sleeve die het
+verst onder haar marge zit" -- eerst NUCL tot energietransitie gevuld was,
+dan IWDA omdat die NUCL-aankopen de kern verdunden. Zo wordt de vraag een
+rekenoefening op wat hij al heeft, en elke aankoop maakt de volgende
+"nodig". Dat is herbalanceren, en daar vroeg hij niet om.
+
+Wat nu geldt:
+
+- **De call beantwoordt één vraag:** als het team vandaag EUR 100 had,
+  welke belegging zou het kopen, en waarom nu? Dat mag een bestaande
+  positie zijn, een naam die Paul volgt (de watchlist is een vijver van
+  kansen, nooit "de portefeuille") of iets nieuws. Het moet uit de
+  signalen en syntheses van de cyclus komen, met een concreet waarom-nu,
+  Farah se sterkste tegenargument en een trigger die het idee laat
+  vervallen. Het moet ook haalbaar zijn met EUR 100 (een aandeel van
+  EUR 292 is dat niet; een ETF op hetzelfde thema wel).
+- **De verdeling is een vangrail, geen takenlijst.**
+  `kompas.core.allocation.cap_check` vervangt `steer_target`: het kiest
+  nooit, het zegt enkel of EUR 100 extra een sleeve boven haar plafond
+  duwt. Een sleeve onder haar minimum is informatie, geen opdracht. Een
+  nieuwe naam buiten de sleeves is toegestaan en is een reden om de
+  verdeling te herzien als Paul hem koopt. Op de pagina heet het blok nu
+  "Teamverdeling -- vangrail, geen takenlijst", en "onder marge" krijgt geen
+  waarschuwingskleur meer; enkel "boven plafond" doet dat.
+- **"wacht"** mag enkel met een concreet, gedateerd moment binnen enkele
+  dagen dat de call noemt -- anders is er altijd wel iets dat het team
+  het liefst zou kopen.
+- Gevolgde calls worden nog steeds erkend (`meta/last_refresh.changes`),
+  maar een gevolgde call is geen reden om hetzelfde opnieuw te zeggen,
+  noch om "het gat" dat hij achterliet te vullen.
+
+De eerste call in die geest (30/9 avond): WIRE, de Xtrackers
+Electrification Technologies & Smart Grid UCITS ETF -- de netbottleneck
+(Siemens Energy EUR 51 miljard aan netorders, levertijden 3+ jaar; koper op
+recordniveau) is het stuk energietransitie dat INRE en NUCL niet dekken.
+Farah se bezwaar staat erbij: geen puur netfonds, veel AI-datacentervraag,
+een jong en klein fonds. Energietransitie komt ermee op ongeveer 19,2%,
+onder het plafond.
+
 ## Waarom het team bleef zeggen "koop NUCL" (30/9/2026)
 
 Paul: "Why do you keep asking to add nucl? I did it twice now on the teams
@@ -263,6 +311,8 @@ advice but they don't seem to notice??" Nagerekend: NUCL ging van 12 naar
    eerst de sleeve het verst onder haar minimum, anders de sleeve het verst
    onder het midden van haar marge. Na Paul se aankopen gaf die regel meteen
    een ander antwoord: kern wereldwijd (IWDA), niet meer NUCL.
+   *Dezelfde avond teruggedraaid -- zie de sectie hierboven: bijsturen naar
+   de marges was zelf de fout, niet enkel het verschuivende stoppunt.*
 
 Daarnaast bleek het vijfde getal in de totaalrij van de sheet géén
 dagverschil te zijn maar het verschil met een oudere momentopname-rij

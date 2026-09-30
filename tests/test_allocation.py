@@ -1,6 +1,6 @@
 import unittest
 
-from kompas.core.allocation import AllocationView, Sleeve, sleeve_status, steer_target, validate_allocation
+from kompas.core.allocation import AllocationView, Sleeve, cap_check, sleeve_status, validate_allocation
 from kompas.core.synthesis import RedTeamChallenge
 from kompas.db.kompas_db import allocation_view_doc
 
@@ -58,17 +58,23 @@ class TestSleeveStatus(unittest.TestCase):
         self.assertEqual(unassigned, ["NEW"])
 
 
-class TestSteerTarget(unittest.TestCase):
-    def test_sleeve_under_minimum_wins(self):
-        name, _ = steer_target(_view(), {"CORE": 580.0, "NUC": 75.0, "CLN": 70.0, "STPL": 275.0})
-        self.assertEqual(name, "Energietransitie")
+class TestCapCheck(unittest.TestCase):
+    def test_a_sleeve_under_its_minimum_is_not_an_order(self):
+        # Energy under its minimum: the guardrail allows more, but a call
+        # for Kern is just as allowed -- the opportunity picks, not the gap.
+        values = {"CORE": 580.0, "NUC": 75.0, "CLN": 70.0, "STPL": 275.0}
+        self.assertTrue(cap_check(_view(), values, "CORE", 10.0)[0])
+        self.assertTrue(cap_check(_view(), values, "NUC", 10.0)[0])
 
-    def test_once_a_sleeve_is_past_its_midpoint_the_money_moves_on(self):
-        # Energy at 19% (past its 17,5% middle) -- the next euro must go
-        # elsewhere, however often it was the answer before.
-        name, reason = steer_target(_view(), {"CORE": 560.0, "NUC": 100.0, "CLN": 90.0, "STPL": 250.0})
-        self.assertEqual(name, "Kern")
-        self.assertIn("midden", reason)
+    def test_adding_past_the_cap_is_blocked(self):
+        ok, reason = cap_check(_view(), {"CORE": 560.0, "NUC": 100.0, "CLN": 95.0, "STPL": 245.0}, "NUC", 100.0)
+        self.assertFalse(ok)
+        self.assertIn("plafond", reason)
+
+    def test_new_ticker_is_allowed_and_flags_a_review(self):
+        ok, reason = cap_check(_view(), {"CORE": 580.0, "STPL": 250.0}, "SU", 100.0)
+        self.assertTrue(ok)
+        self.assertIn("herzien", reason)
 
 
 if __name__ == "__main__":
