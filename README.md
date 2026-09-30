@@ -238,6 +238,42 @@ opnieuw wegzakt. De Routine-prompt is bijgewerkt om elke cyclus expliciet
 te wegen of de AI/chip-thematiek weer domineert, en zo ja, bewust
 elders te zoeken.
 
+## Waarom het team bleef zeggen "koop NUCL" (30/9/2026)
+
+Paul: "Why do you keep asking to add nucl? I did it twice now on the teams
+advice but they don't seem to notice??" Nagerekend: NUCL ging van 12 naar
+18 stukken (twee keer 3). Drie echte fouten, geen interpretatiekwestie:
+
+1. **De portefeuille werd enkel 's avonds ingelezen.** De ochtendcall
+   van 30/9 draaide op de inlezing van 29/9 18:49 en schreef als feit
+   "sinds gisteravond niets bijgestuurd" -- iets wat hij niet kon weten.
+   Fix: de Pijler B-Routine draait nu ook 's ochtends (06:45 UTC, vóór
+   Pijler A), enkel om in te lezen. En een call mag nooit meer beweren
+   dat er niets gekocht is zonder een inlezing ná de vorige call die dat
+   aantoont.
+2. **Aankopen werden niet als zodanig gezien.** Nieuw:
+   `position_changes` legt bij elke inlezing vast wat er sinds de vorige
+   inlezing gekocht of verkocht is (`meta/last_refresh.changes`). Beide
+   Routines moeten dat eerst lezen en het benoemen ("je volgde de call")
+   voor ze een nieuwe call maken.
+3. **Het stoppunt schoof op.** Eerst "tot ~17%", dan "tot het midden van
+   de marge", terwijl de teamverdeling niet zei wat er moet gebeuren als
+   alle sleeves binnen hun marge zitten -- dus improviseerde elke call.
+   Nieuw: `kompas.core.allocation.steer_target`, één vaste regel in code:
+   eerst de sleeve het verst onder haar minimum, anders de sleeve het verst
+   onder het midden van haar marge. Na Paul se aankopen gaf die regel meteen
+   een ander antwoord: kern wereldwijd (IWDA), niet meer NUCL.
+
+Daarnaast bleek het vijfde getal in de totaalrij van de sheet géén
+dagverschil te zijn maar het verschil met een oudere momentopname-rij
+eronder. De "−€34 vandaag" van 28/9 was dus fout gelabeld. De dagbeweging
+wordt nu berekend uit de Change(vsYday%)-kolom per positie
+(`portfolio_day_change_eur`).
+
+Een run die stopt, schrijft voortaan waarom (`meta/last_attempt`), zodat
+een stille mislukking -- zoals de avondrun van 30/9, die na een minuut
+zonder uitleg stopte -- zichtbaar wordt.
+
 ## Avondupdate portefeuille en teamverdeling (28/9/2026)
 
 Paul: "an update end of day of my positions would be nice, as would a

@@ -57,7 +57,6 @@ class PortfolioSummary:
     cost_eur: float
     gain_eur: float
     gain_pct: float
-    day_change_eur: float | None = None
 
 
 

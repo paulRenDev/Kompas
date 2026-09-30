@@ -156,6 +156,7 @@
     <div class="section-label"><span>Het team over je portefeuille</span><span id="portfolio-stamp"></span></div>
     <div class="card">
       <p class="pf-roundup" id="portfolio-roundup" style="display:none;"></p>
+      <div class="pf-targets" id="portfolio-freshness"></div>
       <div id="allocation-block" style="display:none;">
         <div class="synthesis-block-label">Teamverdeling — sturen met nieuw geld</div>
         <div id="allocation-sleeves"></div>
@@ -434,7 +435,7 @@
 
   // Positions are read only to judge them -- never listed. Paul keeps the
   // wallet itself in his Sheet. Mirrors kompas/core/allocation.sleeve_status.
-  var portfolio = { positions: [], allocation: null, roundup: null };
+  var portfolio = { positions: [], allocation: null, roundup: null, refresh: null };
 
   function renderPortfolio() {
     var section = document.getElementById('portfolio-section');
@@ -446,6 +447,14 @@
       ru.textContent = portfolio.roundup.text; ru.style.display = '';
       document.getElementById('portfolio-stamp').textContent = formatDateTime(portfolio.roundup.observed_at);
     } else { ru.style.display = 'none'; }
+
+    var fr = portfolio.refresh;
+    document.getElementById('portfolio-freshness').textContent = fr
+      ? 'portefeuille laatst ingelezen: ' + formatDateTime(fr.refreshed_at) +
+        ((fr.changes || []).length ? ' — nieuw sinds de vorige inlezing: ' + fr.changes.map(function (c) {
+          return c.ticker + ' ' + (c.delta > 0 ? '+' : '') + c.delta;
+        }).join(', ') : '')
+      : '';
 
     var block = document.getElementById('allocation-block');
     if (!view || !portfolio.positions.length) { block.style.display = 'none'; return; }
@@ -510,6 +519,11 @@
     // Positions only -- the watchlist collection is deliberately never read here.
     db.collection('wallet-positions').onSnapshot(function (snap) {
       portfolio.positions = snap.docs.map(function (d) { return d.data(); });
+      renderPortfolio();
+    }, function () { /* additive */ });
+
+    db.collection('meta').onSnapshot(function (snap) {
+      snap.docs.forEach(function (d) { var x = d.data(); if (x.pijler === 'B') portfolio.refresh = x; });
       renderPortfolio();
     }, function () { /* additive */ });
 

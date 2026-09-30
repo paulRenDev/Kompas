@@ -16,8 +16,10 @@ class TestParseAandelenCsv(unittest.TestCase):
         s = self.snapshot.summary
         self.assertEqual((s.value_eur, s.cost_eur, s.gain_eur, s.gain_pct), (350.0, 330.0, 20.0, 6.06))
 
-    def test_summary_day_change(self):
-        self.assertEqual(self.snapshot.summary.day_change_eur, -4.5)
+    def test_snapshot_delta_cell_is_not_read_as_day_change(self):
+        # The fifth summary cell is the change vs. the sheet's snapshot row,
+        # not today's move -- it once got labelled "vandaag" by mistake.
+        self.assertFalse(hasattr(self.snapshot.summary, "day_change_eur"))
 
     def test_positions_with_day_change_and_negative_euro(self):
         core, stpl = self.snapshot.positions
@@ -39,8 +41,19 @@ class TestCsvCycle(unittest.TestCase):
         docs = {d["path"]: d for d in result.write_batch}
         self.assertEqual(docs["wallet-positions/CORE-AMS"]["weight_pct"], 65.71)
         self.assertEqual(docs["wallet-positions/STPL-EPA"]["day_change_pct"], 1.5)
-        self.assertEqual(docs["wallet/state"]["day_change_eur"], -4.5)
+        # 230 at -0,24% and 120 at +1,50% -> -0,55 + 1,77
+        self.assertEqual(docs["wallet/state"]["day_change_eur"], 1.22)
         self.assertNotIn("wallet/targets", docs)
+
+    def test_purchases_since_previous_refresh_are_recorded(self):
+        result = run_cycle_csv(FIXTURE, previous_qty={"CORE-AMS": 2.0, "STPL-EPA": 7.0, "SOLD-EPA": 4.0},
+                               previous_refreshed_at="2026-09-29T16:49:18+00:00")
+        meta = {d["path"]: d for d in result.write_batch}["meta/last_refresh"]
+        by_id = {c["doc_id"]: c for c in meta["changes"]}
+        self.assertEqual(by_id["STPL-EPA"]["delta"], 3.0)
+        self.assertEqual(by_id["SOLD-EPA"]["after"], 0.0)
+        self.assertNotIn("CORE-AMS", by_id)
+        self.assertEqual(meta["previous_refreshed_at"], "2026-09-29T16:49:18+00:00")
 
     def test_stale_position_ids_names_sold_positions_only(self):
         snapshot = parse_aandelen_csv(FIXTURE)

@@ -119,7 +119,12 @@ def watchlist_doc(entry: WatchlistEntry, refreshed_at: str) -> dict:
     }
 
 
-def meta_refresh_doc(result: ReconciliationResult, refreshed_at: str) -> dict:
+def meta_refresh_doc(
+    result: ReconciliationResult,
+    refreshed_at: str,
+    changes: list[dict] | None = None,
+    previous_refreshed_at: str | None = None,
+) -> dict:
     return {
         "path": "meta/last_refresh",
         "pijler": "B",
@@ -127,7 +132,37 @@ def meta_refresh_doc(result: ReconciliationResult, refreshed_at: str) -> dict:
         "diffs": result.diffs,
         "watchlist_count": result.watchlist_count,
         "refreshed_at": refreshed_at,
+        # What Paul bought or sold between the previous refresh and this
+        # one. Both Routines must read this before making a EUR 100 call:
+        # a call that repeats itself after Paul already followed it is the
+        # exact failure this field exists to prevent.
+        "changes": changes or [],
+        "previous_refreshed_at": previous_refreshed_at,
     }
+
+
+def portfolio_day_change_eur(positions: list[Position]) -> float | None:
+    """Today's move in EUR from each position's Change(vsYday%). Shares
+    bought during the day count as if held all day -- a small overstatement,
+    stated here rather than hidden."""
+    known = [p for p in positions if p.day_change_pct is not None]
+    if not known:
+        return None
+    return round(sum(p.value_eur * p.day_change_pct / (100 + p.day_change_pct) for p in known), 2)
+
+
+def position_changes(previous_qty: dict[str, float], snapshot: PortfolioSnapshot) -> list[dict]:
+    """Quantity changes per wallet-positions doc id since the previous
+    refresh: buys, sells, new and closed positions."""
+    current = {_position_doc_id(p): p for p in snapshot.positions}
+    out: list[dict] = []
+    for doc_id in sorted(set(previous_qty) | set(current)):
+        before = previous_qty.get(doc_id, 0.0)
+        after = current[doc_id].qty if doc_id in current else 0.0
+        if after != before:
+            ticker = current[doc_id].ticker if doc_id in current else doc_id.split("-")[0]
+            out.append({"doc_id": doc_id, "ticker": ticker, "before": before, "after": after, "delta": after - before})
+    return out
 
 
 def _slugify(text: str) -> str:
@@ -282,6 +317,8 @@ def build_batch(
     snapshot: PortfolioSnapshot,
     result: ReconciliationResult,
     refreshed_at: str | None = None,
+    previous_qty: dict[str, float] | None = None,
+    previous_refreshed_at: str | None = None,
 ) -> list[dict]:
     """The full write set for one Pijler B cycle. Caller must check
     result.ok first — this function does not check it for you, on purpose:
@@ -290,9 +327,9 @@ def build_batch(
     function should silently guard.
     """
     refreshed_at = refreshed_at or datetime.now(timezone.utc).isoformat()
-    day_change = snapshot.summary.day_change_eur if snapshot.summary else None
-    docs = [wallet_state_doc(result, refreshed_at, day_change)]
+    docs = [wallet_state_doc(result, refreshed_at, portfolio_day_change_eur(snapshot.positions))]
     docs += [wallet_position_doc(p, refreshed_at, result.computed_value_eur) for p in snapshot.positions]
     docs += [watchlist_doc(w, refreshed_at) for w in snapshot.watchlist]
-    docs.append(meta_refresh_doc(result, refreshed_at))
+    changes = position_changes(previous_qty, snapshot) if previous_qty is not None else []
+    docs.append(meta_refresh_doc(result, refreshed_at, changes, previous_refreshed_at))
     return docs

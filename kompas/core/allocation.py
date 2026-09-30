@@ -102,3 +102,21 @@ def sleeve_status(view: AllocationView, value_by_ticker: dict[str, float]) -> tu
     claimed = {t for s in view.sleeves for t in s.holdings}
     unassigned = sorted(t for t in value_by_ticker if t not in claimed)
     return out, unassigned
+
+
+def steer_target(view: AllocationView, value_by_ticker: dict[str, float]) -> tuple[str, str]:
+    """Where the next euro goes -- one fixed rule, so calls can't invent a
+    new stopping point each time (they did: "until ~17%", then "until the
+    midpoint", while Paul kept buying).
+
+    1. A sleeve under its minimum: the one furthest under it.
+    2. Otherwise: the sleeve furthest below the middle of its range.
+    Returns (sleeve name, reason in plain Dutch)."""
+    status, _ = sleeve_status(view, value_by_ticker)
+    under = [s for s in status if s.weight_pct < s.low_pct]
+    if under:
+        s = max(under, key=lambda s: s.low_pct - s.weight_pct)
+        return s.name, f"{s.name} staat op {s.weight_pct:.1f}%, onder het minimum van {s.low_pct:g}%"
+    s = max(status, key=lambda s: (s.low_pct + s.high_pct) / 2 - s.weight_pct)
+    mid = (s.low_pct + s.high_pct) / 2
+    return s.name, f"alles binnen de marges; {s.name} zit het verst onder het midden ({s.weight_pct:.1f}% tegenover {mid:g}%)"

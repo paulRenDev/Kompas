@@ -129,11 +129,11 @@ def parse_portfolio_summary(rows: list[list[str]]) -> PortfolioSummary:
     gain_pct = parse_number(data_cells[3])
     if None in (value, cost, gain, gain_pct):
         raise ParseError(f"portfolio summary row had an unparseable cell: {data_cells[:4]!r}")
-    # The unlabelled fifth cell is the day's change in EUR ("-€ 34,17").
-    day_change = parse_number(_cell(data_cells, 4))
-    return PortfolioSummary(
-        value_eur=value, cost_eur=cost, gain_eur=gain, gain_pct=gain_pct, day_change_eur=day_change
-    )
+    # The unlabelled fifth cell is NOT the day's change: it is the change
+    # against the snapshot row right below it (a fixed earlier value), so it
+    # is deliberately not parsed. Day change comes from the per-position
+    # Change(vsYday%) column -- see kompas_db.portfolio_day_change_eur.
+    return PortfolioSummary(value_eur=value, cost_eur=cost, gain_eur=gain, gain_pct=gain_pct)
 
 
 def parse_positions(rows: list[list[str]]) -> list[Position]:
