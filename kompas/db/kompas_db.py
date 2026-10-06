@@ -141,6 +141,35 @@ def meta_refresh_doc(
     }
 
 
+def cycle_a_doc(
+    at: str,
+    run: str,
+    signals_written: int,
+    syntheses_written: int,
+    call_written: bool,
+    note: str = "",
+) -> dict:
+    """`meta/last_cycle_a` -- written at the end of EVERY Pijler A cycle,
+    also an empty one. Paul, 6/10/2026: "en stilgevallen? laatste update is
+    van gisteren avond?" -- the 09:12 cycle had run, found nothing material
+    and kept the call, but the page only showed the newest signal's time,
+    so an honest empty cycle looked like a dead one."""
+    if run not in ("morning", "evening"):
+        raise ValueError(f"run must be 'morning' or 'evening', not {run!r}")
+    if min(signals_written, syntheses_written) < 0:
+        raise ValueError("counts can't be negative")
+    return {
+        "path": "meta/last_cycle_a",
+        "pijler": "A",
+        "at": at,
+        "run": run,
+        "signals_written": signals_written,
+        "syntheses_written": syntheses_written,
+        "call_written": call_written,
+        "note": note.strip(),
+    }
+
+
 def portfolio_day_change_eur(positions: list[Position]) -> float | None:
     """Today's move in EUR from each position's Change(vsYday%). Shares
     bought during the day count as if held all day -- a small overstatement,

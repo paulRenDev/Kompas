@@ -238,6 +238,29 @@ opnieuw wegzakt. De Routine-prompt is bijgewerkt om elke cyclus expliciet
 te wegen of de AI/chip-thematiek weer domineert, en zo ja, bewust
 elders te zoeken.
 
+## "Stilgevallen?" en het potje (6/10/2026)
+
+Paul: "en stilgevallen? laatste update is van gisteren avond? btw je moet
+100 euro niet letterlijk nemen. wat als ik nu een potje had waarin zou ik
+investeren."
+
+**Niet stilgevallen, wel onzichtbaar.** Op 6/10 liepen beide ochtendruns:
+de portefeuille werd om 06:47 UTC ingelezen, de signalencyclus draaide
+07:12-07:16 UTC en schreef een nieuwe call, maar vond geen nieuw materieel
+signaal. De pagina toonde enkel het tijdstip van het nieuwste signaal
+(zondagavond), dus een eerlijke lege cyclus zag eruit als een dode. Nieuw:
+elke Pijler A-cyclus schrijft aan het eind `meta/last_cycle_a`
+(`cycle_a_doc`: wanneer, hoeveel signalen en syntheses, of de call
+bijgewerkt is), ook als er niets materieels was. De pagina toont dat als
+"team keek laatst: ..." onder het laatste signaal.
+
+**Het bedrag is niet letterlijk.** EUR 100 staat voor "geld dat nu aan het
+werk kan". De call gaat over WAT het team zou kopen, niet over hoeveel:
+een aandeel van meer dan EUR 100 is een geldig antwoord, en de eis "moet
+met EUR 100 te kopen zijn" van 30/9 vervalt. De pagina zegt nu "Als het
+team nu geld vrij had". `cap_check` blijft de vangrail, met EUR 100 als
+nominale eenheid.
+
 ## EUR 100-vraag = de beste kans nu, de verdeling is een vangrail (30/9/2026)
 
 Paul: "if the team will always only advice on the weight dispersion of the
@@ -261,8 +284,8 @@ Wat nu geldt:
   kansen, nooit "de portefeuille") of iets nieuws. Het moet uit de
   signalen en syntheses van de cyclus komen, met een concreet waarom-nu,
   Farah se sterkste tegenargument en een trigger die het idee laat
-  vervallen. Het moet ook haalbaar zijn met EUR 100 (een aandeel van
-  EUR 292 is dat niet; een ETF op hetzelfde thema wel).
+  vervallen. *(Een eis "haalbaar met EUR 100" stond hier; die vervalt op
+  6/10 -- het bedrag is niet letterlijk, zie de sectie hierboven.)*
 - **De verdeling is een vangrail, geen takenlijst.**
   `kompas.core.allocation.cap_check` vervangt `steer_target`: het kiest
   nooit, het zegt enkel of EUR 100 extra een sleeve boven haar plafond

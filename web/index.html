@@ -144,11 +144,12 @@
     <div class="eyebrow">KOMPAS</div>
     <h1>Signalen &amp; watchlist</h1>
     <div class="meta-line" id="last-signal-line">laatste signaal: wordt geladen…</div>
+    <div class="meta-line" id="last-cycle-line"></div>
     <div class="meta-line" id="capital-call-ratio"></div>
   </header>
 
   <section id="capital-call-section" style="display:none;">
-    <div class="section-label"><span>Als het team vandaag EUR 100 had</span><span>Paul beslist zelf of hij dit volgt</span></div>
+    <div class="section-label"><span>Als het team nu geld vrij had</span><span>Paul beslist zelf of hij dit volgt</span></div>
     <div id="capital-call-card"></div>
   </section>
 
@@ -283,7 +284,7 @@
     var cv = c.capital_view;
     var label = CAPITAL_VIEW_LABELS[cv.action] || cv.action;
     return '<div class="capital-view">' +
-      '<div class="capital-view-head"><span class="capital-view-label">EUR 100-vraag:</span>' +
+      '<div class="capital-view-head"><span class="capital-view-label">Waar het team nu in zou stappen:</span>' +
       '<span class="capital-view-action ' + cv.action + '">' + label + '</span>' +
       (c.subject ? '<span class="spotlight-subject">' + c.subject + '</span>' : '') + '</div>' +
       '<div class="capital-view-reasoning">' + cv.reasoning + '</div>' +
@@ -418,7 +419,7 @@
     var counts = { wacht: 0, verhoog_bestaand: 0, nieuwe_positie: 0 };
     calls.forEach(function (c) { counts[c.capital_view.action] = (counts[c.capital_view.action] || 0) + 1; });
     var actie = counts.verhoog_bestaand + counts.nieuwe_positie;
-    el.textContent = 'EUR 100-calls tot nu toe: ' + counts.wacht + ' wacht · ' + actie + ' actie (van ' + calls.length + ')';
+    el.textContent = 'calls tot nu toe: ' + counts.wacht + ' wacht · ' + actie + ' actie (van ' + calls.length + ')';
   }
 
   var MAX_AGE_DAYS = 4;
@@ -482,6 +483,18 @@
       (loose.length ? 'nog niet ingedeeld: ' + loose.join(', ') + ' — ' : '') + 'herzien: ' + view.trigger;
   }
 
+  // When the team last looked, even if it found nothing: an empty cycle
+  // must not look like a dead one (Paul, 6/10: "en stilgevallen?").
+  function renderCycle(c) {
+    if (!c || !c.at) return;
+    var n = c.signals_written || 0;
+    var what = n ? n + (n === 1 ? ' nieuw signaal' : ' nieuwe signalen') : 'geen nieuw materieel signaal';
+    if (c.syntheses_written) what += ', ' + c.syntheses_written + (c.syntheses_written === 1 ? ' synthese' : ' syntheses');
+    if (c.call_written) what += ', call bijgewerkt';
+    document.getElementById('last-cycle-line').textContent =
+      'team keek laatst: ' + formatDateTime(c.at) + ' — ' + what + (c.note ? ' (' + c.note + ')' : '');
+  }
+
   function renderAll(events) {
     if (!events.length) {
       document.getElementById('spotlight-list').innerHTML = '<div class="empty">Nog geen signalen — Pijler A heeft nog geen draaiende cyclus.</div>';
@@ -528,7 +541,11 @@
     }, function () { /* additive */ });
 
     db.collection('meta').onSnapshot(function (snap) {
-      snap.docs.forEach(function (d) { var x = d.data(); if (x.pijler === 'B') portfolio.refresh = x; });
+      snap.docs.forEach(function (d) {
+        var x = d.data();
+        if (x.pijler === 'B') portfolio.refresh = x;
+        if (x.pijler === 'A') renderCycle(x);
+      });
       renderPortfolio();
     }, function () { /* additive */ });
 

@@ -33,6 +33,11 @@ now. The team's allocation (kompas/core/allocation.py) is only a
 guardrail: `cap_check` can veto a call that pushes a theme past its cap,
 it never picks the call. "wacht" stays legitimate only when a specific,
 dated event is days away and the call names it.
+
+6/10/2026 -- the amount is not literal. Paul: "je moet 100 euro niet
+letterlijk nemen. wat als ik nu een potje had waarin zou ik investeren."
+EUR 100 is shorthand for "money to put to work now", so a share priced
+above EUR 100 is a valid answer; the call is about WHAT, not how much.
 """
 
 from __future__ import annotations
