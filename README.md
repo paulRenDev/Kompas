@@ -238,6 +238,22 @@ opnieuw wegzakt. De Routine-prompt is bijgewerkt om elke cyclus expliciet
 te wegen of de AI/chip-thematiek weer domineert, en zo ja, bewust
 elders te zoeken.
 
+## Verhandelbaarheid: een idee dat Paul niet kan kopen is geen idee (7/10/2026)
+
+Paul: "copx bestaat niet in medirect? wel in bolero maar is blijkbaar niet
+verhandelbaar door bepaalde kosten die door de emittent niet doorgegeven
+zijn." Een Belgische broker mag een fonds niet laten verhandelen als de
+uitgever geen essentiële informatie en kostengegevens (KID) aanlevert. De
+Global X Copper Miners UCITS ETF (COPX, IE0003Z9E2Y3) valt daaronder.
+
+`kompas.core.capital_call.KNOWN_UNTRADABLE` houdt zulke instrumenten bij;
+`validate_capital_call` weigert een call die er een als subject noemt of
+het ISIN in de redenering zet. Het team moet dan een verhandelbaar
+alternatief op hetzelfde idee noemen -- voor koper: de iShares Copper Miners
+UCITS ETF (COPM, IE00063FT9K6, Euronext Amsterdam). Voorkeur voor fondsen
+van grote uitgevers op beurzen waar Paul al handelt (Amsterdam, Parijs,
+Londen); meldt Paul dat iets niet te koop is, dan komt het in die lijst.
+
 ## "Stilgevallen?" en het potje (6/10/2026)
 
 Paul: "en stilgevallen? laatste update is van gisteren avond? btw je moet

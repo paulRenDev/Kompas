@@ -42,6 +42,7 @@ above EUR 100 is a valid answer; the call is about WHAT, not how much.
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 
 from kompas.core.signal import CAPITAL_VIEW_ACTIONS, CapitalView
@@ -53,6 +54,33 @@ class CapitalCall:
     observed_at: str  # RFC3339
     considered: list[str] = field(default_factory=list)  # subjects/signal_ids weighed this cycle
     subject: str | None = None  # the name this call is about; None for a genuine "nothing stands out"
+
+
+# Instruments Paul cannot buy at his brokers (MeDirect, Bolero), keyed by
+# ticker, with the ISIN and the reason. A call naming one is useless to him,
+# however good the thesis -- the gate rejects it so the team names a
+# tradable alternative instead. Paul, 7/10/2026: "copx bestaat niet in
+# medirect? wel in bolero maar is blijkbaar niet verhandelbaar door bepaalde
+# kosten die door de emittent niet doorgegeven zijn" (no KID/cost data from
+# the issuer, so a Belgian broker may not let him trade it).
+KNOWN_UNTRADABLE: dict[str, tuple[str, str]] = {
+    "COPX": (
+        "IE0003Z9E2Y3",
+        "Global X Copper Miners UCITS ETF: niet bij MeDirect; bij Bolero geblokkeerd "
+        "omdat de uitgever geen kosteninformatie aanlevert",
+    ),
+}
+
+
+def untradable_mentions(call: "CapitalCall") -> list[str]:
+    """Tickers from KNOWN_UNTRADABLE that the call recommends: named as the
+    subject, or their ISIN anywhere in the reasoning."""
+    subject = call.subject or ""
+    hits = []
+    for ticker, (isin, _) in KNOWN_UNTRADABLE.items():
+        if re.search(rf"\b{re.escape(ticker)}\b", subject) or isin in call.capital_view.reasoning:
+            hits.append(ticker)
+    return hits
 
 
 @dataclass(frozen=True)
@@ -89,6 +117,12 @@ def validate_capital_call(call: CapitalCall) -> CapitalCallValidationResult:
         errors.append(
             f"capital_view {cv.action!r} vereist een subject -- een actie zonder naam "
             "is geen echt standpunt"
+        )
+    for ticker in untradable_mentions(call):
+        isin, why = KNOWN_UNTRADABLE[ticker]
+        errors.append(
+            f"{ticker} ({isin}) is voor Paul niet verhandelbaar ({why}) -- "
+            "kies een verhandelbaar alternatief op hetzelfde idee"
         )
 
     return CapitalCallValidationResult(ok=not errors, errors=errors)

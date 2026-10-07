@@ -63,5 +63,27 @@ class TestValidateCapitalCall(unittest.TestCase):
         self.assertTrue(result.ok, msg=result.errors)
 
 
+
+def _buy(subject, reasoning="Koper via de mijnen."):
+    return _valid_call(
+        capital_view=CapitalView(action="nieuwe_positie", reasoning=reasoning, trigger="Vervalt bij een akkoord."),
+        subject=subject,
+    )
+
+
+class TestUntradable(unittest.TestCase):
+    def test_untradable_subject_rejected(self):
+        result = validate_capital_call(_buy("COPX — Global X Copper Miners UCITS ETF"))
+        self.assertFalse(result.ok)
+        self.assertTrue(any("niet verhandelbaar" in e for e in result.errors))
+
+    def test_untradable_isin_in_reasoning_rejected(self):
+        self.assertFalse(validate_capital_call(_buy("Koper", "Via IE0003Z9E2Y3.")).ok)
+
+    def test_tradable_alternative_passes_even_if_it_mentions_copx_ticker(self):
+        call = _buy("COPM — iShares Copper Miners UCITS ETF", "In plaats van COPX, die je niet kunt kopen.")
+        self.assertTrue(validate_capital_call(call).ok)
+
+
 if __name__ == "__main__":
     unittest.main()
