@@ -127,6 +127,10 @@
   .sleeve-name { font-weight: 500; font-size: 13px; }
   .sleeve-range, .sleeve-now { font-family: var(--mono); font-size: 11px; color: var(--muted); text-align: right; white-space: nowrap; }
   .sleeve-why { grid-column: 1 / -1; font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .bm-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 7px; vertical-align: 1px; background: var(--dim); }
+  .bm-groen { background: var(--teal); } .bm-oranje { background: var(--brass); } .bm-rood { background: var(--red); }
+  .bm-level { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+  .bm-level.rustig { color: var(--teal); } .bm-level.opletten { color: var(--brass); } .bm-level.alarm { color: var(--red); }
   .st-onder { color: var(--muted); }
   .st-boven { color: var(--brass); }
   .st-binnen { color: var(--teal); }
@@ -164,6 +168,15 @@
         <div id="allocation-sleeves"></div>
         <div class="pf-targets" id="allocation-trigger"></div>
       </div>
+    </div>
+  </section>
+
+  <section id="bubble-section" style="display:none;">
+    <div class="section-label"><span>AI-bubbelmonitor</span><span id="bubble-stamp"></span></div>
+    <div class="card">
+      <p class="pf-roundup" id="bubble-note"></p>
+      <div id="bubble-rows"></div>
+      <div class="pf-targets">Zes vaste indicatoren, elke avond nagekeken. Rustig, opletten (1 rood of 3 oranje) of alarm (3 rood). Nooit een verkooporder: jij beslist.</div>
     </div>
   </section>
 
@@ -495,6 +508,22 @@
       'team keek laatst: ' + formatDateTime(c.at) + ' — ' + what + (c.note ? ' (' + c.note + ')' : '');
   }
 
+  // Paul, 9/10: "Houden jullie actief bubbel breek signalen bij?" -- the
+  // latest reading of kompas/core/bubble_monitor.py, six fixed indicators.
+  function renderBubble(b) {
+    var section = document.getElementById('bubble-section');
+    if (!b || !b.indicators) { section.style.display = 'none'; return; }
+    section.style.display = '';
+    document.getElementById('bubble-stamp').innerHTML =
+      '<span class="bm-level ' + b.level + '">' + b.level + '</span> · ' + formatDateTime(b.observed_at);
+    document.getElementById('bubble-note').textContent = b.note || '';
+    document.getElementById('bubble-rows').innerHTML = b.indicators.map(function (i) {
+      return '<div class="sleeve"><span class="sleeve-name"><span class="bm-dot bm-' + i.status + '"></span>' + i.name + '</span>' +
+        '<span class="sleeve-range"></span><span class="sleeve-now">' + i.status + '</span>' +
+        '<span class="sleeve-why">' + i.evidence + (i.source ? ' <span class="pf-targets">(' + i.source + ')</span>' : '') + '</span></div>';
+    }).join('');
+  }
+
   function renderAll(events) {
     if (!events.length) {
       document.getElementById('spotlight-list').innerHTML = '<div class="empty">Nog geen signalen — Pijler A heeft nog geen draaiende cyclus.</div>';
@@ -547,6 +576,10 @@
         if (x.pijler === 'A') renderCycle(x);
       });
       renderPortfolio();
+    }, function () { /* additive */ });
+
+    db.collection('bubble_monitor').orderBy('observed_at', 'desc').onSnapshot(function (snap) {
+      renderBubble(snap.docs.length ? snap.docs[0].data() : null);
     }, function () { /* additive */ });
 
     db.collection('allocation_views').orderBy('observed_at', 'desc').onSnapshot(function (snap) {

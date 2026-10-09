@@ -238,6 +238,35 @@ opnieuw wegzakt. De Routine-prompt is bijgewerkt om elke cyclus expliciet
 te wegen of de AI/chip-thematiek weer domineert, en zo ja, bewust
 elders te zoeken.
 
+## AI-bubbelmonitor (9/10/2026)
+
+Paul, na Ray Dalio's waarschuwing in Bloomberg (7/10) dat AI "een klassieke
+bubbel" is die dicht bij het barstpunt zit: "Houden jullie actief bubbel
+breek signalen bij? Ik zou niet weten wat te monitoren hiervoor maar jullie
+vast wel. [...] Het komt er op aan om de signalen tijdig te zijn."
+
+Tot dan niet systematisch: signalen over AI kwamen binnen als ze toevallig
+de materialiteitsdrempel haalden. Nu: `kompas.core.bubble_monitor` met zes
+vaste indicatoren, elk met geschreven drempels voor oranje en rood --
+rente, krediet voor AI, investeringen van de grote techbedrijven,
+AI-omzet en chips, breedte van de beurs, hefboom en cash-out. Ze volgen
+Dalio's eigen mechanisme (AI-investeringen op schuld ontmoeten een
+stijgende rente; vermogen moet omgezet worden in geld) plus de klassieke
+laat-in-de-bubbel-tekens. Het niveau volgt één vaste regel: alarm bij drie
+keer rood, opletten bij één rood of drie oranje, anders rustig.
+
+De avondcyclus van Pijler A schrijft elke avond één meting
+(`bubble_monitor/{datum}`, via `bubble_reading_doc`); een status
+verandert alleen op een feit met bron. Verandert het niveau, dan komt er
+ook een signaal in de recap. Bij "alarm" opent de ochtendcall ermee. De
+pagina toont de laatste meting.
+
+Eerlijke grenzen, ook op de pagina: één keer per dag, niet live; het
+verhoogt de kans om een breuk te zien aankomen, het voorspelt de top niet;
+Dalio waarschuwt al sinds januari 2026, dus "opletten" kan maanden duren.
+Een meting is nooit een verkooporder -- de regel "nooit verkoop voorstellen"
+blijft staan tot Paul zelf iets anders beslist.
+
 ## Verhandelbaarheid: een idee dat Paul niet kan kopen is geen idee (7/10/2026)
 
 Paul: "copx bestaat niet in medirect? wel in bolero maar is blijkbaar niet

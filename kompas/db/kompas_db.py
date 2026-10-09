@@ -170,6 +170,33 @@ def cycle_a_doc(
     }
 
 
+def bubble_reading_doc(reading: "BubbleReading") -> dict:
+    """`bubble_monitor/{date}` -- one reading per evening (a rerun the same
+    day overwrites it). See kompas/core/bubble_monitor.py."""
+    from kompas.core.bubble_monitor import INDICATORS, level, validate_bubble_reading
+
+    result = validate_bubble_reading(reading)
+    if not result.ok:
+        raise ValueError(f"bubble reading failed validation, not writing: {result.errors}")
+    order = list(INDICATORS)
+    return {
+        "path": f"bubble_monitor/{reading.observed_at[:10]}",
+        "level": level(reading),
+        "note": reading.note.strip(),
+        "observed_at": reading.observed_at,
+        "indicators": [
+            {
+                "key": r.key,
+                "name": INDICATORS[r.key][0],
+                "status": r.status,
+                "evidence": r.evidence.strip(),
+                "source": r.source.strip(),
+            }
+            for r in sorted(reading.readings, key=lambda r: order.index(r.key))
+        ],
+    }
+
+
 def portfolio_day_change_eur(positions: list[Position]) -> float | None:
     """Today's move in EUR from each position's Change(vsYday%). Shares
     bought during the day count as if held all day -- a small overstatement,
