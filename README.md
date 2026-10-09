@@ -238,6 +238,36 @@ opnieuw wegzakt. De Routine-prompt is bijgewerkt om elke cyclus expliciet
 te wegen of de AI/chip-thematiek weer domineert, en zo ja, bewust
 elders te zoeken.
 
+## Verkopen mag, onder een plan (9/10/2026)
+
+Op de vraag of het team bij alarm een verkoop mag voorstellen, antwoordde
+Paul: "Zeker! Mag! Ik volg jullie oordeel. Jullie taak samen is het
+rendement ten allen tijde te beschermen en optimaliseren." Daarmee vervalt
+de oude regel "nooit verkoop voorstellen".
+
+Beschermen en optimaliseren trekken in tegengestelde richting: een verkoop
+die twee keer fout uitvalt (te vroeg eruit, te laat terug) kost meer
+rendement dan de daling die hij wilde vermijden, en elke verschuiving kost
+beurstaks aan beide kanten. Daarom mag het team alleen in drie gevallen een
+verkoop voorstellen, vastgelegd in `kompas.core.sell_proposal`:
+
+1. **Het plan** (`DERISK_PLAN`), in alle rust afgesproken: staat de
+   AI-bubbelmonitor op alarm, dan verschuift een derde van IWDA naar value
+   (IWVL) en goud (iShares Physical Gold ETC, PPFB op Xetra), half om half.
+   Bij de stand van 9/10 is dat zo'n EUR 1.355: EUR 680 naar elk.
+2. **Herinstap**, het spiegelbeeld: terug naar IWDA na 20 beursdagen op
+   rustig, of wanneer de Nasdaq-100 meer dan 30% onder zijn top staat --
+   dan is de bubbel geprikt en is goedkoop terugkopen de kans.
+3. **Een gebroken these**: een feit met bron dat de reden om een positie te
+   houden wegneemt. Nooit voor een slechte dag, een kop of een gewicht.
+
+`validate_sell_proposal` weigert een voorstel dat meer verkoopt dan Paul
+heeft, meer koopt dan het verkoopt, de kosten niet benoemt of zonder
+terugdraai-voorwaarde komt; een gebroken these zonder signaal ook. Buiten
+het plan hooguit één voorstel per week. Pijler A schrijft ze
+(`sell_proposals/{datum}`); de pagina toont het nieuwste een week lang
+bovenaan. Uitvoeren blijft bij Paul.
+
 ## AI-bubbelmonitor (9/10/2026)
 
 Paul, na Ray Dalio's waarschuwing in Bloomberg (7/10) dat AI "een klassieke
@@ -264,8 +294,9 @@ pagina toont de laatste meting.
 Eerlijke grenzen, ook op de pagina: één keer per dag, niet live; het
 verhoogt de kans om een breuk te zien aankomen, het voorspelt de top niet;
 Dalio waarschuwt al sinds januari 2026, dus "opletten" kan maanden duren.
-Een meting is nooit een verkooporder -- de regel "nooit verkoop voorstellen"
-blijft staan tot Paul zelf iets anders beslist.
+Een meting op zich is geen verkooporder; sinds dezelfde dag zet de
+afgesproken regel in "Verkopen mag, onder een plan" alarm wel om in een
+voorstel.
 
 ## Verhandelbaarheid: een idee dat Paul niet kan kopen is geen idee (7/10/2026)
 

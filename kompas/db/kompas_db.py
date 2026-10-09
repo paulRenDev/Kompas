@@ -197,6 +197,26 @@ def bubble_reading_doc(reading: "BubbleReading") -> dict:
     }
 
 
+def sell_proposal_doc(proposal: "SellProposal", value_by_ticker: dict[str, float]) -> dict:
+    """`sell_proposals/{date}` -- see kompas/core/sell_proposal.py."""
+    from kompas.core.sell_proposal import validate_sell_proposal
+
+    result = validate_sell_proposal(proposal, value_by_ticker)
+    if not result.ok:
+        raise ValueError(f"sell proposal failed validation, not writing: {result.errors}")
+    return {
+        "path": f"sell_proposals/{proposal.observed_at[:10]}",
+        "source": proposal.source,
+        "sell": [{"ticker": l.ticker, "amount_eur": l.amount_eur} for l in proposal.sell],
+        "buy": [{"ticker": l.ticker, "amount_eur": l.amount_eur} for l in proposal.buy],
+        "reasoning": proposal.reasoning.strip(),
+        "costs": proposal.costs.strip(),
+        "undo": proposal.undo.strip(),
+        "signal_refs": proposal.signal_refs,
+        "observed_at": proposal.observed_at,
+    }
+
+
 def portfolio_day_change_eur(positions: list[Position]) -> float | None:
     """Today's move in EUR from each position's Change(vsYday%). Shares
     bought during the day count as if held all day -- a small overstatement,

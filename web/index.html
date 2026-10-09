@@ -152,6 +152,11 @@
     <div class="meta-line" id="capital-call-ratio"></div>
   </header>
 
+  <section id="sell-section" style="display:none;">
+    <div class="section-label"><span>Het team stelt een verschuiving voor</span><span id="sell-stamp"></span></div>
+    <div class="card" id="sell-card" style="border-color: var(--red);"></div>
+  </section>
+
   <section id="capital-call-section" style="display:none;">
     <div class="section-label"><span>Als het team nu geld vrij had</span><span>Paul beslist zelf of hij dit volgt</span></div>
     <div id="capital-call-card"></div>
@@ -176,7 +181,7 @@
     <div class="card">
       <p class="pf-roundup" id="bubble-note"></p>
       <div id="bubble-rows"></div>
-      <div class="pf-targets">Zes vaste indicatoren, elke avond nagekeken. Rustig, opletten (1 rood of 3 oranje) of alarm (3 rood). Nooit een verkooporder: jij beslist.</div>
+      <div class="pf-targets">Zes vaste indicatoren, elke avond nagekeken. Rustig, opletten (1 rood of 3 oranje) of alarm (3 rood).<br>Afgesproken plan bij alarm: een derde van IWDA naar value (IWVL) en goud (PPFB), half om half. Terug naar IWDA na 20 beursdagen rustig, of als de Nasdaq-100 meer dan 30% onder zijn top staat. Jij voert uit.</div>
     </div>
   </section>
 
@@ -510,6 +515,24 @@
 
   // Paul, 9/10: "Houden jullie actief bubbel breek signalen bij?" -- the
   // latest reading of kompas/core/bubble_monitor.py, six fixed indicators.
+  // Sell proposals (kompas/core/sell_proposal.py): shown for a week, then
+  // they drop off like everything else that's no longer fresh.
+  function renderSell(p) {
+    var section = document.getElementById('sell-section');
+    var fresh = p && (Date.now() - Date.parse(p.observed_at)) < 7 * 86400000;
+    if (!fresh) { section.style.display = 'none'; return; }
+    section.style.display = '';
+    var eur = function (x) { return 'EUR ' + Number(x).toLocaleString('nl-BE', {minimumFractionDigits: 0, maximumFractionDigits: 0}); };
+    var legs = function (ls) { return ls.map(function (l) { return l.ticker + ' ' + eur(l.amount_eur); }).join(' + '); };
+    var label = {plan: 'afgesproken plan', these_breuk: 'these gebroken', herinstap: 'terug naar het normale'}[p.source] || p.source;
+    document.getElementById('sell-stamp').textContent = label + ' · ' + formatDateTime(p.observed_at);
+    document.getElementById('sell-card').innerHTML =
+      '<p class="pf-roundup"><strong>Verkoop ' + legs(p.sell) + '</strong>' +
+      (p.buy && p.buy.length ? ' → <strong>koop ' + legs(p.buy) + '</strong>' : ' → in cash houden') + '</p>' +
+      '<p class="pf-roundup">' + p.reasoning + '</p>' +
+      '<div class="pf-targets">Kosten: ' + p.costs + '<br>Terugdraaien als: ' + p.undo + '<br>Jij beslist en voert zelf uit.</div>';
+  }
+
   function renderBubble(b) {
     var section = document.getElementById('bubble-section');
     if (!b || !b.indicators) { section.style.display = 'none'; return; }
@@ -576,6 +599,10 @@
         if (x.pijler === 'A') renderCycle(x);
       });
       renderPortfolio();
+    }, function () { /* additive */ });
+
+    db.collection('sell_proposals').orderBy('observed_at', 'desc').onSnapshot(function (snap) {
+      renderSell(snap.docs.length ? snap.docs[0].data() : null);
     }, function () { /* additive */ });
 
     db.collection('bubble_monitor').orderBy('observed_at', 'desc').onSnapshot(function (snap) {

@@ -14,7 +14,9 @@ stocks then I will always have to rebalance every position. It's a never
 ending story."). The EUR 100 call picks the best opportunity now, wherever
 it is; the allocation only answers "would this push a theme past its cap?".
 A sleeve under its minimum is information, not an order. Nothing here ever
-says "sell" -- selling to rebalance costs tax and fees, and it's Paul's call.
+says "sell" -- selling to rebalance costs tax and fees. Selling is allowed
+since 9/10/2026, but only under kompas/core/sell_proposal.py, never to
+fix a weight.
 
 Stable on purpose. A new view is written only when its own `trigger` fires
 or something structural changes (a new position, a sold one), never as a

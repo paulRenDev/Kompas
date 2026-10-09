@@ -16,8 +16,8 @@ leadership, record leverage). Each status change needs a sourced fact --
 Honest limits, stated on purpose: this is checked once a day, not live; it
 raises the odds of seeing a break coming, it does not time the top; and
 Dalio himself has warned since January 2026 while markets kept rising, so
-"opletten" can last months. No reading here is ever a sell order -- what
-Paul does with it is his decision.
+"opletten" can last months. A reading by itself is not a sell order; the
+agreed plan in kompas/core/sell_proposal.py turns "alarm" into a proposal.
 """
 
 from __future__ import annotations
