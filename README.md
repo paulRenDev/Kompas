@@ -238,6 +238,19 @@ opnieuw wegzakt. De Routine-prompt is bijgewerkt om elke cyclus expliciet
 te wegen of de AI/chip-thematiek weer domineert, en zo ja, bewust
 elders te zoeken.
 
+## Een afgekapte kopie kost enkel de watchlist (12/10/2026)
+
+De Routine kan het resultaat van de Drive-download niet naar schijf sturen;
+ze moet de base64-tekst met de hand in een bestand zetten. Lange kopieën
+krijgen losse spaties en verliezen soms hun staart (5/10 en 12/10: de
+inlezing stopte, de portefeuille bleef een dag oud). `kompas.pijler_b.export`
+ruimt spaties en losse tekens op, knipt een rafelige staart af tot de laatste
+volledige base64-groep en meldt dat. Omdat de posities bovenaan de export
+staan en de watchlist onderaan, kost een verloren staart bijna altijd enkel
+watchlistrijen: `run_cycle_csv(..., include_watchlist=False)` publiceert dan
+de posities (nog altijd afgetoetst aan de totaalrij van de sheet) en laat de
+watchlist ongemoeid -- niets overschreven, niets verwijderd.
+
 ## Verkopen mag, onder een plan (9/10/2026)
 
 Op de vraag of het team bij alarm een verkoop mag voorstellen, antwoordde

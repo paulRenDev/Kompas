@@ -33,17 +33,25 @@ def run_cycle_csv(
     csv_text: str,
     previous_qty: dict[str, float] | None = None,
     previous_refreshed_at: str | None = None,
+    include_watchlist: bool = True,
 ) -> CycleResult:
     """previous_qty: {wallet-positions doc id: qty} as read from the database
-    just before this refresh -- needed to record what Paul bought or sold."""
-    return _run(parse_aandelen_csv(csv_text), previous_qty, previous_refreshed_at)
+    just before this refresh -- needed to record what Paul bought or sold.
+    include_watchlist=False when the export was truncated (see export.py)."""
+    return _run(parse_aandelen_csv(csv_text, watchlist_optional=not include_watchlist), previous_qty, previous_refreshed_at, include_watchlist)
 
 
 def _run(
     snapshot: PortfolioSnapshot,
     previous_qty: dict[str, float] | None = None,
     previous_refreshed_at: str | None = None,
+    include_watchlist: bool = True,
 ) -> CycleResult:
     result = reconcile(snapshot)
-    batch = build_batch(snapshot, result, previous_qty=previous_qty, previous_refreshed_at=previous_refreshed_at) if result.ok else None
+    batch = (
+        build_batch(snapshot, result, previous_qty=previous_qty, previous_refreshed_at=previous_refreshed_at,
+                    include_watchlist=include_watchlist)
+        if result.ok
+        else None
+    )
     return CycleResult(snapshot=snapshot, reconciliation=result, write_batch=batch)

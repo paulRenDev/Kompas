@@ -224,10 +224,19 @@ def parse_watchlist(rows: list[list[str]]) -> list[WatchlistEntry]:
     return entries
 
 
-def _snapshot_from_rows(rows: list[list[str]]) -> PortfolioSnapshot:
+def _snapshot_from_rows(rows: list[list[str]], watchlist_optional: bool = False) -> PortfolioSnapshot:
+    """watchlist_optional: the export copy lost its tail (see
+    kompas/pijler_b/export.py) -- a broken watchlist block yields an empty
+    watchlist instead of failing the whole read; positions stay strict."""
+    try:
+        watchlist = parse_watchlist(rows)
+    except ParseError:
+        if not watchlist_optional:
+            raise
+        watchlist = []
     return PortfolioSnapshot(
         positions=parse_positions(rows),
-        watchlist=parse_watchlist(rows),
+        watchlist=watchlist,
         summary=parse_portfolio_summary(rows),
     )
 
@@ -236,6 +245,6 @@ def parse_aandelen_dump(raw_text: str) -> PortfolioSnapshot:
     return _snapshot_from_rows([_split_row(line) for line in raw_text.splitlines()])
 
 
-def parse_aandelen_csv(csv_text: str) -> PortfolioSnapshot:
+def parse_aandelen_csv(csv_text: str, watchlist_optional: bool = False) -> PortfolioSnapshot:
     rows = [[c.strip() for c in row] for row in csv.reader(io.StringIO(csv_text))]
-    return _snapshot_from_rows(rows)
+    return _snapshot_from_rows(rows, watchlist_optional)

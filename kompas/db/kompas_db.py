@@ -395,8 +395,12 @@ def build_batch(
     refreshed_at: str | None = None,
     previous_qty: dict[str, float] | None = None,
     previous_refreshed_at: str | None = None,
+    include_watchlist: bool = True,
 ) -> list[dict]:
-    """The full write set for one Pijler B cycle. Caller must check
+    """The full write set for one Pijler B cycle. include_watchlist=False
+    when the export copy lost its tail (kompas/pijler_b/export.py): the
+    positions are still reconciled against the sheet's summary row, but a
+    shortened watchlist must neither overwrite nor delete anything. Caller must check
     result.ok first — this function does not check it for you, on purpose:
     a cycle script that calls build_batch without checking ok first is a
     bug the type checker/reviewer should catch, not something this
@@ -405,7 +409,8 @@ def build_batch(
     refreshed_at = refreshed_at or datetime.now(timezone.utc).isoformat()
     docs = [wallet_state_doc(result, refreshed_at, portfolio_day_change_eur(snapshot.positions))]
     docs += [wallet_position_doc(p, refreshed_at, result.computed_value_eur) for p in snapshot.positions]
-    docs += [watchlist_doc(w, refreshed_at) for w in snapshot.watchlist]
+    if include_watchlist:
+        docs += [watchlist_doc(w, refreshed_at) for w in snapshot.watchlist]
     changes = position_changes(previous_qty, snapshot) if previous_qty is not None else []
     docs.append(meta_refresh_doc(result, refreshed_at, changes, previous_refreshed_at))
     return docs
