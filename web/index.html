@@ -128,7 +128,7 @@
   .sleeve-range, .sleeve-now { font-family: var(--mono); font-size: 11px; color: var(--muted); text-align: right; white-space: nowrap; }
   .sleeve-why { grid-column: 1 / -1; font-size: 12px; color: var(--muted); line-height: 1.5; }
   .bm-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 7px; vertical-align: 1px; background: var(--dim); }
-  .bm-groen { background: var(--teal); } .bm-oranje { background: var(--brass); } .bm-rood { background: var(--red); }
+  .bm-groen, .bm-laag { background: var(--teal); } .bm-oranje, .bm-stijgend { background: var(--brass); } .bm-rood, .bm-acuut { background: var(--red); }
   .bm-level { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
   .bm-level.rustig { color: var(--teal); } .bm-level.opletten { color: var(--brass); } .bm-level.alarm { color: var(--red); }
   .st-onder { color: var(--muted); }
@@ -181,7 +181,16 @@
     <div class="card">
       <p class="pf-roundup" id="bubble-note"></p>
       <div id="bubble-rows"></div>
-      <div class="pf-targets">Zes vaste indicatoren, elke avond nagekeken. Rustig, opletten (1 rood of 3 oranje) of alarm (3 rood).<br>Afgesproken plan bij alarm: een derde van IWDA naar value (IWVL) en goud (PPFB), half om half. Terug naar IWDA na 20 beursdagen rustig, of als de Nasdaq-100 meer dan 30% onder zijn top staat. Jij voert uit.</div>
+      <div class="pf-targets">Zes vaste indicatoren, elke avond nagekeken. Rustig, opletten (1 rood of 3 oranje) of alarm (3 rood).<br>Afgesproken plan bij alarm: een derde van IWDA naar value (IWVL) en goud (Amundi Physical Gold, GOLD op Parijs), half om half. Terug naar IWDA na 20 beursdagen rustig, of als de Nasdaq-100 meer dan 30% onder zijn top staat. Jij voert uit.</div>
+    </div>
+  </section>
+
+  <section id="scenario-section" style="display:none;">
+    <div class="section-label"><span>Risicoscenario's</span><span id="scenario-stamp"></span></div>
+    <div class="card">
+      <p class="pf-roundup" id="scenario-note"></p>
+      <div id="scenario-rows"></div>
+      <div class="pf-targets">Vier scenario's, elke avond nagekeken: laag, stijgend of acuut. Pas bij acuut stuurt het team de call om. Verzekering (goud, kasreserve) blijft daarbuiten onder 15% van je portefeuille, zodat je niet te voorzichtig wordt.</div>
     </div>
   </section>
 
@@ -533,6 +542,23 @@
       '<div class="pf-targets">Kosten: ' + p.costs + '<br>Terugdraaien als: ' + p.undo + '<br>Jij beslist en voert zelf uit.</div>';
   }
 
+  // Paul, 12/10: "nemen jullie deze afweging mee in jullie dagelijkse
+  // bespreking?" -- kompas/core/scenario_monitor.py, four scenarios.
+  function renderScenarios(m) {
+    var section = document.getElementById('scenario-section');
+    if (!m || !m.scenarios) { section.style.display = 'none'; return; }
+    section.style.display = '';
+    document.getElementById('scenario-stamp').innerHTML =
+      (m.any_acute ? '<span class="bm-level alarm">acuut</span> · ' : '') + formatDateTime(m.observed_at);
+    document.getElementById('scenario-note').textContent = m.note || '';
+    document.getElementById('scenario-rows').innerHTML = m.scenarios.map(function (sc) {
+      return '<div class="sleeve"><span class="sleeve-name"><span class="bm-dot bm-' + sc.status + '"></span>' + sc.name + '</span>' +
+        '<span class="sleeve-range"></span><span class="sleeve-now">' + sc.status + '</span>' +
+        '<span class="sleeve-why">' + sc.evidence + (sc.source ? ' <span class="pf-targets">(' + sc.source + ')</span>' : '') +
+        '<br><span class="pf-targets">Voor jou: ' + sc.impact + '</span></span></div>';
+    }).join('');
+  }
+
   function renderBubble(b) {
     var section = document.getElementById('bubble-section');
     if (!b || !b.indicators) { section.style.display = 'none'; return; }
@@ -603,6 +629,10 @@
 
     db.collection('sell_proposals').orderBy('observed_at', 'desc').onSnapshot(function (snap) {
       renderSell(snap.docs.length ? snap.docs[0].data() : null);
+    }, function () { /* additive */ });
+
+    db.collection('scenario_monitor').orderBy('observed_at', 'desc').onSnapshot(function (snap) {
+      renderScenarios(snap.docs.length ? snap.docs[0].data() : null);
     }, function () { /* additive */ });
 
     db.collection('bubble_monitor').orderBy('observed_at', 'desc').onSnapshot(function (snap) {

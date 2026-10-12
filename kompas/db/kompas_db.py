@@ -217,6 +217,33 @@ def sell_proposal_doc(proposal: "SellProposal", value_by_ticker: dict[str, float
     }
 
 
+def scenario_snapshot_doc(snapshot: "ScenarioSnapshot") -> dict:
+    """`scenario_monitor/{date}` -- see kompas/core/scenario_monitor.py."""
+    from kompas.core.scenario_monitor import SCENARIOS, any_acute, validate_scenarios
+
+    result = validate_scenarios(snapshot)
+    if not result.ok:
+        raise ValueError(f"scenario snapshot failed validation, not writing: {result.errors}")
+    order = list(SCENARIOS)
+    return {
+        "path": f"scenario_monitor/{snapshot.observed_at[:10]}",
+        "any_acute": any_acute(snapshot),
+        "note": snapshot.note.strip(),
+        "observed_at": snapshot.observed_at,
+        "scenarios": [
+            {
+                "key": r.key,
+                "name": SCENARIOS[r.key][0],
+                "status": r.status,
+                "evidence": r.evidence.strip(),
+                "source": r.source.strip(),
+                "impact": SCENARIOS[r.key][4],
+            }
+            for r in sorted(snapshot.readings, key=lambda r: order.index(r.key))
+        ],
+    }
+
+
 def portfolio_day_change_eur(positions: list[Position]) -> float | None:
     """Today's move in EUR from each position's Change(vsYday%). Shares
     bought during the day count as if held all day -- a small overstatement,

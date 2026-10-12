@@ -69,6 +69,11 @@ KNOWN_UNTRADABLE: dict[str, tuple[str, str]] = {
         "Global X Copper Miners UCITS ETF: niet bij MeDirect; bij Bolero geblokkeerd "
         "omdat de uitgever geen kosteninformatie aanlevert",
     ),
+    "PPFB": (
+        "IE00B4ND3602",
+        "iShares Physical Gold ETC: niet te vinden bij MeDirect (Paul, 12/10/2026); "
+        "alternatief: Amundi Physical Gold ETC, GOLD op Euronext Parijs, FR0013416716",
+    ),
 }
 
 

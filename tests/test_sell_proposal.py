@@ -18,7 +18,7 @@ class TestDerisk(unittest.TestCase):
     def test_plan_moves_a_third_of_iwda_half_value_half_gold(self):
         sell, buy = derisk_legs(WALLET)
         self.assertEqual(sell, [Leg("IWDA", 1355.0)])
-        self.assertEqual({l.ticker: l.amount_eur for l in buy}, {"IWVL": 677.5, "PPFB": 677.5})
+        self.assertEqual({l.ticker: l.amount_eur for l in buy}, {"IWVL": 677.5, "GOLD": 677.5})
 
     def test_valid_plan_proposal_serializes(self):
         doc = sell_proposal_doc(_p(), WALLET)

@@ -238,6 +238,31 @@ opnieuw wegzakt. De Routine-prompt is bijgewerkt om elke cyclus expliciet
 te wegen of de AI/chip-thematiek weer domineert, en zo ja, bewust
 elders te zoeken.
 
+## Risicoscenario's dagelijks, met een rem op voorzichtigheid (12/10/2026)
+
+Paul vroeg of hij ingedekt is tegen de Amerikaanse rente en de geopolitieke
+chaos, en daarna: "nemen jullie deze afweging mee in jullie dagelijkse
+bespreking? ik wil niet te risico avers worden maar we moeten de signalen wel
+tijdig opmerken."
+
+`kompas.core.scenario_monitor` volgt vier scenario's, elk met geschreven
+grenzen voor "stijgend" en "acuut": rente door inflatie en olie, vertrouwen
+in Amerikaanse schuld (het gevaarlijkste: obligaties en dollar die samen
+dalen, dan verliest een eurobelegger twee keer), olie en geopolitiek, en een
+groeischok of AI-barst. De avondcyclus schrijft elke avond één meting
+(`scenario_monitor/{datum}`); een statuswijziging wordt een signaal. De
+pagina toont per scenario wat het voor Paul betekent.
+
+De rem: verzekering -- goud en een kasreserve -- blijft buiten een acuut
+scenario of een bubbelalarm onder `HEDGE_CAP` (15% van de portefeuille).
+"Stijgend" is informatie, geen reden om meer verzekering te kopen; enkel
+"acuut" stuurt de call om. Zo let het team op zonder de portefeuille uit
+schrik in te pakken.
+
+Goud: de iShares Physical Gold ETC (PPFB) vond Paul niet bij MeDirect; het
+team gebruikt de Amundi Physical Gold ETC (GOLD op Euronext Parijs,
+FR0013416716), bij Bolero te koop. PPFB staat in `KNOWN_UNTRADABLE`.
+
 ## Een afgekapte kopie kost enkel de watchlist (12/10/2026)
 
 De Routine kan het resultaat van de Drive-download niet naar schijf sturen;
@@ -266,7 +291,7 @@ verkoop voorstellen, vastgelegd in `kompas.core.sell_proposal`:
 
 1. **Het plan** (`DERISK_PLAN`), in alle rust afgesproken: staat de
    AI-bubbelmonitor op alarm, dan verschuift een derde van IWDA naar value
-   (IWVL) en goud (iShares Physical Gold ETC, PPFB op Xetra), half om half.
+   (IWVL) en goud (Amundi Physical Gold ETC, GOLD op Euronext Parijs; de iShares-variant PPFB biedt MeDirect niet aan), half om half.
    Bij de stand van 9/10 is dat zo'n EUR 1.355: EUR 680 naar elk.
 2. **Herinstap**, het spiegelbeeld: terug naar IWDA na 20 beursdagen op
    rustig, of wanneer de Nasdaq-100 meer dan 30% onder zijn top staat --

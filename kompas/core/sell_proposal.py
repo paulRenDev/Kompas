@@ -31,7 +31,9 @@ DERISK_PLAN = {
     # where the proceeds go, as fractions of the amount sold
     "buy": {
         "IWVL": 0.5,  # value: held up far better than growth after 2000
-        "PPFB": 0.5,  # iShares Physical Gold ETC, IE00B4ND3602, Xetra in EUR -- Dalio's own hedge
+        # Amundi Physical Gold ETC, FR0013416716, Euronext Paris in EUR -- Dalio's
+        # own hedge. (iShares' PPFB isn't offered at MeDirect, Paul 12/10.)
+        "GOLD": 0.5,
     },
     "re_entry": (
         "terug naar IWDA wanneer de monitor 20 beursdagen op rustig staat, of wanneer de "
