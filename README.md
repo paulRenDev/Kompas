@@ -270,6 +270,36 @@ Goud: de iShares Physical Gold ETC (PPFB) vond Paul niet bij MeDirect; het
 team gebruikt de Amundi Physical Gold ETC (GOLD op Euronext Parijs,
 FR0013416716), bij Bolero te koop. PPFB staat in `KNOWN_UNTRADABLE`.
 
+## Draaiboeken: wat als... (19/10/2026)
+
+Paul, nadat het team toegaf dat enkel de AI-bubbel een uitgeschreven plan
+had: "ik zou dynamische draaiboeken willen afhankelijk van nieuws. wat als
+trump senaat en house verliest? wat als rusland zijn view opdringt, wat als
+le pen wint of net niet, wat als de eu begroting zwaar tegenvalt wat als us
+weer rare claims legt op groenland, wat als er een significante klimaatramp
+optreedt [...] what if what if what if." Het doel: "ongeschonden en liefst
+beter uitkomen".
+
+`kompas.core.playbook` legt elk draaiboek vast in `playbooks/{key}`: de
+gebeurtenis, het gedateerde moment, de signalen waarop het team let, en
+twee verplichte helften, `protect` (hoe Paul ongeschonden blijft) en
+`opportunity` (waar de kans ligt). Een draaiboek zonder kans of zonder
+bescherming wordt geweigerd.
+
+Dynamisch: de avondcyclus houdt ze levend. Waakzaam wordt naderend als het
+moment dichtbij komt of de signalen bewegen, actief als de gebeurtenis echt
+plaatsvindt (een feit met bron), voorbij als ze achter de rug is. Nieuws dat
+een echt nieuw "wat als" oplevert, wordt een nieuw draaiboek; hoogstens
+`MAX_LIVE` (10) tegelijk, zodat "wat als" geen paniek over alles wordt.
+
+Pas bij actief mag geld bewegen: een verkoopvoorstel met bron `draaiboek`
+(kompas/core/sell_proposal.py), hoogstens `shift_max` en nooit meer dan
+`MAX_SHIFT` (20%) van de portefeuille, met het draaiboek en het signaal dat
+de gebeurtenis toont, en altijd met een weg terug. De eerste zes: de
+Amerikaanse tussentijdse verkiezingen (3/11), Rusland dat zijn voorwaarden
+afdwingt, Frankrijk 2027, de Europese en Franse begroting, Groenland, en
+een grote klimaatramp of sabotage in Europa.
+
 ## Een afgekapte kopie kost enkel de watchlist (12/10/2026)
 
 De Routine kan het resultaat van de Drive-download niet naar schijf sturen;

@@ -128,7 +128,8 @@
   .sleeve-range, .sleeve-now { font-family: var(--mono); font-size: 11px; color: var(--muted); text-align: right; white-space: nowrap; }
   .sleeve-why { grid-column: 1 / -1; font-size: 12px; color: var(--muted); line-height: 1.5; }
   .bm-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 7px; vertical-align: 1px; background: var(--dim); }
-  .bm-groen, .bm-laag { background: var(--teal); } .bm-oranje, .bm-stijgend { background: var(--brass); } .bm-rood, .bm-acuut { background: var(--red); }
+  .bm-groen, .bm-laag { background: var(--teal); } .bm-oranje, .bm-stijgend { background: var(--brass); } .bm-rood, .bm-acuut { background: var(--red); } .bm-waakzaam { background: var(--dim); } .bm-naderend { background: var(--brass); } .bm-actief { background: var(--red); } .bm-voorbij { background: var(--border2); }
+  .pb-moves { margin: 4px 0 0; padding-left: 16px; } .pb-moves li { margin: 2px 0; } .pb-head { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: .04em; color: var(--dim); margin-top: 6px; }
   .bm-level { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
   .bm-level.rustig { color: var(--teal); } .bm-level.opletten { color: var(--brass); } .bm-level.alarm { color: var(--red); }
   .st-onder { color: var(--muted); }
@@ -190,7 +191,15 @@
     <div class="card">
       <p class="pf-roundup" id="scenario-note"></p>
       <div id="scenario-rows"></div>
-      <div class="pf-targets">Vier scenario's, elke avond nagekeken: laag, stijgend of acuut. Pas bij acuut stuurt het team de call om. Verzekering (goud, kasreserve) blijft daarbuiten onder 15% van je portefeuille, zodat je niet te voorzichtig wordt.</div>
+      <div class="pf-targets">Vijf scenario's, elke avond nagekeken: laag, stijgend of acuut. Pas bij acuut stuurt het team de call om. Verzekering (goud, kasreserve) blijft daarbuiten onder 15% van je portefeuille, zodat je niet te voorzichtig wordt.</div>
+    </div>
+  </section>
+
+  <section id="playbook-section" style="display:none;">
+    <div class="section-label"><span>Draaiboeken — wat als…</span><span id="playbook-stamp"></span></div>
+    <div class="card">
+      <div id="playbook-rows"></div>
+      <div class="pf-targets">Vooraf uitgeschreven, elke avond bijgewerkt: waakzaam, naderend, actief of voorbij. Elk draaiboek zegt hoe je ongeschonden blijft én waar de kans ligt. Pas als de gebeurtenis echt plaatsvindt (actief) mag het team een verschuiving voorstellen, hoogstens 20% van je portefeuille en altijd met een weg terug. Jij beslist en handelt zelf.</div>
     </div>
   </section>
 
@@ -559,6 +568,31 @@
     }).join('');
   }
 
+  var PB_ORDER = { actief: 0, naderend: 1, waakzaam: 2, voorbij: 3 };
+  function renderPlaybooks(list) {
+    var section = document.getElementById('playbook-section');
+    if (!list || !list.length) { section.style.display = 'none'; return; }
+    section.style.display = '';
+    list.sort(function (a, b) { return (PB_ORDER[a.status] - PB_ORDER[b.status]) || ((b.updated_at || '') > (a.updated_at || '') ? 1 : -1); });
+    var newest = list.reduce(function (m, p) { return (p.updated_at || '') > m ? p.updated_at : m; }, '');
+    document.getElementById('playbook-stamp').textContent = newest ? 'bijgewerkt ' + formatDateTime(newest) : '';
+    function moves(ms) {
+      return '<ul class="pb-moves">' + (ms || []).map(function (m) {
+        return '<li><strong>' + m.action + '</strong> ' + m.what + ' — ' + m.why + '</li>';
+      }).join('') + '</ul>';
+    }
+    document.getElementById('playbook-rows').innerHTML = list.map(function (p) {
+      return '<div class="sleeve"><span class="sleeve-name"><span class="bm-dot bm-' + p.status + '"></span>' + p.what_if + '</span>' +
+        '<span class="sleeve-range">' + Math.round((p.shift_max || 0) * 100) + '% max</span><span class="sleeve-now">' + p.status + '</span>' +
+        '<span class="sleeve-why">' + p.status_reason + ' <span class="pf-targets">(' + p.source + ')</span>' +
+        '<br><span class="pf-targets">Wanneer: ' + p.when + '</span>' +
+        '<div class="pb-head">Beschermen</div>' + moves(p.protect) +
+        '<div class="pb-head">De kans</div>' + moves(p.opportunity) +
+        '<div class="pb-head">Waar het team op let</div><span class="pf-targets">' + (p.watch || []).join(' · ') + '</span>' +
+        '<br><span class="pf-targets">Terug: ' + p.undo + '</span></span></div>';
+    }).join('');
+  }
+
   function renderBubble(b) {
     var section = document.getElementById('bubble-section');
     if (!b || !b.indicators) { section.style.display = 'none'; return; }
@@ -633,6 +667,10 @@
 
     db.collection('scenario_monitor').orderBy('observed_at', 'desc').onSnapshot(function (snap) {
       renderScenarios(snap.docs.length ? snap.docs[0].data() : null);
+    }, function () { /* additive */ });
+
+    db.collection('playbooks').onSnapshot(function (snap) {
+      renderPlaybooks(snap.docs.map(function (d) { return d.data(); }));
     }, function () { /* additive */ });
 
     db.collection('bubble_monitor').orderBy('observed_at', 'desc').onSnapshot(function (snap) {

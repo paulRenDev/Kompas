@@ -213,7 +213,37 @@ def sell_proposal_doc(proposal: "SellProposal", value_by_ticker: dict[str, float
         "costs": proposal.costs.strip(),
         "undo": proposal.undo.strip(),
         "signal_refs": proposal.signal_refs,
+        "playbook": proposal.playbook,
         "observed_at": proposal.observed_at,
+    }
+
+
+def playbook_doc(playbook: "Playbook") -> dict:
+    """`playbooks/{key}` -- one living doc per what-if, see kompas/core/playbook.py."""
+    from kompas.core.playbook import validate_playbook
+
+    result = validate_playbook(playbook)
+    if not result.ok:
+        raise ValueError(f"playbook failed validation, not writing: {result.errors}")
+
+    def moves(ms):
+        return [{"action": m.action, "what": m.what.strip(), "why": m.why.strip()} for m in ms]
+
+    return {
+        "path": f"playbooks/{playbook.key}",
+        "key": playbook.key,
+        "what_if": playbook.what_if.strip(),
+        "when": playbook.when.strip(),
+        "status": playbook.status,
+        "status_reason": playbook.status_reason.strip(),
+        "source": playbook.source.strip(),
+        "watch": [w.strip() for w in playbook.watch],
+        "protect": moves(playbook.protect),
+        "opportunity": moves(playbook.opportunity),
+        "shift_max": playbook.shift_max,
+        "undo": playbook.undo.strip(),
+        "scenario_links": playbook.scenario_links,
+        "updated_at": playbook.updated_at,
     }
 
 

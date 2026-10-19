@@ -7,7 +7,7 @@ taak samen is het rendement ten allen tijde te beschermen en optimaliseren."
 That mandate cuts both ways. Selling to protect costs beurstaks, spread and
 possibly meerwaardebelasting, and a sale that's wrong twice (out too early,
 back in too late) destroys more return than a drawdown it was meant to
-dodge. So the team may propose a sale only in two situations, both written
+dodge. So the team may propose a sale only in these situations, all written
 down here so the bar can't drift with the mood of a single day:
 
 1. The de-risk plan (DERISK_PLAN): agreed with Paul in calm, executed when
@@ -15,6 +15,10 @@ down here so the bar can't drift with the mood of a single day:
    gold. Its mirror image, the re-entry rule, says when to move back.
 2. A broken thesis: a sourced fact that kills the reason a specific
    position is held (not a bad day, not a scary headline).
+3. Since 19/10/2026, an active playbook (kompas/core/playbook.py): the
+   what-if it was written for actually happened. It may move at most
+   MAX_SHIFT of the portfolio, and names the playbook and the signal that
+   shows the event.
 
 A proposal is hypothetical and non-executing, like every call: Paul trades
 himself.
@@ -42,7 +46,7 @@ DERISK_PLAN = {
     ),
 }
 
-SOURCES = ("plan", "these_breuk", "herinstap")
+SOURCES = ("plan", "these_breuk", "herinstap", "draaiboek")
 
 
 @dataclass(frozen=True)
@@ -61,6 +65,7 @@ class SellProposal:
     undo: str  # what would make the team reverse this
     observed_at: str
     signal_refs: list[str] = field(default_factory=list)
+    playbook: str = ""  # the playbook key, required for source "draaiboek"
 
 
 @dataclass(frozen=True)
@@ -98,4 +103,14 @@ def validate_sell_proposal(p: SellProposal, value_by_ticker: dict[str, float]) -
             errors.append(f"{name} ontbreekt")
     if p.source == "these_breuk" and not p.signal_refs:
         errors.append("een gebroken these zonder signaal is een gevoel -- verwijs naar het signaal")
+    if p.source == "draaiboek":
+        from kompas.core.playbook import MAX_SHIFT
+
+        if not p.playbook.strip():
+            errors.append("een draaiboekverkoop moet het draaiboek noemen")
+        if not p.signal_refs:
+            errors.append("een draaiboek wordt actief door een feit -- verwijs naar het signaal dat het toont")
+        cap = MAX_SHIFT * sum(value_by_ticker.values())
+        if sold > cap + 0.01:
+            errors.append(f"een draaiboek verschuift hoogstens {MAX_SHIFT:.0%} van de portefeuille (EUR {cap:.2f})")
     return SellValidationResult(ok=not errors, errors=errors)
