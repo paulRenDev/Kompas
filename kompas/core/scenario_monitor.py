@@ -1,4 +1,4 @@
-"""The macro-scenario monitor -- four risk scenarios, checked every evening.
+"""The macro-scenario monitor -- five risk scenarios, checked every evening.
 
 Paul, 12/10/2026, after the team mapped what US rate risk and the
 geopolitical mess could do to his portfolio: "nemen jullie deze afweging mee
@@ -56,6 +56,16 @@ SCENARIOS: dict[str, tuple[str, str, str, str, str]] = {
         "de bubbelmonitor staat op opletten en de beurs zakt meer dan 5% onder zijn top",
         "de bubbelmonitor staat op alarm, of de S&P 500 staat meer dan 10% onder zijn top terwijl de 10-jaarsrente op een maand meer dan 0,4 procentpunt daalt",
         "groei en thema's dalen het hardst; wie cash heeft, kan goedkoop bijkopen; goud en defensief (HLTW, COSW) houden beter stand",
+    ),
+    # Added 19/10/2026, when riots in France pushed the OAT-Bund spread back
+    # towards its October peak: the other four look at the US, while Paul
+    # lives, saves and pays tax in the eurozone.
+    "eurozone_schuld": (
+        "Schuldstress in de eurozone",
+        "Het renteverschil tussen Franse en Duitse 10-jaarsrente (OAT-Bund), het Belgisch-Duitse verschil, de euro, en of de ECB moet ingrijpen.",
+        "het OAT-Bund-verschil boven 120 basispunten, of een Franse begroting die vastloopt",
+        "OAT-Bund-verschil slot boven 180 basispunten, of de ECB zet haar noodinstrument (TPI) in voor een land",
+        "je beleggingen zitten nauwelijks in Frankrijk: een Parijse notering (NUCL, HLTW, COSW, INRE, GOLD) is een beursplaats, geen Frans risico; een zwakkere euro maakt je dollarposities en goud in euro meer waard; Europese banken en de euro dalen het hardst",
     ),
 }
 

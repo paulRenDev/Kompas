@@ -245,7 +245,7 @@ chaos, en daarna: "nemen jullie deze afweging mee in jullie dagelijkse
 bespreking? ik wil niet te risico avers worden maar we moeten de signalen wel
 tijdig opmerken."
 
-`kompas.core.scenario_monitor` volgt vier scenario's, elk met geschreven
+`kompas.core.scenario_monitor` volgt vijf scenario's, elk met geschreven
 grenzen voor "stijgend" en "acuut": rente door inflatie en olie, vertrouwen
 in Amerikaanse schuld (het gevaarlijkste: obligaties en dollar die samen
 dalen, dan verliest een eurobelegger twee keer), olie en geopolitiek, en een
@@ -258,6 +258,13 @@ scenario of een bubbelalarm onder `HEDGE_CAP` (15% van de portefeuille).
 "Stijgend" is informatie, geen reden om meer verzekering te kopen; enkel
 "acuut" stuurt de call om. Zo let het team op zonder de portefeuille uit
 schrik in te pakken.
+
+Op 19/10 kwam er een vijfde bij: schuldstress in de eurozone. Rellen in
+Frankrijk duwden het Frans-Duitse renteverschil (OAT-Bund) terug naar zijn
+piek van begin oktober, en de vier andere scenario's keken enkel naar de VS,
+terwijl Paul in de eurozone woont, spaart en belast wordt. Stijgend boven 120
+basispunten, acuut boven 180 of als de ECB moet ingrijpen. Een Parijse
+notering is een beursplaats, geen Frans risico.
 
 Goud: de iShares Physical Gold ETC (PPFB) vond Paul niet bij MeDirect; het
 team gebruikt de Amundi Physical Gold ETC (GOLD op Euronext Parijs,

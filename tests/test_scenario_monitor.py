@@ -27,6 +27,10 @@ class TestScenarios(unittest.TestCase):
         bad = [ScenarioReading(k, "stijgend", "voelt eng", "") for k in SCENARIOS]
         self.assertFalse(validate_scenarios(_snap(readings=bad)).ok)
 
+    def test_eurozone_debt_is_watched(self):
+        self.assertIn("eurozone_schuld", SCENARIOS)
+        self.assertFalse(validate_scenarios(_snap(readings=[r for r in _snap().readings if r.key != "eurozone_schuld"])).ok)
+
     def test_missing_scenario_rejected(self):
         self.assertFalse(validate_scenarios(_snap(readings=_snap().readings[:-1])).ok)
 
