@@ -1202,6 +1202,11 @@ Deze build heeft zijn **eigen, nieuwe** artifact + database:
 
 ## Publicatiemechaniek — de validatietrio
 
+**Werkwijze (Paul, 26/10/2026):** er staat altijd een live versie die
+gelijk loopt met `main`. Elke wijziging aan `web/index.html` wordt na de
+validatie meteen gepubliceerd naar de vaste artifact-url én de PR wordt
+samengevoegd in `main` — niet het ene zonder het andere.
+
 Vóór elke publicatie van de HTML-pagina (via de `Artifact`-tool, altijd
 dezelfde vaste url):
 
