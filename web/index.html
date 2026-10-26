@@ -28,6 +28,13 @@
     --display: 'IBM Plex Sans', system-ui, sans-serif;
     --body: 'IBM Plex Sans', system-ui, sans-serif;
     --mono: 'IBM Plex Mono', ui-monospace, monospace;
+    /* Status scale (Paul, 26/10: the shades must stand apart): each step
+       differs in lightness as well as hue, so calm / watch / alert stay
+       distinct in grayscale and for colour-blind readers. */
+    --st-ok: #1F8A70;
+    --st-watch: #E8B04A;
+    --st-alert: #A3123A;
+    --st-none: #CFCCC2;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
@@ -36,6 +43,7 @@
       --brass: #D9A54B; --brass-bg: #332A16; --teal: #5FB3AB; --teal-bg: #16302D;
       --red: #E08A7A; --red-bg: #3A2320; --blue: #7FAEDB; --blue-bg: #17273A;
       --purple: #B79BE0; --purple-bg: #271B36;
+      --st-ok: #2C8C70; --st-watch: #F5C04A; --st-alert: #FF5470; --st-none: #3A4244;
       color-scheme: dark;
     }
   }
@@ -45,6 +53,7 @@
     --brass: #D9A54B; --brass-bg: #332A16; --teal: #5FB3AB; --teal-bg: #16302D;
     --red: #E08A7A; --red-bg: #3A2320; --blue: #7FAEDB; --blue-bg: #17273A;
     --purple: #B79BE0; --purple-bg: #271B36;
+      --st-ok: #2C8C70; --st-watch: #F5C04A; --st-alert: #FF5470; --st-none: #3A4244;
     color-scheme: dark;
   }
   * { box-sizing: border-box; }
@@ -75,11 +84,11 @@
   a.chip:hover { border-color: var(--border); }
   .chip .k { color: var(--dim); text-transform: uppercase; letter-spacing: .05em; font-size: 9.5px; }
 
-  .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--dim); flex: none; }
-  .s-groen, .s-laag, .s-rustig, .s-binnen, .s-up { background: var(--teal); }
-  .s-oranje, .s-stijgend, .s-opletten, .s-naderend { background: var(--brass); }
-  .s-rood, .s-acuut, .s-alarm, .s-actief, .s-down { background: var(--red); }
-  .s-waakzaam, .s-onbekend { background: var(--dim); }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--st-none); flex: none; }
+  .s-groen, .s-laag, .s-rustig, .s-binnen, .s-up { background: var(--st-ok); }
+  .s-oranje, .s-stijgend, .s-opletten, .s-naderend { background: var(--st-watch); }
+  .s-rood, .s-acuut, .s-alarm, .s-actief, .s-down { background: var(--st-alert); }
+  .s-waakzaam, .s-onbekend { background: var(--st-none); }
   .s-voorbij { background: var(--border); }
   .pill { font-family: var(--mono); font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; padding: 2px 8px; border-radius: 3px; white-space: nowrap; }
   .p-rustig, .p-laag { background: var(--teal-bg); color: var(--teal); }
@@ -93,8 +102,8 @@
   .rose .ring { fill: none; stroke: var(--border2); stroke-width: 1; }
   .rose .spoke { stroke: var(--border2); stroke-width: 1; }
   .rose .needle { stroke-width: 7; stroke-linecap: round; }
-  .rose .n-positief { stroke: var(--teal); } .rose .n-neutraal { stroke: var(--dim); } .rose .n-voorzichtig { stroke: var(--brass); }
-  .rose .tip-positief { fill: var(--teal); } .rose .tip-neutraal { fill: var(--dim); } .rose .tip-voorzichtig { fill: var(--brass); }
+  .rose .n-positief { stroke: var(--st-ok); } .rose .n-neutraal { stroke: var(--st-none); } .rose .n-voorzichtig { stroke: var(--st-watch); }
+  .rose .tip-positief { fill: var(--st-ok); } .rose .tip-neutraal { fill: var(--st-none); } .rose .tip-voorzichtig { fill: var(--st-watch); }
   .rose .hub { fill: var(--surface); stroke: var(--ink); stroke-width: 1.5; }
   .rose text { font-family: var(--mono); font-size: 12px; fill: var(--muted); }
   .rose-caption { font-family: var(--mono); font-size: 9.5px; color: var(--dim); text-align: center; margin-top: 4px; }
@@ -106,8 +115,10 @@
   .wx-row { display: grid; grid-template-columns: 9.5rem repeat(var(--days), minmax(9px, 1fr)); gap: 3px; align-items: center; }
   .wx-label { font-size: 11.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .wx-cell { height: 14px; border-radius: 2px; background: var(--border2); }
-  .wx-cell.s-groen, .wx-cell.s-laag { background: var(--teal); } .wx-cell.s-oranje, .wx-cell.s-stijgend { background: var(--brass); }
-  .wx-cell.s-rood, .wx-cell.s-acuut { background: var(--red); } .wx-cell.s-onbekend { background: var(--dim); }
+  .wx-cell.s-groen, .wx-cell.s-laag { background: var(--st-ok); } .wx-cell.s-oranje, .wx-cell.s-stijgend { background: var(--st-watch); }
+  .wx-cell.s-rood, .wx-cell.s-acuut { background: var(--st-alert); } .wx-cell.s-onbekend { background: var(--st-none); }
+  .wx-legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 11px; color: var(--muted); margin: -6px 0 18px; }
+  .wx-legend span { display: inline-flex; align-items: center; gap: 6px; }
   .wx-cell.today { outline: 2px solid var(--ink); outline-offset: 1px; }
   .wx-group { font-family: var(--mono); font-size: 9.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--dim); margin-top: 6px; }
   .wx-axis { font-family: var(--mono); font-size: 9.5px; color: var(--dim); }
@@ -270,6 +281,7 @@
       <div id="wx-block" hidden>
         <div class="block-label">Risicoweer — elke avondmeting van de laatste drie weken, de laatste omlijnd</div>
         <div class="wx" id="wx"></div>
+        <div class="wx-legend"><span><span class="dot s-groen"></span>groen / laag</span><span><span class="dot s-oranje"></span>oranje / stijgend</span><span><span class="dot s-rood"></span>rood / acuut</span><span><span class="dot"></span>niet gemeten</span></div>
       </div>
       <div id="radar-rows"></div>
     </div>
@@ -463,7 +475,7 @@
       parts.push('<text x="' + lx.toFixed(1) + '" y="' + ly.toFixed(1) + '" text-anchor="' + anchor + '">' + (ROSE_LABEL[t.key] || t.name) + '</text>');
     });
     parts.push('<circle class="hub" r="5"/>');
-    $('rose').innerHTML = '<svg class="rose" viewBox="-150 -108 300 216" role="img" aria-label="Kompasroos: waar het team staat per thema">' + parts.join('') + '</svg>';
+    $('rose').innerHTML = '<svg class="rose" viewBox="-168 -108 336 216" role="img" aria-label="Kompasroos: waar het team staat per thema">' + parts.join('') + '</svg>';
     var before = {};
     if (prev) prev.themes.forEach(function (t) { before[t.key] = t.stance; });
     $('rose-summary').textContent = 'Waarom de naalden zo staan · ' + formatDateTime(cur.observed_at);
