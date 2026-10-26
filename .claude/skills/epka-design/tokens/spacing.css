@@ -1,0 +1,59 @@
+/* ==========================================================================
+   EPKA — Spacing, radii, shadows, borders, layout
+   The brand reads clean and corporate-modern: generous whitespace,
+   restrained radii (8–14px), soft cool-grey shadows, 1px hairline borders.
+   ========================================================================== */
+
+:root {
+  /* Spacing scale (4px base) */
+  --space-0:  0;
+  --space-1:  0.25rem; /* 4 */
+  --space-2:  0.5rem;  /* 8 */
+  --space-3:  0.75rem; /* 12 */
+  --space-4:  1rem;    /* 16 */
+  --space-5:  1.5rem;  /* 24 */
+  --space-6:  2rem;    /* 32 */
+  --space-7:  2.5rem;  /* 40 */
+  --space-8:  3rem;    /* 48 */
+  --space-9:  4rem;    /* 64 */
+  --space-10: 5rem;    /* 80 */
+  --space-12: 7.5rem;  /* 120 */
+
+  /* Radii — corners are gently rounded, never pill-soft on big surfaces. */
+  --radius-xs:   4px;
+  --radius-sm:   6px;
+  --radius-md:   10px;  /* default card / input */
+  --radius-lg:   14px;  /* feature card */
+  --radius-xl:   20px;
+  --radius-pill: 999px; /* tags, avatars, small buttons */
+
+  /* Borders */
+  --border-hairline: 1px solid var(--color-border);
+  --border-strong:   1px solid var(--color-border-strong);
+  --border-dark:     1px solid var(--color-border-dark);
+  --border-width:    1px;
+
+  /* Shadows — cool, soft, low-spread. Petrol-tinted rather than pure black. */
+  --shadow-xs: 0 1px 2px rgba(11, 43, 54, 0.06);
+  --shadow-sm: 0 1px 3px rgba(11, 43, 54, 0.08), 0 1px 2px rgba(11, 43, 54, 0.05);
+  --shadow-md: 0 4px 12px rgba(11, 43, 54, 0.08), 0 2px 4px rgba(11, 43, 54, 0.05);
+  --shadow-lg: 0 12px 28px rgba(11, 43, 54, 0.12), 0 4px 8px rgba(11, 43, 54, 0.06);
+  --shadow-xl: 0 24px 56px rgba(11, 43, 54, 0.16);
+  --shadow-coral: 0 8px 22px rgba(252, 76, 80, 0.30); /* lifted coral CTA */
+  --ring-focus: 0 0 0 3px rgba(252, 76, 80, 0.35);
+
+  /* Layout */
+  --container-sm:  640px;
+  --container-md:  840px;
+  --container-lg:  1100px;
+  --container-xl:  1320px;
+  --gutter:        var(--space-6);
+  --section-y:     var(--space-12);
+
+  /* Motion — quiet, confident easing. Short, no bounce. */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);  /* @kind other */
+  --ease-out:      cubic-bezier(0.16, 1, 0.3, 1); /* @kind other */
+  --duration-fast: 120ms; /* @kind other */
+  --duration-base: 200ms; /* @kind other */
+  --duration-slow: 360ms; /* @kind other */
+}

@@ -1,0 +1,74 @@
+/* ==========================================================================
+   EPKA — Colour tokens
+   Sampled from the EPKA logo (#0B2B36 petrol ink, #FC4C50 coral network mark)
+   and the portfolio deck (slate body, teal + gold supporting accents).
+   ========================================================================== */
+
+:root {
+  /* --- Brand: petrol ink ------------------------------------------------ */
+  --epka-ink:        #0B2B36; /* logo wordmark — primary dark, headings, dark surfaces */
+  --epka-ink-soft:   #16404C; /* lifted petrol — secondary dark surfaces, hovers on dark */
+  --epka-ink-line:   #25525E; /* hairline / border on dark petrol */
+
+  /* --- Brand: coral (the network mark) ---------------------------------- */
+  --epka-coral:        #FC4C50; /* primary accent — CTAs, marks, highlights */
+  --epka-coral-strong: #E63A3E; /* hover / pressed */
+  --epka-coral-deep:   #C32C30; /* text-on-light coral that stays AA legible */
+  --epka-coral-soft:   #FFE9E8; /* tint surface */
+
+  /* --- Brand: supporting accents (from the data viz) -------------------- */
+  --epka-teal:      #1B8A7A; /* secondary accent — positive, retention, success */
+  --epka-teal-soft: #E1F0ED;
+  --epka-gold:      #F0E199; /* warm highlight — callouts, sand band */
+  --epka-gold-soft: #FBF5DC;
+
+  /* --- Neutrals: cool grey ramp ---------------------------------------- */
+  --epka-white:    #FFFFFF;
+  --epka-paper:    #F7F8F9; /* page background */
+  --epka-mist:     #F1F3F4; /* subtle filled surface */
+  --epka-cloud:    #E5E7EB; /* borders, dividers */
+  --epka-steel:    #9CA3AF; /* faint text, disabled, icon ghost */
+  --epka-slate:    #6B7280; /* secondary / muted text */
+  --epka-graphite: #374151; /* body text */
+
+  /* ======================================================================
+     Semantic aliases — reference these in components, not the raw ramp.
+     ====================================================================== */
+
+  /* Surfaces */
+  --color-bg:            var(--epka-paper);
+  --color-surface:       var(--epka-white);
+  --color-surface-sunken:var(--epka-mist);
+  --color-surface-dark:  var(--epka-ink);
+  --color-surface-dark-2:var(--epka-ink-soft);
+
+  /* Text */
+  --text-strong:  var(--epka-ink);      /* headings */
+  --text-body:    var(--epka-graphite); /* paragraph copy */
+  --text-muted:   var(--epka-slate);    /* secondary, labels */
+  --text-faint:   var(--epka-steel);    /* meta, placeholder */
+  --text-on-dark: var(--epka-white);
+  --text-on-dark-muted: rgba(255,255,255,0.68);
+
+  /* Borders */
+  --color-border:        var(--epka-cloud);
+  --color-border-strong: #D1D5DB;
+  --color-border-dark:   var(--epka-ink-line);
+
+  /* Brand roles */
+  --brand-primary:       var(--epka-coral);
+  --brand-primary-hover: var(--epka-coral-strong);
+  --brand-primary-text:  var(--epka-coral-deep); /* coral as readable text on light */
+  --brand-ink:           var(--epka-ink);
+  --brand-teal:          var(--epka-teal);
+  --brand-gold:          var(--epka-gold);
+
+  /* Feedback */
+  --color-success: var(--epka-teal);
+  --color-danger:  var(--epka-coral-strong);
+  --color-warning: #D98B1F;
+
+  /* Interaction */
+  --focus-ring: var(--epka-coral);
+  --selection-bg: var(--epka-coral-soft);
+}
