@@ -270,6 +270,56 @@ Goud: de iShares Physical Gold ETC (PPFB) vond Paul niet bij MeDirect; het
 team gebruikt de Amundi Physical Gold ETC (GOLD op Euronext Parijs,
 FR0013416716), bij Bolero te koop. PPFB staat in `KNOWN_UNTRADABLE`.
 
+## Vorm en communicatie: herontwerp door Studio Helder (26/10/2026)
+
+Paul, 26/10: "ik zou graag een apart team laten opzetten die het concept
+herbekijkt zodat we relevant kunnen blijven en de dames van finance
+intelligence kunnen shinen. [...] de inhoud zal bepaald worden door de dames
+van finance intelligence. dit is vorm en innovatieve communicatie."
+
+Studio Helder is een tweede, gemengd team, enkel voor vorm: Lotte
+(informatieontwerp, leidt), Jonas (eindredactie), Amira (data en
+kleurcodes), Ruben (multimedia en nieuwe formats) en Noor (spreekt voor de
+lezer en is het kritischst). Ze raken geen inhoud aan: geen cijfer, bron of
+oordeel van Vera, Naomi, Mila en Farah.
+
+Hun lezing van de pagina, met Pauls punten als vertrekpunt:
+- Er ontbrak een antwoord op "moet ik vandaag iets weten?". Nu opent de
+  pagina met "In één oogopslag": de koopsuggestie in één zin, en vier
+  bolletjes (AI-bubbel, risico's, draaiboeken, portefeuille vandaag) die
+  naar hun sectie springen.
+- De koopsuggestie toont eerst de eerste zin en "vervalt als"; de volledige
+  redenering en wat het team afwoog zitten onder een klik.
+- Synthese ("big fan") staat hoog, direct na de suggestie.
+- "Conflict zichtbaar gehouden" was ondergesneeuwd onderaan; nu heet het
+  "Waar de signalen botsen" en staat het direct na de synthese.
+- AI-bubbelmonitor en risicoscenario's zijn samen de "Risicoradar": per
+  instrument één rij gekleurde bolletjes met de notitie. Het bewijs en de
+  bronnen staan onder "Waarom, met bronnen". De drempels en de
+  fundamenten veranderen niet.
+- Draaiboeken: enkel wat naderend of actief is, staat open; de rest zit
+  onder "Op de radar". Zie hieronder voor de inhoudelijke kant.
+- "Het team over je portefeuille" staat onderaan; de teamverdeling is
+  ingeklapt.
+- Signalen buiten de spotlight zitten onder "Overige signalen".
+
+Voor het finance-team (inhoud, op Pauls vraag): nieuwe draaiboeken komen
+niet meer uit een vaste lijst "wat als"-voorbeelden. Ze ontstaan uit een
+botsing tussen signalen (twee lezingen: als A klopt, dan dit; als B, dan
+dat) of uit een gedateerd moment dat binnen ongeveer een maand iets raakt
+wat Paul bezit. Een draaiboek beschrijft wat de beurs doet, nooit of een
+uitkomst goed is. Paul: "i care about freedom en democratie" -- een
+uitslag die de beurs niet bevalt, kan er een zijn die hij toejuicht.
+
+Wat Studio Helder nog voorstelt, niet gebouwd (Open vragen):
+- een trackrecord van de koopsuggesties: wat deed elke suggestie sinds ze
+  gegeven werd, ook de mislukte. Geen enkele nieuwsbrief toont dat eerlijk,
+  en het is het sterkste argument voor een award;
+- een wekelijkse "Kompas op zondag": vijf zinnen over de week, voor wie
+  doordeweeks niet kijkt;
+- een middagronde op weekdagen die enkel grenzen bewaakt en alleen bij een
+  overschrijding een pushmelding stuurt (wacht op Pauls akkoord).
+
 ## Draaiboeken: wat als... (19/10/2026)
 
 Paul, nadat het team toegaf dat enkel de AI-bubbel een uitgeschreven plan

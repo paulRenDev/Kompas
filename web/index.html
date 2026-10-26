@@ -1,7 +1,12 @@
 <title>Kompas</title>
-<meta name="description" content="Signalenfeed voor Paul, met het oordeel van het team over zijn portefeuille — de posities zelf staan in de Google Sheet en worden hier niet herhaald.">
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Kompas: het oordeel van het team over de markten en Pauls portefeuille, kort bovenaan en in detail eronder. De posities zelf staan in de Google Sheet en worden hier niet herhaald.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap">
 <style>
+  /* Layout: a morning paper. The brief answers "moet ik iets weten?" in one
+     glance; the team's thinking (call, synthesis, where signals clash)
+     follows; risk instruments and the portfolio sit lower, compact, with
+     the detail one tap away. */
   :root {
     --bg: #F5F5F0;
     --surface: #FFFFFF;
@@ -26,241 +31,264 @@
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --bg: #14181A;
-      --surface: #1B2023;
-      --border: #303738;
-      --border2: #262C2D;
-      --ink: #EDEAE2;
-      --muted: #A8ACA9;
-      --dim: #6E7674;
-      --brass: #D9A54B;
-      --brass-bg: #332A16;
-      --teal: #5FB3AB;
-      --teal-bg: #16302D;
-      --red: #E08A7A;
-      --red-bg: #3A2320;
-      --blue: #7FAEDB;
-      --blue-bg: #17273A;
-      --purple: #B79BE0;
-      --purple-bg: #271B36;
+      --bg: #14181A; --surface: #1B2023; --border: #303738; --border2: #262C2D;
+      --ink: #EDEAE2; --muted: #A8ACA9; --dim: #6E7674;
+      --brass: #D9A54B; --brass-bg: #332A16; --teal: #5FB3AB; --teal-bg: #16302D;
+      --red: #E08A7A; --red-bg: #3A2320; --blue: #7FAEDB; --blue-bg: #17273A;
+      --purple: #B79BE0; --purple-bg: #271B36;
+      color-scheme: dark;
     }
   }
   :root[data-theme="dark"] {
-    --bg: #14181A;
-    --surface: #1B2023;
-    --border: #303738;
-    --border2: #262C2D;
-    --ink: #EDEAE2;
-    --muted: #A8ACA9;
-    --dim: #6E7674;
-    --brass: #D9A54B;
-    --brass-bg: #332A16;
-    --teal: #5FB3AB;
-    --teal-bg: #16302D;
-    --red: #E08A7A;
-    --red-bg: #3A2320;
-    --blue: #7FAEDB;
-    --blue-bg: #17273A;
-    --purple: #B79BE0;
-    --purple-bg: #271B36;
+    --bg: #14181A; --surface: #1B2023; --border: #303738; --border2: #262C2D;
+    --ink: #EDEAE2; --muted: #A8ACA9; --dim: #6E7674;
+    --brass: #D9A54B; --brass-bg: #332A16; --teal: #5FB3AB; --teal-bg: #16302D;
+    --red: #E08A7A; --red-bg: #3A2320; --blue: #7FAEDB; --blue-bg: #17273A;
+    --purple: #B79BE0; --purple-bg: #271B36;
+    color-scheme: dark;
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); }
-  .wrap { max-width: 900px; margin: 0 auto; padding: 28px 20px 80px; }
-  .statusbar { background: #1A1A1A; color: #fff; font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; padding: 8px 14px; border-radius: 6px; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
-  .statusbar .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--teal); flex: none; }
-  header { border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 16px; }
-  .eyebrow { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; color: var(--teal); }
-  h1 { font-weight: 300; font-size: 26px; margin: 4px 0 0; }
-  .meta-line { font-family: var(--mono); font-size: 11px; color: var(--dim); margin-top: 6px; }
-  section { margin-bottom: 32px; }
-  .section-label { font-size: 10px; font-family: var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-  .spotlight-card { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--purple); border-radius: 8px; padding: 16px 18px; margin-bottom: 14px; }
-  .spotlight-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 6px; flex-wrap: wrap; }
-  .spotlight-subject { font-weight: 600; font-size: 15px; }
-  .spotlight-roles { font-family: var(--mono); font-size: 9.5px; color: var(--dim); margin-bottom: 10px; }
+  .wrap { max-width: 860px; margin: 0 auto; padding-block: 24px 80px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  a { color: var(--teal); }
+  :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: 3px; }
+
+  header { padding-bottom: 14px; margin-bottom: 18px; border-bottom: 1px solid var(--border); }
+  .eyebrow { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; color: var(--teal); text-transform: uppercase; }
+  h1 { font-weight: 300; font-size: 26px; margin: 4px 0 0; text-wrap: balance; }
+  .meta-line { font-family: var(--mono); font-size: 11px; color: var(--dim); margin-top: 6px; line-height: 1.5; }
+
+  section { margin-bottom: 30px; }
+  .section-label { font-size: 10px; font-family: var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; min-width: 0; }
+  .empty { color: var(--dim); font-size: 13px; padding: 4px 0; }
+  .lede { font-size: 15px; line-height: 1.55; margin: 0; max-width: 65ch; }
+  .prose { font-size: 13.5px; line-height: 1.6; color: var(--ink); margin: 0; max-width: 68ch; }
+  .fine { font-family: var(--mono); font-size: 10px; color: var(--dim); line-height: 1.6; }
+
+  /* Brief: the one-glance answer */
+  .brief { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px; display: grid; gap: 14px; }
+  .brief-kicker { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--dim); }
+  .brief-head { font-size: 19px; font-weight: 500; line-height: 1.35; margin: 2px 0 0; text-wrap: balance; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { display: inline-flex; align-items: center; gap: 7px; font-family: var(--mono); font-size: 11px; color: var(--ink); background: var(--bg); border: 1px solid var(--border2); border-radius: 999px; padding: 5px 11px; text-decoration: none; font-variant-numeric: tabular-nums; }
+  a.chip:hover { border-color: var(--border); }
+  .chip .k { color: var(--dim); text-transform: uppercase; letter-spacing: .05em; font-size: 9.5px; }
+
+  .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--dim); flex: none; }
+  .s-groen, .s-laag, .s-rustig, .s-binnen, .s-up { background: var(--teal); }
+  .s-oranje, .s-stijgend, .s-opletten, .s-naderend { background: var(--brass); }
+  .s-rood, .s-acuut, .s-alarm, .s-actief, .s-down { background: var(--red); }
+  .s-waakzaam, .s-onbekend { background: var(--dim); }
+  .s-voorbij { background: var(--border); }
+  .pill { font-family: var(--mono); font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; padding: 2px 8px; border-radius: 3px; white-space: nowrap; }
+  .p-rustig, .p-laag { background: var(--teal-bg); color: var(--teal); }
+  .p-opletten, .p-stijgend, .p-naderend { background: var(--brass-bg); color: var(--brass); }
+  .p-alarm, .p-acuut, .p-actief { background: var(--red-bg); color: var(--red); }
+  .p-waakzaam, .p-voorbij { background: var(--border2); color: var(--muted); }
+
+  /* Call */
+  .call { border-color: var(--teal); }
+  .call-head { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: baseline; margin-bottom: 8px; }
+  .call-subject { font-size: 18px; font-weight: 600; }
+  .action { font-family: var(--mono); font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 3px; }
+  .action.nieuwe_positie { background: var(--teal-bg); color: var(--teal); }
+  .action.verhoog_bestaand { background: var(--blue-bg); color: var(--blue); }
+  .action.wacht { background: var(--border2); color: var(--muted); }
+  .kv { display: grid; grid-template-columns: max-content minmax(0,1fr); gap: 6px 12px; margin: 12px 0 0; font-size: 12.5px; line-height: 1.5; }
+  .kv dt { font-family: var(--mono); font-size: 9.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--dim); padding-top: 2px; }
+  .kv dd { margin: 0; color: var(--muted); min-width: 0; }
+
+  details { margin-top: 10px; }
+  summary { cursor: pointer; font-family: var(--mono); font-size: 10.5px; color: var(--teal); list-style: none; display: inline-flex; gap: 6px; align-items: center; }
+  summary::-webkit-details-marker { display: none; }
+  summary::before { content: "+"; font-weight: 600; }
+  details[open] > summary::before { content: "–"; }
+  details > .more { margin-top: 10px; display: grid; gap: 10px; }
+
+  /* Synthesis */
+  .synthesis-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; margin-bottom: 12px; }
+  .subject { font-weight: 600; font-size: 15px; margin-bottom: 6px; }
+  .red-team { background: var(--red-bg); border-radius: 6px; padding: 10px 12px; margin-top: 10px; }
+  .block-label { font-family: var(--mono); font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--dim); margin-bottom: 4px; }
+  .red-team .block-label { color: var(--red); }
+  .verdict { font-family: var(--mono); font-size: 10px; font-weight: 700; margin-top: 6px; }
+
+  /* Where signals clash */
+  .fork { background: var(--surface); border: 1px solid var(--brass); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; display: grid; gap: 8px; }
+  .fork-head { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; align-items: baseline; }
+  .fork-label { font-family: var(--mono); font-size: 9.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--brass); }
+
+  /* Signals */
+  .spotlight-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; margin-bottom: 12px; }
+  .spotlight-roles { font-family: var(--mono); font-size: 9.5px; color: var(--dim); margin-bottom: 8px; }
   .spotlight-item { border-top: 1px solid var(--border2); padding-top: 10px; margin-top: 10px; }
   .spotlight-item:first-of-type { border-top: none; padding-top: 0; margin-top: 0; }
-  .item-text { font-size: 13.5px; color: var(--ink); line-height: 1.55; margin: 4px 0 8px; }
+  .item-text { font-size: 13.5px; line-height: 1.55; margin: 4px 0 8px; max-width: 68ch; }
   .fact-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; background: var(--bg); border-radius: 6px; padding: 10px 12px; margin-bottom: 6px; }
   .fact-label { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--dim); margin-bottom: 2px; }
-  .fact-value { font-size: 12px; color: var(--ink); line-height: 1.4; }
-  .tags { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 6px; }
+  .fact-value { font-size: 12px; line-height: 1.4; min-width: 0; overflow-wrap: anywhere; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 6px; }
   .tags-label { font-family: var(--mono); font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--dim); }
   .tag { font-family: var(--mono); font-size: 10.5px; padding: 2px 7px; border-radius: 3px; background: var(--bg); border: 1px solid var(--border2); color: var(--muted); }
-  .role-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; }
-  @media (max-width: 720px) { .role-grid, .fact-grid { grid-template-columns: 1fr; } }
-  .role-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
-  .role-name { font-weight: 600; font-size: 13.5px; margin-bottom: 8px; }
+  .role-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+  .role-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; min-width: 0; }
+  .role-name { font-weight: 600; font-size: 13px; margin-bottom: 6px; }
   .role-item { padding: 9px 0; border-top: 1px solid var(--border2); }
   .role-item:first-of-type { border-top: none; }
   .role-item-head { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
   .role-item-name { font-weight: 500; font-size: 13px; }
   .role-item-text { font-size: 12.5px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
-  .role-item-meta { font-family: var(--mono); font-size: 9.5px; color: var(--dim); margin-top: 5px; line-height: 1.5; }
+  .meta { font-family: var(--mono); font-size: 9.5px; color: var(--dim); margin-top: 5px; line-height: 1.5; overflow-wrap: anywhere; }
   .badge { font-family: var(--mono); font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 3px; white-space: nowrap; }
   .badge-hoog { background: var(--teal-bg); color: var(--teal); }
   .badge-voorlopig { background: var(--blue-bg); color: var(--blue); }
   .badge-speculatief { background: var(--brass-bg); color: var(--brass); }
-  .conflict-card { background: var(--brass-bg); border: 1px solid var(--brass); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
-  .conflict-head { font-family: var(--mono); font-size: 10px; font-weight: 700; color: var(--brass); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
-  .conflict-body { font-size: 13px; color: var(--ink); line-height: 1.5; }
-  .synthesis-card { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--teal); border-radius: 8px; padding: 16px 18px; margin-bottom: 14px; }
-  .synthesis-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 8px; }
-  .synthesis-subject { font-weight: 600; font-size: 15px; }
-  .synthesis-block-label { font-family: var(--mono); font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--dim); margin: 10px 0 4px; }
-  .synthesis-narrative { font-size: 13.5px; color: var(--ink); line-height: 1.6; }
-  .red-team-box { background: var(--red-bg); border: 1px solid var(--red); border-radius: 6px; padding: 10px 12px; margin-top: 4px; }
-  .red-team-box .synthesis-block-label { color: var(--red); margin-top: 0; }
-  .red-team-verdict { font-family: var(--mono); font-size: 10px; font-weight: 700; margin-top: 6px; }
-  .capital-view { border-left: 3px solid var(--border2); padding: 6px 0 6px 10px; margin-top: 8px; }
-  .capital-view-head { display: flex; align-items: baseline; gap: 6px; margin-bottom: 3px; }
-  .capital-view-label { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--dim); }
-  .capital-view-action { font-family: var(--mono); font-size: 10.5px; font-weight: 700; padding: 1px 6px; border-radius: 3px; }
-  .capital-view-action.nieuwe_positie { background: var(--teal-bg); color: var(--teal); }
-  .capital-view-action.verhoog_bestaand { background: var(--blue-bg); color: var(--blue); }
-  .capital-view-action.wacht { background: var(--border2); color: var(--muted); }
-  .capital-view-reasoning { font-size: 12px; color: var(--muted); line-height: 1.5; }
-  .empty { color: var(--dim); font-size: 13px; padding: 4px 0; }
-  .pf-roundup { font-size: 13.5px; line-height: 1.6; color: var(--ink); margin: 0 0 14px; }
-  .sleeve { display: grid; grid-template-columns: minmax(0,1fr) auto auto; gap: 4px 12px; align-items: baseline; padding: 7px 0; border-top: 1px solid var(--border2); }
+  @media (max-width: 640px) { .fact-grid { grid-template-columns: 1fr; } }
+
+  /* Risk radar: one row per instrument, detail on demand */
+  .radar-row { display: grid; grid-template-columns: 9.5rem minmax(0,1fr); gap: 8px 14px; align-items: start; padding: 12px 0; border-top: 1px solid var(--border2); }
+  .radar-row:first-child { border-top: none; padding-top: 0; }
+  .radar-name { font-weight: 500; font-size: 13px; display: grid; gap: 4px; justify-items: start; }
+  .radar-dots { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 12px; color: var(--muted); }
+  .radar-dots span { display: inline-flex; gap: 6px; align-items: center; }
+  .radar-note { grid-column: 1 / -1; font-size: 12.5px; color: var(--muted); line-height: 1.5; margin: 0; }
+  .radar-more { grid-column: 1 / -1; }
+  .detail-row { padding: 8px 0; border-top: 1px solid var(--border2); font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .detail-row strong { color: var(--ink); font-weight: 500; }
+  @media (max-width: 560px) { .radar-row { grid-template-columns: 1fr; } }
+
+  /* Playbooks */
+  .pb { padding: 12px 0; border-top: 1px solid var(--border2); display: grid; gap: 6px; }
+  .pb:first-child { border-top: none; padding-top: 0; }
+  .pb-title { display: flex; gap: 8px; align-items: baseline; font-weight: 500; font-size: 13.5px; line-height: 1.45; }
+  .pb-cols { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+  .pb-cols ul { margin: 2px 0 0; padding-left: 16px; font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .pb-reason { font-size: 12.5px; color: var(--muted); }
+  @media (max-width: 560px) { .pb-cols { grid-template-columns: 1fr; } }
+
+  /* Portfolio */
+  .sleeve { display: grid; grid-template-columns: minmax(0,1fr) auto auto; gap: 4px 12px; align-items: baseline; padding: 7px 0; border-top: 1px solid var(--border2); font-variant-numeric: tabular-nums; }
   .sleeve-name { font-weight: 500; font-size: 13px; }
   .sleeve-range, .sleeve-now { font-family: var(--mono); font-size: 11px; color: var(--muted); text-align: right; white-space: nowrap; }
   .sleeve-why { grid-column: 1 / -1; font-size: 12px; color: var(--muted); line-height: 1.5; }
-  .bm-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 7px; vertical-align: 1px; background: var(--dim); }
-  .bm-groen, .bm-laag { background: var(--teal); } .bm-oranje, .bm-stijgend { background: var(--brass); } .bm-rood, .bm-acuut { background: var(--red); } .bm-waakzaam { background: var(--dim); } .bm-naderend { background: var(--brass); } .bm-actief { background: var(--red); } .bm-voorbij { background: var(--border2); }
-  .pb-moves { margin: 4px 0 0; padding-left: 16px; } .pb-moves li { margin: 2px 0; } .pb-head { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: .04em; color: var(--dim); margin-top: 6px; }
-  .bm-level { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
-  .bm-level.rustig { color: var(--teal); } .bm-level.opletten { color: var(--brass); } .bm-level.alarm { color: var(--red); }
-  .st-onder { color: var(--muted); }
-  .st-boven { color: var(--brass); }
-  .st-binnen { color: var(--teal); }
-  .pf-targets { font-family: var(--mono); font-size: 10px; color: var(--dim); margin-top: 10px; line-height: 1.6; }
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px; }
-  footer { border-top: 1px solid var(--border); padding-top: 18px; margin-top: 8px; font-family: var(--mono); font-size: 11px; color: var(--dim); line-height: 1.7; }
-  footer a { color: var(--teal); }
-  @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+  .st-onder { color: var(--muted); } .st-boven { color: var(--brass); } .st-binnen { color: var(--teal); }
+  @media (max-width: 480px) { .sleeve { grid-template-columns: minmax(0,1fr); } .sleeve-range, .sleeve-now { text-align: left; } }
+
+  .sell { border-color: var(--red); }
+  footer { border-top: 1px solid var(--border); padding-top: 16px; margin-top: 8px; font-family: var(--mono); font-size: 11px; color: var(--dim); line-height: 1.7; }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 </style>
 
 <div class="wrap">
-  <div class="statusbar"><span class="dot"></span>KOMPAS — LIVE SIGNALENFEED, ECHTE DATA UIT DE DATABASE</div>
-
   <header>
-    <div class="eyebrow">KOMPAS</div>
-    <h1>Signalen &amp; watchlist</h1>
-    <div class="meta-line" id="last-signal-line">laatste signaal: wordt geladen…</div>
-    <div class="meta-line" id="last-cycle-line"></div>
-    <div class="meta-line" id="capital-call-ratio"></div>
+    <div class="eyebrow">Kompas · finance intelligence</div>
+    <h1 id="page-date">Vandaag bij het team</h1>
+    <div class="meta-line" id="last-cycle-line">team keek laatst: wordt geladen…</div>
   </header>
 
-  <section id="sell-section" style="display:none;">
-    <div class="section-label"><span>Het team stelt een verschuiving voor</span><span id="sell-stamp"></span></div>
-    <div class="card" id="sell-card" style="border-color: var(--red);"></div>
+  <section id="brief-section" aria-label="In één oogopslag">
+    <div class="brief">
+      <div>
+        <div class="brief-kicker">In één oogopslag</div>
+        <p class="brief-head" id="brief-head">Wordt geladen…</p>
+      </div>
+      <div class="chips" id="brief-chips"></div>
+    </div>
   </section>
 
-  <section id="capital-call-section" style="display:none;">
-    <div class="section-label"><span>Als het team nu geld vrij had</span><span>Paul beslist zelf of hij dit volgt</span></div>
+  <section id="sell-section" hidden>
+    <div class="section-label"><span>Het team stelt een verschuiving voor</span><span id="sell-stamp"></span></div>
+    <div class="card sell" id="sell-card"></div>
+  </section>
+
+  <section id="capital-call-section" hidden>
+    <div class="section-label"><span>Als het team nu geld vrij had</span><span>jij beslist zelf</span></div>
     <div id="capital-call-card"></div>
   </section>
 
-  <section id="portfolio-section" style="display:none;">
-    <div class="section-label"><span>Het team over je portefeuille</span><span id="portfolio-stamp"></span></div>
-    <div class="card">
-      <p class="pf-roundup" id="portfolio-roundup" style="display:none;"></p>
-      <div class="pf-targets" id="portfolio-freshness"></div>
-      <div id="allocation-block" style="display:none;">
-        <div class="synthesis-block-label">Teamverdeling — vangrail, geen takenlijst</div>
-        <p class="pf-roundup" id="allocation-narrative"></p>
-        <div id="allocation-sleeves"></div>
-        <div class="pf-targets" id="allocation-trigger"></div>
-      </div>
-    </div>
-  </section>
-
-  <section id="bubble-section" style="display:none;">
-    <div class="section-label"><span>AI-bubbelmonitor</span><span id="bubble-stamp"></span></div>
-    <div class="card">
-      <p class="pf-roundup" id="bubble-note"></p>
-      <div id="bubble-rows"></div>
-      <div class="pf-targets">Zes vaste indicatoren, elke avond nagekeken. Rustig, opletten (1 rood of 3 oranje) of alarm (3 rood).<br>Afgesproken plan bij alarm: een derde van IWDA naar value (IWVL) en goud (Amundi Physical Gold, GOLD op Parijs), half om half. Terug naar IWDA na 20 beursdagen rustig, of als de Nasdaq-100 meer dan 30% onder zijn top staat. Jij voert uit.</div>
-    </div>
-  </section>
-
-  <section id="scenario-section" style="display:none;">
-    <div class="section-label"><span>Risicoscenario's</span><span id="scenario-stamp"></span></div>
-    <div class="card">
-      <p class="pf-roundup" id="scenario-note"></p>
-      <div id="scenario-rows"></div>
-      <div class="pf-targets">Vijf scenario's, elke avond nagekeken: laag, stijgend of acuut. Pas bij acuut stuurt het team de call om. Verzekering (goud, kasreserve) blijft daarbuiten onder 15% van je portefeuille, zodat je niet te voorzichtig wordt.</div>
-    </div>
-  </section>
-
-  <section id="playbook-section" style="display:none;">
-    <div class="section-label"><span>Draaiboeken — wat als…</span><span id="playbook-stamp"></span></div>
-    <div class="card">
-      <div id="playbook-rows"></div>
-      <div class="pf-targets">Vooraf uitgeschreven, elke avond bijgewerkt: waakzaam, naderend, actief of voorbij. Elk draaiboek zegt hoe je ongeschonden blijft én waar de kans ligt. Pas als de gebeurtenis echt plaatsvindt (actief) mag het team een verschuiving voorstellen, hoogstens 20% van je portefeuille en altijd met een weg terug. Jij beslist en handelt zelf.</div>
-    </div>
-  </section>
-
-  <section id="synthesis-section" style="display:none;">
-    <div class="section-label"><span>Synthese — samengebracht, dan aangevallen</span><span>Vera verzamelt, Farah probeert het onderuit te halen</span></div>
+  <section id="synthesis-section" hidden>
+    <div class="section-label"><span>Synthese — samengebracht, dan aangevallen</span><span>Vera verzamelt, Farah valt aan</span></div>
     <div id="synthesis-list"></div>
   </section>
 
-  <section>
-    <div class="section-label"><span>Sector-specialistenpool — spotlight</span><span>verbanden die je zelf niet meteen ziet</span></div>
-    <div id="spotlight-list"></div>
-  </section>
-
-  <section>
-    <div class="section-label"><span>Signalenmotor — overige rollen</span></div>
-    <div id="role-grid"></div>
-  </section>
-
-  <section id="conflict-section" style="display:none;">
-    <div class="section-label"><span>Conflict zichtbaar gehouden — niet gemiddeld</span></div>
+  <section id="conflict-section" hidden>
+    <div class="section-label"><span>Waar de signalen botsen</span><span>niet uitgemiddeld</span></div>
     <div id="conflict-list"></div>
   </section>
 
+  <section id="signals">
+    <div class="section-label"><span>Signalen — waar specialisten elkaar kruisen</span><span>verbanden die je zelf niet meteen ziet</span></div>
+    <div id="spotlight-list"></div>
+    <details id="roles-details" hidden>
+      <summary id="roles-summary">Overige signalen</summary>
+      <div class="more"><div id="role-grid"></div></div>
+    </details>
+  </section>
+
+  <section id="risico" hidden>
+    <div class="section-label"><span>Risicoradar</span><span id="radar-stamp"></span></div>
+    <div class="card">
+      <div id="radar-rows"></div>
+    </div>
+  </section>
+
+  <section id="draaiboeken" hidden>
+    <div class="section-label"><span>Draaiboeken — wat als…</span><span id="playbook-stamp"></span></div>
+    <div class="card">
+      <div id="playbook-rows"></div>
+      <details id="radar-playbooks" hidden>
+        <summary id="radar-playbooks-summary">Op de radar</summary>
+        <div class="more" id="radar-playbook-rows"></div>
+      </details>
+      <p class="fine" style="margin:12px 0 0;">Alleen als de gebeurtenis echt plaatsvindt (actief) mag het team een verschuiving voorstellen: hoogstens 20% van je portefeuille, altijd met een weg terug. Een draaiboek beschrijft wat de beurs doet, geen oordeel over de uitkomst zelf.</p>
+    </div>
+  </section>
+
+  <section id="portefeuille" hidden>
+    <div class="section-label"><span>Het team over je portefeuille</span><span id="portfolio-stamp"></span></div>
+    <div class="card">
+      <p class="prose" id="portfolio-roundup" hidden></p>
+      <p class="fine" id="portfolio-freshness" style="margin:8px 0 0;"></p>
+      <details id="allocation-block" hidden>
+        <summary>Teamverdeling — vangrail, geen takenlijst</summary>
+        <div class="more">
+          <p class="prose" id="allocation-narrative"></p>
+          <div id="allocation-sleeves"></div>
+          <p class="fine" id="allocation-trigger" style="margin:0;"></p>
+        </div>
+      </details>
+    </div>
+  </section>
+
   <footer>
+    <div id="last-signal-line">laatste signaal: wordt geladen…</div>
+    <div id="capital-call-ratio"></div>
     <a href="https://github.com/paulRenDev/kompas">paulRenDev/kompas</a>
   </footer>
 </div>
 
 <script>
 (function () {
+  function $(id) { return document.getElementById(id); }
+
   // Mirrors kompas/pijler_a/spotlight.py -- keep the two in sync.
-  function groupBySubject(events) {
+  function groupBy(events, key) {
     var groups = {};
-    events.forEach(function (e) {
-      (groups[e.subject] = groups[e.subject] || []).push(e);
-    });
+    events.forEach(function (e) { (groups[e[key]] = groups[e[key]] || []).push(e); });
     return groups;
   }
 
   function crossSpecialistSubjects(events) {
-    var groups = groupBySubject(events);
+    var groups = groupBy(events, 'subject');
     var subjects = Object.keys(groups).filter(function (s) {
       var roles = {};
       groups[s].forEach(function (e) { roles[e.role] = true; });
       return Object.keys(roles).length >= 2;
     });
-    subjects.sort(function (a, b) {
-      function latest(s) {
-        return groups[s].reduce(function (m, e) { return e.observed_at > m ? e.observed_at : m; }, '');
-      }
-      return latest(b) < latest(a) ? -1 : (latest(b) > latest(a) ? 1 : 0);
-    });
+    function latest(s) { return groups[s].reduce(function (m, e) { return e.observed_at > m ? e.observed_at : m; }, ''); }
+    subjects.sort(function (a, b) { return latest(b) < latest(a) ? -1 : (latest(b) > latest(a) ? 1 : 0); });
     return subjects;
-  }
-
-  function groupByRole(events) {
-    var groups = {};
-    events.forEach(function (e) {
-      (groups[e.role] = groups[e.role] || []).push(e);
-    });
-    return groups;
   }
 
   function confidenceBadge(level) {
@@ -270,17 +298,20 @@
   }
 
   var MONTHS_NL = ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
+  var MONTHS_LONG = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december'];
+  var DAYS_NL = ['Zondag', 'Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag'];
 
   function formatDateTime(iso) {
     var d = new Date(iso);
-    if (isNaN(d.getTime())) return iso;
-    var day = d.getDate();
-    var month = MONTHS_NL[d.getMonth()];
-    var year = d.getFullYear();
-    var hh = String(d.getHours()).padStart(2, '0');
-    var mm = String(d.getMinutes()).padStart(2, '0');
-    return day + ' ' + month + ' ' + year + ', ' + hh + ':' + mm;
+    if (isNaN(d.getTime())) return iso || '';
+    return d.getDate() + ' ' + MONTHS_NL[d.getMonth()] + ' ' + d.getFullYear() + ', ' +
+      String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
   }
+
+  (function () {
+    var d = new Date();
+    $('page-date').textContent = DAYS_NL[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS_LONG[d.getMonth()];
+  })();
 
   function ageLabel(observedAt) {
     var then = new Date(observedAt).getTime();
@@ -294,218 +325,310 @@
   function ageBadge(observedAt) {
     var days = Math.floor((Date.now() - new Date(observedAt).getTime()) / 86400000);
     var stale = days >= 3;
-    var style = stale ? ' style="color:var(--brass)"' : '';
-    return '<span class="role-item-meta"' + style + '>' + ageLabel(observedAt) + (stale ? ' — check op vervolg' : '') + '</span>';
+    return '<span class="meta"' + (stale ? ' style="color:var(--brass)"' : '') + '>' + ageLabel(observedAt) + (stale ? ' — check op vervolg' : '') + '</span>';
+  }
+
+  // The first sentence of a long text: the lede for the call.
+  function firstSentence(t) {
+    t = (t || '').trim();
+    var m = t.match(/^.*?[.!?](\s|$)/);
+    return m ? m[0].trim() : t;
   }
 
   function factGrid(s) {
-    var html = '<div class="fact-grid">' +
+    return '<div class="fact-grid">' +
       '<div><div class="fact-label">omvang</div><div class="fact-value">' + s.magnitude + '</div></div>' +
       '<div><div class="fact-label">tijdshorizon</div><div class="fact-value">' + s.timeframe_horizon + '</div></div>' +
       '<div><div class="fact-label">bron</div><div class="fact-value">' + s.source + ' <span style="color:var(--dim)">(' + s.source_tier + ')</span></div></div>' +
-      '</div>';
-    if (s.chart_timeframe) {
-      html += '<div class="role-item-meta">chart timeframe: ' + s.chart_timeframe + '</div>';
-    }
-    return html;
-  }
-
-  var CAPITAL_VIEW_LABELS = {
-    nieuwe_positie: 'nieuwe positie',
-    verhoog_bestaand: 'verhoog bestaande blootstelling',
-    wacht: 'wacht'
-  };
-
-  function capitalCallBlock(c) {
-    var cv = c.capital_view;
-    var label = CAPITAL_VIEW_LABELS[cv.action] || cv.action;
-    return '<div class="capital-view">' +
-      '<div class="capital-view-head"><span class="capital-view-label">Waar het team nu in zou stappen:</span>' +
-      '<span class="capital-view-action ' + cv.action + '">' + label + '</span>' +
-      (c.subject ? '<span class="spotlight-subject">' + c.subject + '</span>' : '') + '</div>' +
-      '<div class="capital-view-reasoning">' + cv.reasoning + '</div>' +
-      (cv.trigger ? '<div class="capital-view-reasoning"><span class="capital-view-label">heroverweeg:</span> ' + cv.trigger + '</div>' : '') +
-      (c.considered && c.considered.length ? '<div class="role-item-meta" style="margin-top:6px;">afgewogen: ' + c.considered.join(', ') + '</div>' : '') +
-      '<div class="role-item-meta" style="margin-top:4px;">' + formatDateTime(c.observed_at) + ' — Paul beslist zelf of hij dit volgt.</div>' +
-      '</div>';
+      '</div>' + (s.chart_timeframe ? '<div class="meta">chart timeframe: ' + s.chart_timeframe + '</div>' : '');
   }
 
   function tagsRow(s) {
     var tags = (s.related_positions || []).concat(s.related_watchlist || []);
-    if (!tags.length) {
-      return '<div class="role-item-meta">geen portefeuille-/watchlist-link</div>';
-    }
+    if (!tags.length) return '<div class="meta">geen portefeuille-/watchlist-link</div>';
     return '<div class="tags"><span class="tags-label">raakt:</span>' +
-      tags.map(function (t) { return '<span class="tag">' + t + '</span>'; }).join('') +
+      tags.map(function (t) { return '<span class="tag">' + t + '</span>'; }).join('') + '</div>';
+  }
+
+  // ---- the brief: one glance, built from the newest doc of each kind ----
+  var state = { call: null, bubble: null, scenarios: null, playbooks: [], wallet: null, sell: null };
+
+  function eur(x) {
+    var n = Number(x);
+    return (n > 0 ? '+' : n < 0 ? '−' : '') + '€' + Math.abs(n).toLocaleString('nl-BE', { maximumFractionDigits: 0 });
+  }
+
+  function renderBrief() {
+    var chips = [];
+    var b = state.bubble;
+    if (b && b.level) {
+      chips.push('<a class="chip" href="#risico"><span class="dot s-' + b.level + '"></span><span class="k">AI-bubbel</span>' + b.level + '</a>');
+    }
+    var sc = state.scenarios;
+    if (sc && sc.scenarios) {
+      var acute = sc.scenarios.filter(function (x) { return x.status === 'acuut'; });
+      var rising = sc.scenarios.filter(function (x) { return x.status === 'stijgend'; });
+      var lvl = acute.length ? 'acuut' : (rising.length ? 'stijgend' : 'laag');
+      var word = acute.length ? acute.map(function (x) { return x.name; }).join(', ') + ' acuut' : (rising.length ? rising.length + ' stijgend' : 'laag');
+      chips.push('<a class="chip" href="#risico"><span class="dot s-' + lvl + '"></span><span class="k">Risico\'s</span>' + word + '</a>');
+    }
+    var live = state.playbooks.filter(function (p) { return p.status === 'actief' || p.status === 'naderend'; });
+    if (live.length) {
+      var act = live.filter(function (p) { return p.status === 'actief'; }).length;
+      chips.push('<a class="chip" href="#draaiboeken"><span class="dot s-' + (act ? 'actief' : 'naderend') + '"></span><span class="k">Draaiboeken</span>' +
+        (act ? act + ' actief' : live.length + ' naderend') + '</a>');
+    }
+    var w = state.wallet;
+    if (w && typeof w.day_change_eur === 'number') {
+      chips.push('<a class="chip" href="#portefeuille"><span class="dot s-' + (w.day_change_eur >= 0 ? 'up' : 'down') + '"></span><span class="k">Portefeuille</span>' + eur(w.day_change_eur) + ' op de dag</a>');
+    }
+    $('brief-chips').innerHTML = chips.join('');
+
+    var head;
+    if (state.sell) {
+      head = 'Het team stelt een verschuiving voor. Lees die eerst.';
+    } else if (state.call) {
+      var c = state.call;
+      head = c.capital_view.action === 'wacht'
+        ? 'Het team wacht: ' + firstSentence(c.capital_view.reasoning)
+        : 'Als het team nu geld vrij had: ' + (c.subject || '') + '.';
+    } else {
+      head = 'Nog geen oordeel van het team.';
+    }
+    $('brief-head').textContent = head;
+  }
+
+  // ---- the call --------------------------------------------------------
+  var CAPITAL_VIEW_LABELS = { nieuwe_positie: 'nieuwe positie', verhoog_bestaand: 'bijkopen', wacht: 'wacht' };
+
+  function renderCapitalCall(calls) {
+    var section = $('capital-call-section');
+    if (!calls.length) { section.hidden = true; state.call = null; renderBrief(); return; }
+    section.hidden = false;
+    var c = calls[0], cv = c.capital_view;
+    state.call = c;
+    var lede = firstSentence(cv.reasoning);
+    var rest = cv.reasoning.trim().slice(lede.length).trim();
+    var considered = c.considered && c.considered.length ? c.considered : [];
+    $('capital-call-card').innerHTML = '<div class="card call">' +
+      '<div class="call-head"><span class="call-subject">' + (c.subject || '') + '</span>' +
+      '<span class="action ' + cv.action + '">' + (CAPITAL_VIEW_LABELS[cv.action] || cv.action) + '</span></div>' +
+      '<p class="lede">' + lede + '</p>' +
+      '<dl class="kv"><dt>Vervalt als</dt><dd>' + (cv.trigger || '—') + '</dd>' +
+      '<dt>Sinds</dt><dd>' + formatDateTime(c.observed_at) + '</dd></dl>' +
+      (rest || considered.length ? '<details><summary>Volledige redenering en wat het team afwoog</summary><div class="more">' +
+        (rest ? '<p class="prose">' + rest + '</p>' : '') +
+        (considered.length ? '<div class="meta">afgewogen: ' + considered.join(' · ') + '</div>' : '') +
+        '</div></details>' : '') +
       '</div>';
+    renderBrief();
+  }
+
+  function renderCapitalCallRatio(calls) {
+    if (!calls.length) { $('capital-call-ratio').textContent = ''; return; }
+    var counts = { wacht: 0, verhoog_bestaand: 0, nieuwe_positie: 0 };
+    calls.forEach(function (c) { counts[c.capital_view.action] = (counts[c.capital_view.action] || 0) + 1; });
+    var actie = counts.verhoog_bestaand + counts.nieuwe_positie;
+    $('capital-call-ratio').textContent = 'calls tot nu toe: ' + counts.wacht + ' wacht · ' + actie + ' actie (van ' + calls.length + ')';
+  }
+
+  // ---- synthesis, clashes, signals -------------------------------------
+  function renderSynthesis(syntheses) {
+    var section = $('synthesis-section');
+    var shown = syntheses.filter(function (s) { return s.relevant !== false; });
+    if (!shown.length) { section.hidden = true; return; }
+    section.hidden = false;
+    $('synthesis-list').innerHTML = shown.map(function (s) {
+      var rt = s.red_team;
+      return '<div class="synthesis-card">' +
+        '<div class="subject">' + s.subject + '</div>' +
+        '<p class="prose">' + s.narrative + '</p>' +
+        '<div class="red-team"><div class="block-label">Farah — tegenwerping</div>' +
+          '<p class="prose">' + rt.objection + '</p>' +
+          '<div class="verdict" style="color:' + (rt.survives ? 'var(--teal)' : 'var(--red)') + '">' +
+          (rt.survives ? 'these overleeft de tegenwerping' : 'tegenwerping haalt de these onderuit') + '</div></div>' +
+        tagsRow(s) + '</div>';
+    }).join('');
+  }
+
+  // A signal that revises or contradicts an earlier one: both readings stay
+  // in view. Paul (26/10): this is the seed of a useful "wat als".
+  function renderConflicts(events) {
+    var section = $('conflict-section');
+    var flagged = events.filter(function (e) { return (e.conflict_note || '').trim(); });
+    if (!flagged.length) { section.hidden = true; return; }
+    section.hidden = false;
+    $('conflict-list').innerHTML = flagged.map(function (s) {
+      return '<div class="fork">' +
+        '<div class="fork-head"><span class="subject" style="margin:0">' + s.subject + '</span><span class="fork-label">' + s.role + ' · ' + ageLabel(s.observed_at) + '</span></div>' +
+        '<p class="prose">' + s.conflict_note + '</p>' +
+        '<details><summary>Het nieuwe signaal</summary><div class="more"><p class="prose">' + s.text + '</p>' + tagsRow(s) + '</div></details>' +
+        '</div>';
+    }).join('');
   }
 
   function renderSpotlight(events) {
-    var el = document.getElementById('spotlight-list');
     var subjects = crossSpecialistSubjects(events);
     if (!subjects.length) {
-      el.innerHTML = '<div class="empty">Nog geen signaal dat door 2+ specialisten tegelijk geraakt is — komt vanzelf zodra de pool dat oplevert.</div>';
+      $('spotlight-list').innerHTML = '<div class="empty">Vandaag raakt geen onderwerp twee specialisten tegelijk.</div>';
       return;
     }
-    var groups = groupBySubject(events);
-    el.innerHTML = subjects.map(function (subject) {
+    var groups = groupBy(events, 'subject');
+    $('spotlight-list').innerHTML = subjects.map(function (subject) {
       var items = groups[subject];
       var roles = [];
       items.forEach(function (i) { if (roles.indexOf(i.role) === -1) roles.push(i.role); });
       return '<div class="spotlight-card">' +
-        '<div class="spotlight-head"><span class="spotlight-subject">' + subject + '</span>' + confidenceBadge(items[0].signal_confidence) + '</div>' +
-        '<div class="spotlight-roles">door: ' + roles.join(' × ') + ' — kruising, geen generalistische pass</div>' +
+        '<div class="fork-head"><span class="subject">' + subject + '</span>' + confidenceBadge(items[0].signal_confidence) + '</div>' +
+        '<div class="spotlight-roles">door: ' + roles.join(' × ') + '</div>' +
         items.map(function (s) {
-          return '<div class="spotlight-item">' +
-            '<div class="item-text">' + s.text + '</div>' +
-            ageBadge(s.observed_at) +
-            factGrid(s) +
-            tagsRow(s) +
-            '</div>';
-        }).join('') +
-        '</div>';
+          return '<div class="spotlight-item"><div class="item-text">' + s.text + '</div>' + ageBadge(s.observed_at) + factGrid(s) + tagsRow(s) + '</div>';
+        }).join('') + '</div>';
     }).join('');
   }
 
   function renderRoleGrid(events) {
-    var el = document.getElementById('role-grid');
-    var spotlightSubjects = crossSpecialistSubjects(events);
-    var rest = events.filter(function (e) { return spotlightSubjects.indexOf(e.subject) === -1; });
-    if (!rest.length) {
-      el.innerHTML = '<div class="empty">Nog geen signalen buiten de spotlight.</div>';
-      return;
-    }
-    var groups = groupByRole(rest);
-    el.innerHTML = '<div class="role-grid">' + Object.keys(groups).sort().map(function (role) {
-      var items = groups[role];
-      return '<div class="role-card">' +
-        '<div class="role-name">' + role + '</div>' +
-        items.map(function (s) {
+    var spot = crossSpecialistSubjects(events);
+    var rest = events.filter(function (e) { return spot.indexOf(e.subject) === -1; });
+    $('roles-summary').textContent = 'Overige signalen (' + rest.length + ')';
+    $('roles-details').hidden = !rest.length;
+    if (!rest.length) { $('role-grid').innerHTML = ''; return; }
+    var groups = groupBy(rest, 'role');
+    $('role-grid').innerHTML = '<div class="role-grid">' + Object.keys(groups).sort().map(function (role) {
+      return '<div class="role-card"><div class="role-name">' + role + '</div>' +
+        groups[role].map(function (s) {
           return '<div class="role-item">' +
             '<div class="role-item-head"><span class="role-item-name">' + s.subject + '</span>' + confidenceBadge(s.signal_confidence) + '</div>' +
-            '<div class="role-item-text">' + s.text + '</div>' +
-            ageBadge(s.observed_at) +
-            '<div class="role-item-meta">omvang: ' + s.magnitude + '<br>horizon: ' + s.timeframe_horizon + (s.chart_timeframe ? ' · timeframe: ' + s.chart_timeframe : '') + '</div>' +
-            '<div class="role-item-meta">bron: ' + s.source + ' (' + s.source_tier + ')</div>' +
-            '</div>';
-        }).join('') +
-        '</div>';
+            '<div class="role-item-text">' + s.text + '</div>' + ageBadge(s.observed_at) +
+            '<div class="meta">omvang: ' + s.magnitude + '<br>horizon: ' + s.timeframe_horizon + (s.chart_timeframe ? ' · timeframe: ' + s.chart_timeframe : '') + '</div>' +
+            '<div class="meta">bron: ' + s.source + ' (' + s.source_tier + ')</div></div>';
+        }).join('') + '</div>';
     }).join('') + '</div>';
   }
 
-  function renderConflicts(events) {
-    var section = document.getElementById('conflict-section');
-    var el = document.getElementById('conflict-list');
-    var flagged = events.filter(function (e) { return (e.conflict_note || '').trim(); });
-    if (!flagged.length) {
-      section.style.display = 'none';
-      return;
-    }
-    section.style.display = '';
-    el.innerHTML = flagged.map(function (s) {
-      return '<div class="conflict-card">' +
-        '<div class="conflict-head">' + s.subject + '</div>' +
-        '<div class="conflict-body">' + s.conflict_note + '</div>' +
-        '</div>';
-    }).join('');
-  }
-
-  function renderSynthesis(syntheses) {
-    var section = document.getElementById('synthesis-section');
-    var el = document.getElementById('synthesis-list');
-    var shown = syntheses.filter(function (s) { return s.relevant !== false; });
-    if (!shown.length) {
-      section.style.display = 'none';
-      return;
-    }
-    section.style.display = '';
-    el.innerHTML = shown.map(function (s) {
-      var rt = s.red_team;
-      var verdictLabel = rt.survives ? 'these overleeft de tegenwerping' : 'tegenwerping haalt de these onderuit';
-      return '<div class="synthesis-card">' +
-        '<div class="synthesis-head"><span class="synthesis-subject">' + s.subject + '</span></div>' +
-        '<div class="synthesis-narrative">' + s.narrative + '</div>' +
-        '<div class="red-team-box">' +
-          '<div class="synthesis-block-label">Farah — tegenwerping</div>' +
-          '<div class="synthesis-narrative">' + rt.objection + '</div>' +
-          '<div class="red-team-verdict" style="color:' + (rt.survives ? 'var(--teal)' : 'var(--red)') + '">' + verdictLabel + '</div>' +
-        '</div>' +
-        tagsRow(s) +
-        '</div>';
-    }).join('');
-  }
-
-  function renderCapitalCall(calls) {
-    var section = document.getElementById('capital-call-section');
-    var el = document.getElementById('capital-call-card');
-    if (!calls.length) {
-      section.style.display = 'none';
-      return;
-    }
-    section.style.display = '';
-    el.innerHTML = '<div class="card">' + capitalCallBlock(calls[0]) + '</div>';
-  }
-
-  function renderCapitalCallRatio(calls) {
-    var el = document.getElementById('capital-call-ratio');
-    if (!calls.length) {
-      el.textContent = '';
-      return;
-    }
-    var counts = { wacht: 0, verhoog_bestaand: 0, nieuwe_positie: 0 };
-    calls.forEach(function (c) { counts[c.capital_view.action] = (counts[c.capital_view.action] || 0) + 1; });
-    var actie = counts.verhoog_bestaand + counts.nieuwe_positie;
-    el.textContent = 'calls tot nu toe: ' + counts.wacht + ' wacht · ' + actie + ' actie (van ' + calls.length + ')';
-  }
-
   var MAX_AGE_DAYS = 4;
-
-  // Paul: "4 dagen oud en meer is nogal veel" -- a story still running after
-  // three days stays on the page only through a fresh follow-up.
+  // Paul: "4 dagen oud en meer is nogal veel".
   function isFresh(item) {
     var t = new Date(item.observed_at).getTime();
     return !isNaN(t) && Math.floor((Date.now() - t) / 86400000) < MAX_AGE_DAYS;
   }
 
-  function fmtPct(n) {
-    return n.toLocaleString('nl-BE', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
+  function renderAll(events) {
+    if (!events.length) {
+      $('spotlight-list').innerHTML = '<div class="empty">Nog geen recente signalen.</div>';
+      $('role-grid').innerHTML = '';
+      $('roles-details').hidden = true;
+      $('last-signal-line').textContent = 'laatste signaal: nog geen';
+      $('conflict-section').hidden = true;
+      return;
+    }
+    var latest = events.reduce(function (m, e) { return e.observed_at > m ? e.observed_at : m; }, events[0].observed_at);
+    $('last-signal-line').textContent = 'laatste signaal: ' + formatDateTime(latest);
+    renderSpotlight(events);
+    renderRoleGrid(events);
+    renderConflicts(events);
   }
 
-  // Positions are read only to judge them -- never listed. Paul keeps the
-  // wallet itself in his Sheet. Mirrors kompas/core/allocation.sleeve_status.
+  // ---- risk radar: bubble monitor + scenarios, compact ------------------
+  function radarRow(name, level, items, note, details) {
+    return '<div class="radar-row">' +
+      '<div class="radar-name">' + name + '<span class="pill p-' + level + '">' + level + '</span></div>' +
+      '<div class="radar-dots">' + items.map(function (i) {
+        return '<span title="' + i.name + ': ' + i.status + '"><span class="dot s-' + i.status + '"></span>' + i.name + '</span>';
+      }).join('') + '</div>' +
+      (note ? '<p class="radar-note">' + note + '</p>' : '') +
+      '<div class="radar-more"><details><summary>Waarom, met bronnen</summary><div class="more" style="gap:0">' + details + '</div></details></div>' +
+      '</div>';
+  }
+
+  function renderRadar() {
+    var b = state.bubble, m = state.scenarios, rows = [];
+    if (b && b.indicators) {
+      rows.push(radarRow('AI-bubbel', b.level, b.indicators, b.note,
+        b.indicators.map(function (i) {
+          return '<div class="detail-row"><strong>' + i.name + '</strong> · ' + i.status + ' — ' + i.evidence + (i.source ? ' <span class="fine">(' + i.source + ')</span>' : '') + '</div>';
+        }).join('') +
+        '<p class="fine" style="margin:8px 0 0">Zes vaste indicatoren, elke avond nagekeken. Opletten bij 1 rood of 3 oranje, alarm bij 3 rood. Plan bij alarm: een derde van IWDA naar waarde (IWVL) en goud (GOLD), half om half; terug na 20 beursdagen rustig, of als de Nasdaq-100 meer dan 30% onder zijn top staat.</p>'));
+    }
+    if (m && m.scenarios) {
+      var lvl = m.any_acute ? 'acuut' : (m.scenarios.some(function (s) { return s.status === 'stijgend'; }) ? 'stijgend' : 'laag');
+      rows.push(radarRow('Risicoscenario\'s', lvl, m.scenarios, m.note,
+        m.scenarios.map(function (sc) {
+          return '<div class="detail-row"><strong>' + sc.name + '</strong> · ' + sc.status + ' — ' + sc.evidence + (sc.source ? ' <span class="fine">(' + sc.source + ')</span>' : '') +
+            '<br><span class="fine">Voor jou: ' + sc.impact + '</span></div>';
+        }).join('') +
+        '<p class="fine" style="margin:8px 0 0">Pas bij acuut stuurt het team de koopsuggestie om. Verzekering (goud, kasreserve) blijft daarbuiten onder 15% van je portefeuille.</p>'));
+    }
+    $('risico').hidden = !rows.length;
+    $('radar-rows').innerHTML = rows.join('');
+    var stamps = [b && b.observed_at, m && m.observed_at].filter(Boolean).sort();
+    $('radar-stamp').textContent = stamps.length ? 'gemeten ' + formatDateTime(stamps[stamps.length - 1]) : '';
+    renderBrief();
+  }
+
+  // ---- playbooks: what is near or happening; the rest folded away -------
+  var PB_ORDER = { actief: 0, naderend: 1, waakzaam: 2, voorbij: 3 };
+  function pbBlock(p) {
+    function moves(ms) { return '<ul>' + (ms || []).map(function (x) { return '<li><strong>' + x.action + '</strong> ' + x.what + ' — ' + x.why + '</li>'; }).join('') + '</ul>'; }
+    return '<div class="pb">' +
+      '<div class="pb-title"><span class="dot s-' + p.status + '"></span><span>' + p.what_if + ' <span class="pill p-' + p.status + '">' + p.status + '</span></span></div>' +
+      '<div class="fine">' + p.when + '</div>' +
+      '<p class="prose pb-reason">' + p.status_reason + ' <span class="fine">(' + p.source + ')</span></p>' +
+      '<div class="pb-cols"><div><div class="block-label">Beschermen</div>' + moves(p.protect) + '</div>' +
+      '<div><div class="block-label">De kans</div>' + moves(p.opportunity) + '</div></div>' +
+      '<div class="fine">Let op: ' + (p.watch || []).join(' · ') + '<br>Terug: ' + p.undo + ' · hoogstens ' + Math.round((p.shift_max || 0) * 100) + '%</div>' +
+      '</div>';
+  }
+
+  function renderPlaybooks(list) {
+    state.playbooks = list || [];
+    var section = $('draaiboeken');
+    if (!state.playbooks.length) { section.hidden = true; renderBrief(); return; }
+    section.hidden = false;
+    var sorted = state.playbooks.slice().sort(function (a, b) { return (PB_ORDER[a.status] - PB_ORDER[b.status]) || ((b.updated_at || '') > (a.updated_at || '') ? 1 : -1); });
+    var live = sorted.filter(function (p) { return p.status === 'actief' || p.status === 'naderend'; });
+    var radar = sorted.filter(function (p) { return p.status === 'waakzaam'; });
+    var newest = sorted.reduce(function (m, p) { return (p.updated_at || '') > m ? p.updated_at : m; }, '');
+    $('playbook-stamp').textContent = newest ? 'bijgewerkt ' + formatDateTime(newest) : '';
+    $('playbook-rows').innerHTML = live.length ? live.map(pbBlock).join('')
+      : '<div class="empty">Niets dat nadert of gebeurt. Het team houdt ' + radar.length + ' mogelijke gebeurtenissen in het oog.</div>';
+    $('radar-playbooks').hidden = !radar.length;
+    $('radar-playbooks-summary').textContent = 'Op de radar (' + radar.length + ')';
+    $('radar-playbook-rows').innerHTML = radar.map(pbBlock).join('');
+    renderBrief();
+  }
+
+  // ---- portfolio: lower on the page, the allocation folded --------------
+  function fmtPct(n) { return n.toLocaleString('nl-BE', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%'; }
+  // Positions are read only to judge them -- never listed. Mirrors
+  // kompas/core/allocation.sleeve_status.
   var portfolio = { positions: [], allocation: null, roundup: null, refresh: null };
 
   function renderPortfolio() {
-    var section = document.getElementById('portfolio-section');
+    var section = $('portefeuille');
     var view = portfolio.allocation;
-    if (!portfolio.roundup && !view) { section.style.display = 'none'; return; }
-    section.style.display = '';
-    var ru = document.getElementById('portfolio-roundup');
+    if (!portfolio.roundup && !view) { section.hidden = true; return; }
+    section.hidden = false;
+    var ru = $('portfolio-roundup');
     if (portfolio.roundup) {
-      ru.textContent = portfolio.roundup.text; ru.style.display = '';
-      document.getElementById('portfolio-stamp').textContent = formatDateTime(portfolio.roundup.observed_at);
-    } else { ru.style.display = 'none'; }
-
+      ru.textContent = portfolio.roundup.text; ru.hidden = false;
+      $('portfolio-stamp').textContent = formatDateTime(portfolio.roundup.observed_at);
+    } else { ru.hidden = true; }
     var fr = portfolio.refresh;
-    document.getElementById('portfolio-freshness').textContent = fr
+    $('portfolio-freshness').textContent = fr
       ? 'portefeuille laatst ingelezen: ' + formatDateTime(fr.refreshed_at) +
-        ((fr.changes || []).length ? ' — nieuw sinds de vorige inlezing: ' + fr.changes.map(function (c) {
-          return c.ticker + ' ' + (c.delta > 0 ? '+' : '') + c.delta;
-        }).join(', ') : '')
+        ((fr.changes || []).length ? ' — nieuw sinds de vorige inlezing: ' + fr.changes.map(function (c) { return c.ticker + ' ' + (c.delta > 0 ? '+' : '') + c.delta; }).join(', ') : '')
       : '';
-
-    var block = document.getElementById('allocation-block');
-    if (!view || !portfolio.positions.length) { block.style.display = 'none'; return; }
-    block.style.display = '';
+    var block = $('allocation-block');
+    if (!view || !portfolio.positions.length) { block.hidden = true; return; }
+    block.hidden = false;
     var byTicker = {};
     portfolio.positions.forEach(function (p) { byTicker[p.ticker] = (byTicker[p.ticker] || 0) + (p.value_eur || 0); });
     var total = Object.keys(byTicker).reduce(function (m, t) { return m + byTicker[t]; }, 0);
     var claimed = {};
-    document.getElementById('allocation-sleeves').innerHTML = view.sleeves.map(function (sl) {
+    $('allocation-sleeves').innerHTML = view.sleeves.map(function (sl) {
       var v = sl.holdings.reduce(function (m, t) { claimed[t] = true; return m + (byTicker[t] || 0); }, 0);
       var w = total ? v / total * 100 : 0;
-      // Guardrail, not a to-do list: only "boven plafond" matters for the
-      // EUR 100 call; "onder marge" is information, never an order to top up.
       var st = w < sl.low_pct ? 'onder' : (w > sl.high_pct ? 'boven' : 'binnen');
       var stText = st === 'boven' ? 'boven plafond' : (st === 'onder' ? 'onder marge' : 'binnen');
       return '<div class="sleeve"><span class="sleeve-name">' + sl.name + '</span>' +
@@ -513,185 +636,74 @@
         '<span class="sleeve-now">nu ' + fmtPct(w) + ' · <span class="st-' + st + '">' + stText + '</span></span>' +
         '<span class="sleeve-why">' + sl.reasoning + '</span></div>';
     }).join('');
-    document.getElementById('allocation-narrative').textContent = view.narrative || '';
+    $('allocation-narrative').textContent = view.narrative || '';
     var loose = Object.keys(byTicker).filter(function (t) { return !claimed[t]; });
-    document.getElementById('allocation-trigger').textContent =
-      (loose.length ? 'nog niet ingedeeld: ' + loose.join(', ') + ' — ' : '') + 'herzien: ' + view.trigger;
+    $('allocation-trigger').textContent = (loose.length ? 'nog niet ingedeeld: ' + loose.join(', ') + ' — ' : '') + 'herzien: ' + view.trigger;
   }
 
-  // When the team last looked, even if it found nothing: an empty cycle
-  // must not look like a dead one (Paul, 6/10: "en stilgevallen?").
+  // When the team last looked, even if it found nothing (Paul, 6/10: "en stilgevallen?").
   function renderCycle(c) {
     if (!c || !c.at) return;
     var n = c.signals_written || 0;
     var what = n ? n + (n === 1 ? ' nieuw signaal' : ' nieuwe signalen') : 'geen nieuw materieel signaal';
     if (c.syntheses_written) what += ', ' + c.syntheses_written + (c.syntheses_written === 1 ? ' synthese' : ' syntheses');
     if (c.call_written) what += ', call bijgewerkt';
-    document.getElementById('last-cycle-line').textContent =
-      'team keek laatst: ' + formatDateTime(c.at) + ' — ' + what + (c.note ? ' (' + c.note + ')' : '');
+    $('last-cycle-line').textContent = 'team keek laatst: ' + formatDateTime(c.at) + ' — ' + what + (c.note ? ' (' + c.note + ')' : '');
   }
 
-  // Paul, 9/10: "Houden jullie actief bubbel breek signalen bij?" -- the
-  // latest reading of kompas/core/bubble_monitor.py, six fixed indicators.
-  // Sell proposals (kompas/core/sell_proposal.py): shown for a week, then
-  // they drop off like everything else that's no longer fresh.
+  // Sell proposals (kompas/core/sell_proposal.py): shown for a week.
   function renderSell(p) {
-    var section = document.getElementById('sell-section');
+    var section = $('sell-section');
     var fresh = p && (Date.now() - Date.parse(p.observed_at)) < 7 * 86400000;
-    if (!fresh) { section.style.display = 'none'; return; }
-    section.style.display = '';
-    var eur = function (x) { return 'EUR ' + Number(x).toLocaleString('nl-BE', {minimumFractionDigits: 0, maximumFractionDigits: 0}); };
-    var legs = function (ls) { return ls.map(function (l) { return l.ticker + ' ' + eur(l.amount_eur); }).join(' + '); };
-    var label = {plan: 'afgesproken plan', these_breuk: 'these gebroken', herinstap: 'terug naar het normale'}[p.source] || p.source;
-    document.getElementById('sell-stamp').textContent = label + ' · ' + formatDateTime(p.observed_at);
-    document.getElementById('sell-card').innerHTML =
-      '<p class="pf-roundup"><strong>Verkoop ' + legs(p.sell) + '</strong>' +
-      (p.buy && p.buy.length ? ' → <strong>koop ' + legs(p.buy) + '</strong>' : ' → in cash houden') + '</p>' +
-      '<p class="pf-roundup">' + p.reasoning + '</p>' +
-      '<div class="pf-targets">Kosten: ' + p.costs + '<br>Terugdraaien als: ' + p.undo + '<br>Jij beslist en voert zelf uit.</div>';
-  }
-
-  // Paul, 12/10: "nemen jullie deze afweging mee in jullie dagelijkse
-  // bespreking?" -- kompas/core/scenario_monitor.py, four scenarios.
-  function renderScenarios(m) {
-    var section = document.getElementById('scenario-section');
-    if (!m || !m.scenarios) { section.style.display = 'none'; return; }
-    section.style.display = '';
-    document.getElementById('scenario-stamp').innerHTML =
-      (m.any_acute ? '<span class="bm-level alarm">acuut</span> · ' : '') + formatDateTime(m.observed_at);
-    document.getElementById('scenario-note').textContent = m.note || '';
-    document.getElementById('scenario-rows').innerHTML = m.scenarios.map(function (sc) {
-      return '<div class="sleeve"><span class="sleeve-name"><span class="bm-dot bm-' + sc.status + '"></span>' + sc.name + '</span>' +
-        '<span class="sleeve-range"></span><span class="sleeve-now">' + sc.status + '</span>' +
-        '<span class="sleeve-why">' + sc.evidence + (sc.source ? ' <span class="pf-targets">(' + sc.source + ')</span>' : '') +
-        '<br><span class="pf-targets">Voor jou: ' + sc.impact + '</span></span></div>';
-    }).join('');
-  }
-
-  var PB_ORDER = { actief: 0, naderend: 1, waakzaam: 2, voorbij: 3 };
-  function renderPlaybooks(list) {
-    var section = document.getElementById('playbook-section');
-    if (!list || !list.length) { section.style.display = 'none'; return; }
-    section.style.display = '';
-    list.sort(function (a, b) { return (PB_ORDER[a.status] - PB_ORDER[b.status]) || ((b.updated_at || '') > (a.updated_at || '') ? 1 : -1); });
-    var newest = list.reduce(function (m, p) { return (p.updated_at || '') > m ? p.updated_at : m; }, '');
-    document.getElementById('playbook-stamp').textContent = newest ? 'bijgewerkt ' + formatDateTime(newest) : '';
-    function moves(ms) {
-      return '<ul class="pb-moves">' + (ms || []).map(function (m) {
-        return '<li><strong>' + m.action + '</strong> ' + m.what + ' — ' + m.why + '</li>';
-      }).join('') + '</ul>';
-    }
-    document.getElementById('playbook-rows').innerHTML = list.map(function (p) {
-      return '<div class="sleeve"><span class="sleeve-name"><span class="bm-dot bm-' + p.status + '"></span>' + p.what_if + '</span>' +
-        '<span class="sleeve-range">' + Math.round((p.shift_max || 0) * 100) + '% max</span><span class="sleeve-now">' + p.status + '</span>' +
-        '<span class="sleeve-why">' + p.status_reason + ' <span class="pf-targets">(' + p.source + ')</span>' +
-        '<br><span class="pf-targets">Wanneer: ' + p.when + '</span>' +
-        '<div class="pb-head">Beschermen</div>' + moves(p.protect) +
-        '<div class="pb-head">De kans</div>' + moves(p.opportunity) +
-        '<div class="pb-head">Waar het team op let</div><span class="pf-targets">' + (p.watch || []).join(' · ') + '</span>' +
-        '<br><span class="pf-targets">Terug: ' + p.undo + '</span></span></div>';
-    }).join('');
-  }
-
-  function renderBubble(b) {
-    var section = document.getElementById('bubble-section');
-    if (!b || !b.indicators) { section.style.display = 'none'; return; }
-    section.style.display = '';
-    document.getElementById('bubble-stamp').innerHTML =
-      '<span class="bm-level ' + b.level + '">' + b.level + '</span> · ' + formatDateTime(b.observed_at);
-    document.getElementById('bubble-note').textContent = b.note || '';
-    document.getElementById('bubble-rows').innerHTML = b.indicators.map(function (i) {
-      return '<div class="sleeve"><span class="sleeve-name"><span class="bm-dot bm-' + i.status + '"></span>' + i.name + '</span>' +
-        '<span class="sleeve-range"></span><span class="sleeve-now">' + i.status + '</span>' +
-        '<span class="sleeve-why">' + i.evidence + (i.source ? ' <span class="pf-targets">(' + i.source + ')</span>' : '') + '</span></div>';
-    }).join('');
-  }
-
-  function renderAll(events) {
-    if (!events.length) {
-      document.getElementById('spotlight-list').innerHTML = '<div class="empty">Nog geen signalen — Pijler A heeft nog geen draaiende cyclus.</div>';
-      document.getElementById('role-grid').innerHTML = '';
-      document.getElementById('last-signal-line').textContent = 'laatste signaal: nog geen';
-      return;
-    }
-    var latest = events.reduce(function (m, e) { return e.observed_at > m ? e.observed_at : m; }, events[0].observed_at);
-    document.getElementById('last-signal-line').textContent = 'laatste signaal: ' + formatDateTime(latest);
-    renderSpotlight(events);
-    renderRoleGrid(events);
-    renderConflicts(events);
+    state.sell = fresh ? p : null;
+    if (!fresh) { section.hidden = true; renderBrief(); return; }
+    section.hidden = false;
+    var money = function (x) { return '€' + Number(x).toLocaleString('nl-BE', { maximumFractionDigits: 0 }); };
+    var legs = function (ls) { return ls.map(function (l) { return l.ticker + ' ' + money(l.amount_eur); }).join(' + '); };
+    var label = { plan: 'afgesproken plan', these_breuk: 'these gebroken', herinstap: 'terug naar het normale', draaiboek: 'draaiboek ' + (p.playbook || '') }[p.source] || p.source;
+    $('sell-stamp').textContent = label + ' · ' + formatDateTime(p.observed_at);
+    $('sell-card').innerHTML =
+      '<p class="lede"><strong>Verkoop ' + legs(p.sell) + '</strong>' + (p.buy && p.buy.length ? ' → <strong>koop ' + legs(p.buy) + '</strong>' : ' → in cash houden') + '</p>' +
+      '<p class="prose" style="margin-top:8px">' + p.reasoning + '</p>' +
+      '<dl class="kv"><dt>Kosten</dt><dd>' + p.costs + '</dd><dt>Terug als</dt><dd>' + p.undo + '</dd></dl>' +
+      '<p class="fine" style="margin:8px 0 0">Jij beslist en voert zelf uit.</p>';
+    renderBrief();
   }
 
   async function boot() {
     var db = null;
-    try {
-      db = await window.claude?.use?.('db');
-    } catch (e) { /* fall through to unavailable state */ }
-
+    try { db = await window.claude?.use?.('db'); } catch (e) { /* unavailable state below */ }
     if (!db) {
-      document.getElementById('spotlight-list').innerHTML = '<div class="card"><div class="empty">Database niet beschikbaar in deze weergave.</div></div>';
+      $('brief-head').textContent = 'De database is niet beschikbaar in deze weergave.';
+      $('spotlight-list').innerHTML = '';
       return;
     }
+    function on(coll, fn, ordered) {
+      var q = ordered ? db.collection(coll).orderBy('observed_at', 'desc') : db.collection(coll);
+      q.onSnapshot(function (snap) { fn(snap.docs.map(function (d) { return d.data(); })); }, function () { /* additive: one failing collection must not blank the page */ });
+    }
 
-    db.collection('events').orderBy('observed_at', 'desc').onSnapshot(function (snap) {
-      var all = snap.docs.map(function (d) { return d.data(); });
-      // Recap lifecycle: a signal stays in the database forever, but drops
-      // out of the recap once its own story is no longer relevant — see
-      // README, "Twee megaverhalen, niet meer thema's" / Signal.relevant.
-      renderAll(all.filter(function (e) { return e.relevant !== false && isFresh(e); }));
-    }, function () {
-      document.getElementById('spotlight-list').innerHTML = '<div class="card"><div class="empty">Kon signalen niet laden.</div></div>';
-    });
-
-    db.collection('synthesis').orderBy('observed_at', 'desc').onSnapshot(function (snap) {
-      renderSynthesis(snap.docs.map(function (d) { return d.data(); }).filter(isFresh));
-    }, function () { /* synthesis is additive; a load failure there shouldn't blank the rest of the page */ });
-
+    // Recap lifecycle: a signal stays in the database, but drops off the
+    // page once its story is no longer relevant or four days old.
+    on('events', function (all) { renderAll(all.filter(function (e) { return e.relevant !== false && isFresh(e); })); }, true);
+    on('synthesis', function (all) { renderSynthesis(all.filter(isFresh)); }, true);
     // Positions only -- the watchlist collection is deliberately never read here.
-    db.collection('wallet-positions').onSnapshot(function (snap) {
-      portfolio.positions = snap.docs.map(function (d) { return d.data(); });
-      renderPortfolio();
-    }, function () { /* additive */ });
-
-    db.collection('meta').onSnapshot(function (snap) {
-      snap.docs.forEach(function (d) {
-        var x = d.data();
+    on('wallet-positions', function (all) { portfolio.positions = all; renderPortfolio(); });
+    on('wallet', function (all) { state.wallet = all.filter(function (d) { return d.path === 'wallet/state'; })[0] || null; renderBrief(); });
+    on('meta', function (all) {
+      all.forEach(function (x) {
         if (x.pijler === 'B') portfolio.refresh = x;
         if (x.pijler === 'A') renderCycle(x);
       });
       renderPortfolio();
-    }, function () { /* additive */ });
-
-    db.collection('sell_proposals').orderBy('observed_at', 'desc').onSnapshot(function (snap) {
-      renderSell(snap.docs.length ? snap.docs[0].data() : null);
-    }, function () { /* additive */ });
-
-    db.collection('scenario_monitor').orderBy('observed_at', 'desc').onSnapshot(function (snap) {
-      renderScenarios(snap.docs.length ? snap.docs[0].data() : null);
-    }, function () { /* additive */ });
-
-    db.collection('playbooks').onSnapshot(function (snap) {
-      renderPlaybooks(snap.docs.map(function (d) { return d.data(); }));
-    }, function () { /* additive */ });
-
-    db.collection('bubble_monitor').orderBy('observed_at', 'desc').onSnapshot(function (snap) {
-      renderBubble(snap.docs.length ? snap.docs[0].data() : null);
-    }, function () { /* additive */ });
-
-    db.collection('allocation_views').orderBy('observed_at', 'desc').onSnapshot(function (snap) {
-      portfolio.allocation = snap.docs.length ? snap.docs[0].data() : null;
-      renderPortfolio();
-    }, function () { /* additive */ });
-
-    db.collection('portfolio_roundups').orderBy('observed_at', 'desc').onSnapshot(function (snap) {
-      portfolio.roundup = snap.docs.length ? snap.docs[0].data() : null;
-      renderPortfolio();
-    }, function () { /* additive */ });
-
-    db.collection('capital_calls').orderBy('observed_at', 'desc').onSnapshot(function (snap) {
-      var calls = snap.docs.map(function (d) { return d.data(); });
-      renderCapitalCall(calls);
-      renderCapitalCallRatio(calls);
-    }, function () { /* additive, same as synthesis */ });
+    });
+    on('sell_proposals', function (all) { renderSell(all[0] || null); }, true);
+    on('scenario_monitor', function (all) { state.scenarios = all[0] || null; renderRadar(); }, true);
+    on('bubble_monitor', function (all) { state.bubble = all[0] || null; renderRadar(); }, true);
+    on('playbooks', renderPlaybooks);
+    on('allocation_views', function (all) { portfolio.allocation = all[0] || null; renderPortfolio(); }, true);
+    on('portfolio_roundups', function (all) { portfolio.roundup = all[0] || null; renderPortfolio(); }, true);
+    on('capital_calls', function (calls) { renderCapitalCall(calls); renderCapitalCallRatio(calls); }, true);
   }
 
   boot();
