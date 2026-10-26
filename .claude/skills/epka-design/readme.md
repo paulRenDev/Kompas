@@ -126,6 +126,7 @@ Kompas is published as a single self-contained Artifact page, so it cannot link 
 - **Figures:** Raleway defaults to old-style figures, which bounce. The page sets `lining-nums` everywhere and `tabular-nums` wherever values line up (chips, dates, percentages, the weather axis, footer).
 - **Body:** Lato. Headings and subjects use petrol ink, running text uses graphite `#374151`.
 - **Cards:** white, 1px `#E5E7EB` hairline, 10px radius, 18/20px padding, soft petrol shadow. The call and a sell proposal get a straight 4px coral or deep-coral bar along the top (clipped by the card, not a bent border). No coloured side edges.
+- **Text fills the card:** running text (`.lede`, `.prose`, `.item-text`) has no `ch` cap; the page's 860px column already bounds the line length (Paul, 26/10: use the full width).
 - **Lists** in playbooks have no bullets, so nothing round competes with the status dots.
 - **Status scale** (Paul, 26/10: the steps must differ in lightness, not just hue): ok teal `#1B8A7A` (L\* 52) · watch gold `#E3BE45` (L\* 78) · alert deep coral `#8E1F2C` (L\* 32). Dark mode: teal · `#F0D267` · `#FF6B6E`. Keep this ordering when changing any of them.
 - **No new hues.** The old blue accent is replaced by lifted petrol (`#16404C`); purple is gone.
