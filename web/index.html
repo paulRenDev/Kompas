@@ -147,8 +147,19 @@
   .rose .hub { fill: var(--surface); stroke: var(--ink); stroke-width: 1.5; }
   .rose text { font-family: var(--body); font-size: 12px; fill: var(--muted); }
   .rose-caption { font-size: 11px; color: var(--dim); text-align: center; margin-top: 4px; }
-  .stance { font-family: var(--display); font-size: 12.5px; font-weight: 700; }
-  .stance.positief { color: var(--teal); } .stance.neutraal { color: var(--muted); } .stance.voorzichtig { color: var(--brass); }
+  /* Why the needles stand: each theme gets the needle's colour as a dot and
+     its stance as a filled pill, so the stance reads at a glance instead of
+     as coloured words in a sentence. */
+  .rose-row { display: grid; grid-template-columns: auto minmax(0,1fr); column-gap: 10px; row-gap: 4px; align-items: center; }
+  .rose-row .dot { grid-row: 1; }
+  .rose-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+  .rose-head strong { font-family: var(--display); font-weight: 700; font-size: 13.5px; }
+  .rose-why { grid-column: 2; }
+  .rose-move { font-size: 12px; color: var(--muted); }
+  .stance-positief { background: var(--teal-bg); color: var(--teal); }
+  .stance-voorzichtig { background: var(--brass-bg); color: var(--brass); }
+  .stance-neutraal { background: var(--sunken); color: var(--muted); }
+  .rose-row .dot.n-positief { background: var(--st-ok); } .rose-row .dot.n-voorzichtig { background: var(--st-watch); } .rose-row .dot.n-neutraal { background: var(--st-none); }
 
   /* Risicoweer: one cell per day per indicator */
   .wx { display: grid; gap: 3px; margin-bottom: 14px; overflow-x: auto; }
@@ -530,8 +541,11 @@
     $('rose-summary').textContent = 'Waarom de naalden zo staan · ' + formatDateTime(cur.observed_at);
     $('rose-reasons').innerHTML = '<p class="prose" style="margin-bottom:6px">' + cur.note + '</p>' + cur.themes.map(function (t) {
       var b = before[t.key], move = '';
-      if (b && b !== t.stance) move = STANCE_RANK[t.stance] > STANCE_RANK[b] ? ' ▲ was ' + b : ' ▼ was ' + b;
-      return '<div class="detail-row"><strong>' + t.name + '</strong> · <span class="stance ' + t.stance + '">' + t.stance + move + '</span> — ' + t.reason + ' <span class="fine">(' + t.source + ')</span></div>';
+      if (b && b !== t.stance) move = STANCE_RANK[t.stance] > STANCE_RANK[b] ? '▲ was ' + b : '▼ was ' + b;
+      return '<div class="detail-row rose-row"><span class="dot n-' + t.stance + '"></span>' +
+        '<div class="rose-head"><strong>' + t.name + '</strong><span class="pill stance-' + t.stance + '">' + t.stance + '</span>' +
+        (move ? '<span class="rose-move">' + move + '</span>' : '') + '</div>' +
+        '<div class="rose-why">' + t.reason + ' <span class="fine">(' + t.source + ')</span></div></div>';
     }).join('');
   }
 
