@@ -101,7 +101,7 @@ Key brand assets live in `assets/`:
 - `SKILL.md`: the skill entry point.
 - `styles.css`: the single global entry point (`@import`s only).
 - `tokens/`: `fonts.css`, `colors.css`, `typography.css`, `spacing.css`, `base.css`.
-- `assets/logos/`, `assets/fonts/`: see above.
+- `assets/logos/`, `assets/fonts/`: see above, plus the Kompas mark (`kompas-mark.svg`, `kompas-mark-white.svg`).
 - `thumbnail.html`: the system's cover card.
 
 Kept in the Claude Design project only (not in this public repo): the React components (Button, IconButton, Input, Select, Checkbox, Radio, Switch, Card, StatCard, Badge, Tag, Avatar, Tabs, Callout) and their compiled `_ds_bundle.js`, the guideline cards, the portfolio sample slides (`slides/`), the Roularta and portfolio decks (`decks/`), the EPKA Deck and QGIS map templates (`templates/`), the website UI kit, client logos, the portrait and the email signature.
@@ -120,7 +120,8 @@ Kept in the Claude Design project only (not in this public repo): the React comp
 
 Kompas is published as a single self-contained Artifact page, so it cannot link `styles.css`. The page copies the token values into its own `:root` block instead, and loads Raleway + Lato from Google Fonts.
 
-- **Header:** a petrol (`#0B2B36`) panel, 14px radius, with a coral uppercase eyebrow, a white Raleway 800 date heading, the coral underline rule, and the white EPKA lockup (inlined as a small base64 PNG so the page stays self-contained). The lockup sits on the date line: same baseline, and the wordmark's x-height matches the date's (logo height = 0.97 × heading size, pulled down 0.222 × heading size). Keep that relation if either size changes.
+- **Header:** a petrol (`#0B2B36`) panel, 14px radius. Top left the Kompas lockup: the Kompas mark (`assets/logos/kompas-mark-white.svg`, inlined), "kompas" in Raleway 800 lowercase like the epka wordmark, and under the word, smaller, "by" plus the white EPKA lockup (inlined as a small base64 PNG). Below it the date as the page heading (Raleway 800, larger than the lockup's word), the coral underline rule, and the "team keek laatst" line.
+- **Kompas mark:** the EPKA network mark turned into a compass needle: two coral nodes (big at the tail, small at the head) on a coral line, pointing north-east, a white hub at the centre, inside a ring with four short compass ticks (the ticks keep it from reading as a "no entry" sign). Petrol-ink version for light backgrounds: `assets/logos/kompas-mark.svg`.
 - **Uppercase is rare:** only the eyebrow, section labels and status pills/badges (OPLETTEN, HOOG, NIEUWE POSITIE) are Raleway 700 uppercase with wide tracking. Section labels are coral (`#C32C30` as text); their right-hand note is muted Lato. Every other small label ("Vervalt als", "omvang", "raakt:") is sentence-case Lato in a muted grey.
 - **Values lead, labels recede:** next to a status dot, or under a small label, the label is Lato regular and muted, and the value is Raleway 700 in petrol ink (chips, fact values, the current share in the portfolio sleeves).
 - **Figures:** Raleway defaults to old-style figures, which bounce. The page sets `lining-nums` everywhere and `tabular-nums` wherever values line up (chips, dates, percentages, the weather axis, footer).
