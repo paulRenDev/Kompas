@@ -120,10 +120,13 @@ Kept in the Claude Design project only (not in this public repo): the React comp
 
 Kompas is published as a single self-contained Artifact page, so it cannot link `styles.css`. The page copies the token values into its own `:root` block instead, and loads Raleway + Lato from Google Fonts.
 
-- **Header:** a petrol (`#0B2B36`) panel, 14px radius, with a coral uppercase eyebrow, a white Raleway 800 date heading, the coral underline rule, and the white EPKA lockup (inlined as a small base64 PNG so the page stays self-contained).
-- **Labels:** every section label, eyebrow, pill, badge and key/value term is Raleway 700, uppercase, wide tracking. Section labels are coral (`#C32C30` as text); their right-hand note is muted Lato.
+- **Header:** a petrol (`#0B2B36`) panel, 14px radius, with a coral uppercase eyebrow, a white Raleway 800 date heading, the coral underline rule, and the white EPKA lockup (inlined as a small base64 PNG so the page stays self-contained). The lockup sits on the date line: same baseline, and the wordmark's x-height matches the date's (logo height = 0.97 × heading size, pulled down 0.222 × heading size). Keep that relation if either size changes.
+- **Uppercase is rare:** only the eyebrow, section labels and status pills/badges (OPLETTEN, HOOG, NIEUWE POSITIE) are Raleway 700 uppercase with wide tracking. Section labels are coral (`#C32C30` as text); their right-hand note is muted Lato. Every other small label ("Vervalt als", "omvang", "raakt:") is sentence-case Lato in a muted grey.
+- **Values lead, labels recede:** next to a status dot, or under a small label, the label is Lato regular and muted, and the value is Raleway 700 in petrol ink (chips, fact values, the current share in the portfolio sleeves).
+- **Figures:** Raleway defaults to old-style figures, which bounce. The page sets `lining-nums` everywhere and `tabular-nums` wherever values line up (chips, dates, percentages, the weather axis, footer).
 - **Body:** Lato. Headings and subjects use petrol ink, running text uses graphite `#374151`.
-- **Cards:** white, 1px `#E5E7EB` hairline, 10px radius, soft petrol shadow. The call and a sell proposal get a 4px coral or deep-coral top edge. Clashing signals get a gold left edge.
+- **Cards:** white, 1px `#E5E7EB` hairline, 10px radius, 18/20px padding, soft petrol shadow. The call and a sell proposal get a straight 4px coral or deep-coral bar along the top (clipped by the card, not a bent border). No coloured side edges.
+- **Lists** in playbooks have no bullets, so nothing round competes with the status dots.
 - **Status scale** (Paul, 26/10: the steps must differ in lightness, not just hue): ok teal `#1B8A7A` (L\* 52) · watch gold `#E3BE45` (L\* 78) · alert deep coral `#8E1F2C` (L\* 32). Dark mode: teal · `#F0D267` · `#FF6B6E`. Keep this ordering when changing any of them.
 - **No new hues.** The old blue accent is replaced by lifted petrol (`#16404C`); purple is gone.
 - **Dark mode** is petrol-based (`#071E26` page, `#0B2B36` surfaces), not neutral grey.
