@@ -87,6 +87,32 @@
   .p-alarm, .p-acuut, .p-actief { background: var(--red-bg); color: var(--red); }
   .p-waakzaam, .p-voorbij { background: var(--border2); color: var(--muted); }
 
+  .brief-grid { display: grid; grid-template-columns: minmax(0,1fr) 290px; gap: 16px 22px; align-items: center; }
+  @media (max-width: 640px) { .brief-grid { grid-template-columns: 1fr; } }
+  .rose { width: 100%; max-width: 290px; height: auto; display: block; margin: 0 auto; }
+  .rose .ring { fill: none; stroke: var(--border2); stroke-width: 1; }
+  .rose .spoke { stroke: var(--border2); stroke-width: 1; }
+  .rose .needle { stroke-width: 7; stroke-linecap: round; }
+  .rose .n-positief { stroke: var(--teal); } .rose .n-neutraal { stroke: var(--dim); } .rose .n-voorzichtig { stroke: var(--brass); }
+  .rose .tip-positief { fill: var(--teal); } .rose .tip-neutraal { fill: var(--dim); } .rose .tip-voorzichtig { fill: var(--brass); }
+  .rose .hub { fill: var(--surface); stroke: var(--ink); stroke-width: 1.5; }
+  .rose text { font-family: var(--mono); font-size: 12px; fill: var(--muted); }
+  .rose-caption { font-family: var(--mono); font-size: 9.5px; color: var(--dim); text-align: center; margin-top: 4px; }
+  .stance { font-family: var(--mono); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+  .stance.positief { color: var(--teal); } .stance.neutraal { color: var(--muted); } .stance.voorzichtig { color: var(--brass); }
+
+  /* Risicoweer: one cell per day per indicator */
+  .wx { display: grid; gap: 3px; margin-bottom: 14px; overflow-x: auto; }
+  .wx-row { display: grid; grid-template-columns: 9.5rem repeat(var(--days), minmax(9px, 1fr)); gap: 3px; align-items: center; }
+  .wx-label { font-size: 11.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .wx-cell { height: 14px; border-radius: 2px; background: var(--border2); }
+  .wx-cell.s-groen, .wx-cell.s-laag { background: var(--teal); } .wx-cell.s-oranje, .wx-cell.s-stijgend { background: var(--brass); }
+  .wx-cell.s-rood, .wx-cell.s-acuut { background: var(--red); } .wx-cell.s-onbekend { background: var(--dim); }
+  .wx-cell.today { outline: 2px solid var(--ink); outline-offset: 1px; }
+  .wx-group { font-family: var(--mono); font-size: 9.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--dim); margin-top: 6px; }
+  .wx-axis { font-family: var(--mono); font-size: 9.5px; color: var(--dim); }
+  @media (max-width: 560px) { .wx-row { grid-template-columns: 6.5rem repeat(var(--days), minmax(7px, 1fr)); } }
+
   /* Call */
   .call { border-color: var(--teal); }
   .call-head { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: baseline; margin-bottom: 8px; }
@@ -189,11 +215,23 @@
 
   <section id="brief-section" aria-label="In één oogopslag">
     <div class="brief">
-      <div>
-        <div class="brief-kicker">In één oogopslag</div>
-        <p class="brief-head" id="brief-head">Wordt geladen…</p>
+      <div class="brief-grid">
+        <div style="display:grid;gap:14px;min-width:0">
+          <div>
+            <div class="brief-kicker">In één oogopslag</div>
+            <p class="brief-head" id="brief-head">Wordt geladen…</p>
+          </div>
+          <div class="chips" id="brief-chips"></div>
+        </div>
+        <figure id="rose-figure" style="margin:0" hidden>
+          <div id="rose"></div>
+          <figcaption class="rose-caption">Kompasroos — waar het team staat. Lange naald: positief · kort: voorzichtig</figcaption>
+        </figure>
       </div>
-      <div class="chips" id="brief-chips"></div>
+      <details id="rose-details" hidden>
+        <summary id="rose-summary">Waarom de naalden zo staan</summary>
+        <div class="more" id="rose-reasons" style="gap:0"></div>
+      </details>
     </div>
   </section>
 
@@ -229,6 +267,10 @@
   <section id="risico" hidden>
     <div class="section-label"><span>Risicoradar</span><span id="radar-stamp"></span></div>
     <div class="card">
+      <div id="wx-block" hidden>
+        <div class="block-label">Risicoweer — elke avondmeting van de laatste drie weken, de laatste omlijnd</div>
+        <div class="wx" id="wx"></div>
+      </div>
       <div id="radar-rows"></div>
     </div>
   </section>
@@ -396,6 +438,70 @@
       head = 'Nog geen oordeel van het team.';
     }
     $('brief-head').textContent = head;
+  }
+
+  // ---- Kompasroos: kompas/core/compass.py, one needle per theme ---------
+  var ROSE_LABEL = { kern: 'Kern', ai_chips: 'AI & chips', energie_netten: 'Energie', waarde_defensief: 'Waarde', europa: 'Europa', verzekering: 'Goud & cash' };
+  var STANCE_LEN = { positief: 1, neutraal: 0.6, voorzichtig: 0.28 };
+  var STANCE_RANK = { voorzichtig: 0, neutraal: 1, positief: 2 };
+
+  function renderCompass(all) {
+    var cur = all[0], prev = all[1];
+    $('rose-figure').hidden = !cur;
+    $('rose-details').hidden = !cur;
+    if (!cur) return;
+    var R = 78, n = cur.themes.length, parts = [];
+    [0.28, 0.6, 1].forEach(function (f) { parts.push('<circle class="ring" r="' + (R * f) + '"/>'); });
+    cur.themes.forEach(function (t, i) {
+      var a = -Math.PI / 2 + i * 2 * Math.PI / n, cx = Math.cos(a), cy = Math.sin(a);
+      var L = R * (STANCE_LEN[t.stance] || 0.6);
+      parts.push('<line class="spoke" x1="0" y1="0" x2="' + (cx * R).toFixed(1) + '" y2="' + (cy * R).toFixed(1) + '"/>');
+      parts.push('<line class="needle n-' + t.stance + '" x1="0" y1="0" x2="' + (cx * L).toFixed(1) + '" y2="' + (cy * L).toFixed(1) + '"><title>' + t.name + ': ' + t.stance + '</title></line>');
+      parts.push('<circle class="tip-' + t.stance + '" cx="' + (cx * L).toFixed(1) + '" cy="' + (cy * L).toFixed(1) + '" r="5"/>');
+      var lx = cx * (R + 14), ly = cy * (R + 14) + 4;
+      var anchor = Math.abs(cx) < 0.2 ? 'middle' : (cx > 0 ? 'start' : 'end');
+      parts.push('<text x="' + lx.toFixed(1) + '" y="' + ly.toFixed(1) + '" text-anchor="' + anchor + '">' + (ROSE_LABEL[t.key] || t.name) + '</text>');
+    });
+    parts.push('<circle class="hub" r="5"/>');
+    $('rose').innerHTML = '<svg class="rose" viewBox="-150 -108 300 216" role="img" aria-label="Kompasroos: waar het team staat per thema">' + parts.join('') + '</svg>';
+    var before = {};
+    if (prev) prev.themes.forEach(function (t) { before[t.key] = t.stance; });
+    $('rose-summary').textContent = 'Waarom de naalden zo staan · ' + formatDateTime(cur.observed_at);
+    $('rose-reasons').innerHTML = '<p class="prose" style="margin-bottom:6px">' + cur.note + '</p>' + cur.themes.map(function (t) {
+      var b = before[t.key], move = '';
+      if (b && b !== t.stance) move = STANCE_RANK[t.stance] > STANCE_RANK[b] ? ' ▲ was ' + b : ' ▼ was ' + b;
+      return '<div class="detail-row"><strong>' + t.name + '</strong> · <span class="stance ' + t.stance + '">' + t.stance + move + '</span> — ' + t.reason + ' <span class="fine">(' + t.source + ')</span></div>';
+    }).join('');
+  }
+
+  // ---- Risicoweer: every evening reading of the monitors, as colour -----
+  function renderWeather() {
+    var B = state.bubbleAll || [], S = state.scenAll || [];
+    var days = {};
+    B.concat(S).forEach(function (d) { days[(d.observed_at || '').slice(0, 10)] = true; });
+    var cols = Object.keys(days).filter(Boolean).sort().slice(-21);
+    $('wx-block').hidden = cols.length < 2;
+    if (cols.length < 2) return;
+    function byDay(list) { var m = {}; list.forEach(function (d) { m[(d.observed_at || '').slice(0, 10)] = d; }); return m; }
+    var bDay = byDay(B), sDay = byDay(S);
+    function rowsFor(map, field) {
+      var latest = map[cols[cols.length - 1]] || map[Object.keys(map).sort().pop()];
+      if (!latest) return '';
+      return latest[field].map(function (item) {
+        return '<div class="wx-row" style="--days:' + cols.length + '"><span class="wx-label" title="' + item.name + '">' + item.name + '</span>' +
+          cols.map(function (c, i) {
+            var doc = map[c], st = '';
+            if (doc) doc[field].forEach(function (x) { if (x.key === item.key) st = x.status; });
+            return '<span class="wx-cell' + (st ? ' s-' + st : '') + (i === cols.length - 1 ? ' today' : '') + '" title="' + c.slice(8, 10) + '/' + c.slice(5, 7) + ': ' + (st || 'niet gemeten') + '"></span>';
+          }).join('') + '</div>';
+      }).join('');
+    }
+    function d(c) { return Number(c.slice(8, 10)) + '/' + Number(c.slice(5, 7)); }
+    $('wx').innerHTML =
+      '<div class="wx-group">AI-bubbel</div>' + rowsFor(bDay, 'indicators') +
+      '<div class="wx-group">Risicoscenario\'s</div>' + rowsFor(sDay, 'scenarios') +
+      '<div class="wx-row" style="--days:' + cols.length + '"><span></span><span class="wx-axis" style="grid-column:2/span ' + Math.ceil(cols.length / 2) + '">' + d(cols[0]) + '</span>' +
+      '<span class="wx-axis" style="grid-column:span ' + Math.floor(cols.length / 2) + ';text-align:right">' + d(cols[cols.length - 1]) + '</span></div>';
   }
 
   // ---- the call --------------------------------------------------------
@@ -698,8 +804,9 @@
       renderPortfolio();
     });
     on('sell_proposals', function (all) { renderSell(all[0] || null); }, true);
-    on('scenario_monitor', function (all) { state.scenarios = all[0] || null; renderRadar(); }, true);
-    on('bubble_monitor', function (all) { state.bubble = all[0] || null; renderRadar(); }, true);
+    on('scenario_monitor', function (all) { state.scenAll = all; state.scenarios = all[0] || null; renderRadar(); renderWeather(); }, true);
+    on('bubble_monitor', function (all) { state.bubbleAll = all; state.bubble = all[0] || null; renderRadar(); renderWeather(); }, true);
+    on('compass', renderCompass, true);
     on('playbooks', renderPlaybooks);
     on('allocation_views', function (all) { portfolio.allocation = all[0] || null; renderPortfolio(); }, true);
     on('portfolio_roundups', function (all) { portfolio.roundup = all[0] || null; renderPortfolio(); }, true);

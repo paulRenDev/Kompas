@@ -218,6 +218,26 @@ def sell_proposal_doc(proposal: "SellProposal", value_by_ticker: dict[str, float
     }
 
 
+def compass_doc(reading: "CompassReading") -> dict:
+    """`compass/{date}` -- the Kompasroos, see kompas/core/compass.py."""
+    from kompas.core.compass import THEMES, validate_compass
+
+    result = validate_compass(reading)
+    if not result.ok:
+        raise ValueError(f"compass reading failed validation, not writing: {result.errors}")
+    by_key = {s.key: s for s in reading.stances}
+    return {
+        "path": f"compass/{reading.observed_at[:10]}",
+        "note": reading.note.strip(),
+        "observed_at": reading.observed_at,
+        "themes": [
+            {"key": k, "name": THEMES[k], "stance": by_key[k].stance,
+             "reason": by_key[k].reason.strip(), "source": by_key[k].source.strip()}
+            for k in THEMES
+        ],
+    }
+
+
 def playbook_doc(playbook: "Playbook") -> dict:
     """`playbooks/{key}` -- one living doc per what-if, see kompas/core/playbook.py."""
     from kompas.core.playbook import validate_playbook

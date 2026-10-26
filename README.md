@@ -270,6 +270,27 @@ Goud: de iShares Physical Gold ETC (PPFB) vond Paul niet bij MeDirect; het
 team gebruikt de Amundi Physical Gold ETC (GOLD op Euronext Parijs,
 FR0013416716), bij Bolero te koop. PPFB staat in `KNOWN_UNTRADABLE`.
 
+## Kompasroos en Risicoweer (26/10/2026)
+
+Paul, na het herontwerp: "ik mis toch nog wat 'op het eerste zicht' dingen
+[...] we moeten echt het verschil kunnen maken tov de concurrentie". Een
+trackrecord met koersen van zijn eigen posities wees hij af: "ik wil mijn
+eigen koersen niet opvolgen ik wil geen kopie van de bestaande excel". Dus
+tonen we wat alleen Kompas heeft: het oordeel van het team, en hoe dat
+beweegt.
+
+- **Kompasroos** (`kompas.core.compass`, `compass/{datum}`): elke avond per
+  vast thema (wereldwijde kern, AI en chips, energie en netten, waarde en
+  defensief, Europa, verzekering) een stand: positief, neutraal of
+  voorzichtig, met één zin waarom en de teamdoc waar ze op rust. De pagina
+  tekent dat als roos met één naald per thema, bovenaan naast de brief; een
+  verschuiving tegenover de vorige stand staat erbij. Een stand verandert
+  enkel als de redenering verandert.
+- **Risicoweer**: de bestaande avondmetingen van de bubbelmonitor en de
+  risicoscenario's als kleurstrook, een vakje per dag. Niets nieuws gemeten,
+  enkel zichtbaar gemaakt: je ziet in één blik of het escaleert (rente van
+  rood naar oranje op 23/10, olie naar acuut op 24/10).
+
 ## Vorm en communicatie: herontwerp door Studio Helder (26/10/2026)
 
 Paul, 26/10: "ik zou graag een apart team laten opzetten die het concept
