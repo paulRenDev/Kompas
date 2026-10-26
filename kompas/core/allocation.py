@@ -11,8 +11,10 @@ just a guess with decimals.
 The sleeves are guardrails, not a to-do list (Paul, 30/9/2026: "if the
 team will always only advice on the weight dispersion of the existing
 stocks then I will always have to rebalance every position. It's a never
-ending story."). The EUR 100 call picks the best opportunity now, wherever
-it is; the allocation only answers "would this push a theme past its cap?".
+ending story."). The free-money call ("als je nu geld over hebt, waarin
+zou het team vandaag investeren?") picks the best opportunity now,
+wherever it is; the allocation only answers "would this push a theme past
+its cap?".
 A sleeve under its minimum is information, not an order. Nothing here ever
 says "sell" -- selling to rebalance costs tax and fees. Selling is allowed
 since 9/10/2026, but only under kompas/core/sell_proposal.py, never to
@@ -108,6 +110,18 @@ def sleeve_status(view: AllocationView, value_by_ticker: dict[str, float]) -> tu
     claimed = {t for s in view.sleeves for t in s.holdings}
     unassigned = sorted(t for t in value_by_ticker if t not in claimed)
     return out, unassigned
+
+
+# Paul, 26/10/2026: drop the EUR 100. The call is about money he has over,
+# whatever the amount, so the guardrail tests a meaningful purchase instead:
+# a fixed share of the portfolio, which grows with it.
+CALL_SHARE = 0.05
+
+
+def call_amount_eur(value_by_ticker: dict[str, float]) -> float:
+    """The purchase cap_check tests for the free-money call: CALL_SHARE of
+    the portfolio's current value (summed per ticker across exchanges)."""
+    return round(sum(value_by_ticker.values()) * CALL_SHARE, 2)
 
 
 def cap_check(view: AllocationView, value_by_ticker: dict[str, float], ticker: str, amount_eur: float) -> tuple[bool, str]:

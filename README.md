@@ -270,6 +270,33 @@ Goud: de iShares Physical Gold ETC (PPFB) vond Paul niet bij MeDirect; het
 team gebruikt de Amundi Physical Gold ETC (GOLD op Euronext Parijs,
 FR0013416716), bij Bolero te koop. PPFB staat in `KNOWN_UNTRADABLE`.
 
+## Geen EUR 100 meer: de vrij-geldvraag (26/10/2026)
+
+Paul: "ook de 100 euro laat het concept van 100 eur vallen. het gaat in
+brede zin over wat als ik geld over heb in wat zou je investeren vandaag
+(rekening houdend met de markt en de opportuniteiten - een eerdere daling
+of whatever of...)"
+
+Dit vervangt elke verwijzing naar "EUR 100" in de secties hieronder
+(30/9, 6/10, 24/9). Die blijven staan als geschiedenis, maar gelden niet
+meer waar ze over het bedrag gaan.
+
+- **De vraag:** als Paul nu geld over heeft, waarin zou het team het
+  vandaag investeren? Eén antwoord per cyclus, zoals voorheen. Geen
+  bedrag, geen "potje": het gaat over WAT en WAAROM NU.
+- **Het waarom-nu mag uit de markt zelf komen,** niet enkel uit nieuws:
+  een recente, gesourcete daling, een koers die terug op een niveau staat
+  dat het team eerder noemde, of een waardering die veranderd is. "Het is
+  gezakt" volstaat niet: de call zegt hoeveel, sinds wanneer, waarom het
+  team denkt dat de reden van de daling voorbij of overdreven is, en wat
+  het idee laat vervallen.
+- **De vangrail rekent met een betekenisvolle aankoop** in plaats van
+  EUR 100: `kompas.core.allocation.call_amount_eur` = 5% van de huidige
+  portefeuillewaarde (`CALL_SHARE`). `cap_check` gebruikt dat bedrag.
+- **Niets anders verandert:** geen herbalancering, de watchlist blijft een
+  vijver van kansen, "wacht" enkel met een gedateerd moment, Farah se
+  tegenargument en een trigger blijven verplicht.
+
 ## Kompasroos en Risicoweer (26/10/2026)
 
 Paul, na het herontwerp: "ik mis toch nog wat 'op het eerste zicht' dingen

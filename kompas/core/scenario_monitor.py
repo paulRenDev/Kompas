@@ -12,7 +12,7 @@ Two halves of one instruction, both encoded here:
 - don't turn risk-averse: insurance is capped. Outside an "acuut" scenario
   or a bubble alarm, hedges (gold, a cash reserve) stay within HEDGE_CAP of
   the portfolio, and a "stijgend" status is information, not a reason to
-  buy more insurance. The EUR 100 call keeps hunting opportunities unless a
+  buy more insurance. The free-money call keeps hunting opportunities unless a
   scenario is acuut.
 """
 

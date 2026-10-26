@@ -133,7 +133,7 @@ def meta_refresh_doc(
         "watchlist_count": result.watchlist_count,
         "refreshed_at": refreshed_at,
         # What Paul bought or sold between the previous refresh and this
-        # one. Both Routines must read this before making a EUR 100 call:
+        # one. Both Routines must read this before making the free-money call:
         # a call that repeats itself after Paul already followed it is the
         # exact failure this field exists to prevent.
         "changes": changes or [],
@@ -391,7 +391,7 @@ def synthesis_doc(synthesis: Synthesis) -> dict:
 
 
 def capital_call_doc(call: CapitalCall) -> dict:
-    """Poort 1's write payload for the cycle's ONE EUR 100 answer -- its
+    """Poort 1's write payload for the cycle's ONE free-money answer -- its
     own `capital_calls` collection, one document per cycle, never per
     signal or per synthesis. See kompas/core/capital_call.py for why this
     replaced the old per-item capital_view.

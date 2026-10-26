@@ -1,4 +1,4 @@
-"""Poort 1 -- the ONE EUR 100 answer per cycle, not N repeated ones.
+"""Poort 1 -- the ONE free-money answer per cycle, not N repeated ones.
 
 Paul: "you can't just keep repeating to wait... make it a separate line.
 If we (and by we I mean the team) had 100 to spend, take this. In the
@@ -38,6 +38,15 @@ dated event is days away and the call names it.
 letterlijk nemen. wat als ik nu een potje had waarin zou ik investeren."
 EUR 100 is shorthand for "money to put to work now", so a share priced
 above EUR 100 is a valid answer; the call is about WHAT, not how much.
+
+26/10/2026 -- the EUR 100 is gone. Paul: "laat het concept van 100 eur
+vallen. het gaat in brede zin over wat als ik geld over heb in wat zou je
+investeren vandaag (rekening houdend met de markt en de opportuniteiten -
+een eerdere daling of whatever)." The call answers: if Paul has money
+over, what would the team invest it in today? The why-now may come from
+the market itself, not only from news: a sourced, recent drop, a price
+back at a level the team named, or a valuation that changed. The
+guardrail tests a purchase of allocation.call_amount_eur, not EUR 100.
 """
 
 from __future__ import annotations

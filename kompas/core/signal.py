@@ -31,7 +31,7 @@ from dataclasses import dataclass, field
 SIGNAL_CONFIDENCE_LEVELS = ("speculatief", "voorlopig", "hoog")
 
 # Paul's framing: "if I had an uncommitted EUR 100 today, would THIS signal
-# move it?" -- deliberately marginal-money language, never "what should I do
+# move it?" (since 26/10/2026 without the amount: money he has over) -- deliberately marginal-money language, never "what should I do
 # with my actual position." nieuwe_positie = a name not currently held or
 # watched at all; verhoog_bestaand = adds conviction to something already
 # HELD (a real position, not just a watchlist name); wacht = real signal,
