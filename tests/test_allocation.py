@@ -1,6 +1,6 @@
 import unittest
 
-from kompas.core.allocation import AllocationView, Sleeve, cap_check, sleeve_status, validate_allocation
+from kompas.core.allocation import AllocationView, Sleeve, call_amount_eur, cap_check, sleeve_status, validate_allocation
 from kompas.core.synthesis import RedTeamChallenge
 from kompas.db.kompas_db import allocation_view_doc
 
@@ -56,6 +56,12 @@ class TestSleeveStatus(unittest.TestCase):
         self.assertEqual(by_name["Energietransitie"].status, "onder")
         self.assertEqual(by_name["Defensief"].status, "binnen")
         self.assertEqual(unassigned, ["NEW"])
+
+
+class TestCallAmount(unittest.TestCase):
+    def test_the_tested_purchase_grows_with_the_portfolio(self):
+        self.assertEqual(call_amount_eur({"CORE": 6000.0, "NUC": 2000.0}), 400.0)
+        self.assertEqual(call_amount_eur({}), 0.0)
 
 
 class TestCapCheck(unittest.TestCase):
