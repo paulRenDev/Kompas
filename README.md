@@ -292,7 +292,7 @@ Wat er nu is:
   ochtend, hoe openen de Amerikaanse futures, staat een grens van een call
   of monitor op springen. Ze schrijft geen call, monitor of draaiboek, en
   verkoopt niets. Alleen als een grens echt overschreden wordt, komt er een
-  signaal bij. Paul vroeg op 12/10 al om een update "zo rond de middag
+  signaal bij. Paul vroeg eerder al om een update "zo rond de middag
   gezien de turbulentie".
 
 ## Risicoscenario's dagelijks, met een rem op voorzichtigheid (12/10/2026)
