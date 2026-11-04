@@ -238,6 +238,63 @@ opnieuw wegzakt. De Routine-prompt is bijgewerkt om elke cyclus expliciet
 te wegen of de AI/chip-thematiek weer domineert, en zo ja, bewust
 elders te zoeken.
 
+## Elke ronde een nieuwe editie (4/11/2026)
+
+Paul, 4/11: "er bougeert niet veel de laatste dagen? [...] waarom ziet dat
+kompas er niet uit alsof er een nieuwe dag gestart is? je kan toch geen
+platform beheren waarop nauwelijks iets wijzigt? dit moet leven he!!!"
+
+Hij had gelijk. Het team zag drie oorzaken:
+- **De call stond stil.** Van 27/10 tot 4/11 kwamen 16 calls na elkaar op
+  TotalEnergies uit, de meeste als "nog altijd X, niets nieuws". De regel
+  "herhaal gisteren niet standaard" was te zacht.
+- **De instrumenten melden vooral "ongewijzigd".** Dat is eerlijk, maar er
+  bovenaan niets anders naast zetten laat de pagina dood lijken.
+- **Niets op de pagina zei wat er sinds gisteren gebeurde.** De bovenkant
+  was een samenvatting van de stand, geen nieuws.
+
+Wat er nu is:
+- **De dagkrant** (`kompas/core/briefing.py`, collectie
+  `briefing/{datum}-{editie}`). Elke ronde schrijft een editie: ochtend,
+  middag of avond. Ze bevat een kop (wat je vandaag moet weten, één zin) en
+  2 tot 5 punten:
+  - "gebeurd", met een bron;
+  - "voor jou", het oordeel van het team, met het teamdocument waarop het
+    steunt;
+  - minstens één "vandaag": waar je vandaag op let, met een uur als dat er
+    is.
+
+  Daarnaast komt een optionele marktpols van hoogstens zes cijfers: futures,
+  rente, olie, euro, zoals een bron ze meldt, met bron en tijdstip. Nooit
+  koersen van Pauls eigen posities. Een stille nacht krijgt ook een editie:
+  die zegt eerlijk dat er weinig bewoog en legt het gewicht op "vandaag".
+- **"Nieuw sinds je laatste bezoek"**, berekend op de pagina zelf. Het
+  toont:
+  - een nieuwe of herbekeken call;
+  - draaiboeken die naderend of actief werden;
+  - indicatoren en scenario's die van kleur wisselden;
+  - naalden van de Kompasroos die bewogen;
+  - nieuwe signalen.
+
+  Wie vandaag nog niet keek, ziet zo in één blik wat er veranderde. Het
+  vorige bezoek bewaart de browser zelf; zonder dat geheugen telt de pagina
+  de laatste 24 uur. Nieuwe signalen krijgen een label "nieuw".
+- **De call telt zijn dagen.** "Dag N van dit idee" staat bij de call.
+  Staat dezelfde keuze er langer dan `STALE_CALL_DAYS` (3) kalenderdagen
+  (`call_is_stale`), dan moet de ochtendcall één van twee dingen doen:
+  - een NIEUW, gebronnd feit noemen dat het idee vandaag opnieuw het beste
+    maakt;
+  - een vers idee naar voren schuiven.
+
+  "Niets nieuws dat het verandert" volstaat dan niet meer.
+- **Een middagronde op weekdagen** (11.40 UTC, 12.40 Belgische
+  wintertijd). Ze schrijft de middageditie: wat bewoog Europa in de
+  ochtend, hoe openen de Amerikaanse futures, staat een grens van een call
+  of monitor op springen. Ze schrijft geen call, monitor of draaiboek, en
+  verkoopt niets. Alleen als een grens echt overschreden wordt, komt er een
+  signaal bij. Paul vroeg op 12/10 al om een update "zo rond de middag
+  gezien de turbulentie".
+
 ## Risicoscenario's dagelijks, met een rem op voorzichtigheid (12/10/2026)
 
 Paul vroeg of hij ingedekt is tegen de Amerikaanse rente en de geopolitieke
@@ -365,8 +422,8 @@ Wat Studio Helder nog voorstelt, niet gebouwd (Open vragen):
   en het is het sterkste argument voor een award;
 - een wekelijkse "Kompas op zondag": vijf zinnen over de week, voor wie
   doordeweeks niet kijkt;
-- een middagronde op weekdagen die enkel grenzen bewaakt en alleen bij een
-  overschrijding een pushmelding stuurt (wacht op Pauls akkoord).
+- een middagronde op weekdagen: sinds 4/11 gebouwd, zie "Elke ronde een
+  nieuwe editie".
 
 ## Draaiboeken: wat als... (19/10/2026)
 

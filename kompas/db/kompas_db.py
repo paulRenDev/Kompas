@@ -491,3 +491,22 @@ def build_batch(
     changes = position_changes(previous_qty, snapshot) if previous_qty is not None else []
     docs.append(meta_refresh_doc(result, refreshed_at, changes, previous_refreshed_at))
     return docs
+
+
+def briefing_doc(briefing: "Briefing") -> dict:
+    """`briefing/{date}-{edition}` -- the day's edition, see kompas/core/briefing.py.
+    A rerun of the same edition overwrites it."""
+    from kompas.core.briefing import validate_briefing
+
+    result = validate_briefing(briefing)
+    if not result.ok:
+        raise ValueError(f"briefing failed validation, not writing: {result.errors}")
+    return {
+        "path": f"briefing/{briefing.observed_at[:10]}-{briefing.edition}",
+        "edition": briefing.edition,
+        "headline": briefing.headline.strip(),
+        "items": [{"kind": i.kind, "text": i.text.strip(), "source": i.source.strip()} for i in briefing.items],
+        "pulse": [{"name": p.name.strip(), "value": p.value.strip(), "change": p.change.strip(),
+                   "source": p.source.strip(), "as_of": p.as_of.strip()} for p in briefing.pulse],
+        "observed_at": briefing.observed_at,
+    }

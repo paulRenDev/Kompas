@@ -136,6 +136,31 @@
   .p-alarm, .p-acuut, .p-actief { background: var(--red-bg); color: var(--red); }
   .p-waakzaam, .p-voorbij { background: var(--sunken); color: var(--muted); }
 
+  /* The day's edition (kompas/core/briefing.py, Paul 4/11: "dit moet leven"):
+     every run writes one, so the top of the page is new every morning, noon
+     and evening. */
+  .edition-line { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
+  .edition-line .fine { font-size: 12px; }
+  .brief-items { list-style: none; margin: 2px 0 0; padding: 0; display: grid; gap: 8px; }
+  .brief-items li { display: grid; grid-template-columns: 4.6rem minmax(0,1fr); gap: 10px; font-size: 14px; line-height: 1.55; color: var(--text); }
+  .bi-kind { font-family: var(--label); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); padding-top: 4px; }
+  .bi-vandaag .bi-kind { color: var(--coral-text); }
+  .bi-src { font-size: 11.5px; color: var(--dim); }
+  .pulse { display: grid; grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)); gap: 8px; }
+  .pulse-tile { background: var(--sunken); border-radius: 8px; padding: 8px 10px; min-width: 0; }
+  .pulse-name { font-size: 11.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pulse-value { font-family: var(--display); font-weight: 700; font-size: 15px; color: var(--ink); font-variant-numeric: lining-nums tabular-nums; }
+  .pulse-change { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; margin-left: 4px; font-family: var(--body); font-weight: 400; }
+  .pulse-src { font-size: 11px; color: var(--dim); margin-top: -6px; }
+  .news { border-top: 1px solid var(--border2); padding-top: 12px; display: grid; gap: 6px; }
+  .news-head { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; align-items: baseline; }
+  .news ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; font-size: 13.5px; color: var(--text); line-height: 1.5; }
+  .news li { display: flex; gap: 8px; align-items: baseline; }
+  .news li .dot { align-self: auto; position: relative; top: 1px; }
+  .new-tag { font-family: var(--label); font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #FFFFFF; background: var(--coral); border-radius: 999px; padding: 2px 7px; margin-right: 6px; vertical-align: 1px; }
+  .call-age { font-size: 12px; color: var(--muted); }
+  .call-age.stale { color: var(--brass); font-weight: 700; }
+  @media (max-width: 480px) { .brief-items li { grid-template-columns: 1fr; gap: 0; } .bi-kind { padding-top: 0; } }
   .brief-grid { display: grid; grid-template-columns: minmax(0,1fr) 290px; gap: 16px 22px; align-items: center; }
   @media (max-width: 640px) { .brief-grid { grid-template-columns: 1fr; } }
   .rose { width: 100%; max-width: 290px; height: auto; display: block; margin: 0 auto; }
@@ -289,7 +314,7 @@
       <div class="brief-grid">
         <div style="display:grid;gap:14px;min-width:0">
           <div>
-            <div class="brief-kicker">In één oogopslag</div>
+            <div class="edition-line"><span class="brief-kicker" id="brief-kicker">In één oogopslag</span><span class="fine" id="edition-next"></span></div>
             <p class="brief-head" id="brief-head">Wordt geladen…</p>
           </div>
           <div class="chips" id="brief-chips"></div>
@@ -298,6 +323,13 @@
           <div id="rose"></div>
           <figcaption class="rose-caption">Kompasroos — waar het team staat. Lange naald: positief · kort: voorzichtig</figcaption>
         </figure>
+      </div>
+      <ul class="brief-items" id="brief-items" hidden></ul>
+      <div class="pulse" id="pulse" hidden></div>
+      <div class="pulse-src" id="pulse-src" hidden></div>
+      <div class="news" id="news" hidden>
+        <div class="news-head"><span class="block-label" style="margin:0" id="news-title">Nieuw sinds je laatste bezoek</span><span class="fine" id="news-since"></span></div>
+        <ul id="news-list"></ul>
       </div>
       <details id="rose-details" hidden>
         <summary id="rose-summary">Waarom de naalden zo staan</summary>
@@ -439,7 +471,7 @@
   function ageBadge(observedAt) {
     var days = Math.floor((Date.now() - new Date(observedAt).getTime()) / 86400000);
     var stale = days >= 3;
-    return '<span class="meta"' + (stale ? ' style="color:var(--brass)"' : '') + '>' + ageLabel(observedAt) + (stale ? ' — check op vervolg' : '') + '</span>';
+    return (isNew(observedAt) ? '<span class="new-tag">nieuw</span>' : '') + '<span class="meta"' + (stale ? ' style="color:var(--brass)"' : '') + '>' + ageLabel(observedAt) + (stale ? ' — check op vervolg' : '') + '</span>';
   }
 
   // The first sentence of a long text: the lede for the call.
@@ -465,7 +497,7 @@
   }
 
   // ---- the brief: one glance, built from the newest doc of each kind ----
-  var state = { call: null, bubble: null, scenarios: null, playbooks: [], wallet: null, sell: null };
+  var state = { call: null, bubble: null, scenarios: null, playbooks: [], wallet: null, sell: null, briefing: null, calls: [], events: [], compassAll: [], loaded: false };
 
   function eur(x) {
     var n = Number(x);
@@ -499,7 +531,9 @@
     $('brief-chips').innerHTML = chips.join('');
 
     var head;
-    if (state.sell) {
+    if (briefingIsFresh(state.briefing)) {
+      head = state.briefing.headline;
+    } else if (state.sell) {
       head = 'Het team stelt een verschuiving voor. Lees die eerst.';
     } else if (state.call) {
       var c = state.call;
@@ -510,6 +544,133 @@
       head = 'Nog geen oordeel van het team.';
     }
     $('brief-head').textContent = head;
+    renderNews();
+  }
+
+  // ---- the day's edition and what is new (Paul, 4/11: "dit moet leven") --
+  // The anchor for "nieuw": the previous visit, kept per browser. A reload
+  // within half an hour keeps the same anchor; no storage means 24 hours.
+  var VISIT = (function () {
+    var now = Date.now(), anchor = now - 86400000, known = false;
+    try {
+      var v = JSON.parse(localStorage.getItem('kompas.visit') || 'null');
+      if (v && v.last) {
+        known = true;
+        anchor = (now - v.last > 30 * 60000) ? v.last : (v.prev || anchor);
+      }
+      localStorage.setItem('kompas.visit', JSON.stringify({ prev: anchor, last: now }));
+    } catch (e) { /* private window: fall back to 24 hours */ }
+    return { anchor: anchor, known: known };
+  })();
+  function isNew(iso) { var t = Date.parse(iso || ''); return !isNaN(t) && t > VISIT.anchor; }
+
+  var EDITION_LABEL = { ochtend: 'Ochtendeditie', middag: 'Middageditie', avond: 'Avondeditie' };
+  // When each edition is usually on the page, in UTC (Pijler A at 07:00 and
+  // 16:00, the midday run at 11:40 on weekdays, each takes a few minutes).
+  var EDITION_SLOTS = [{ ed: 'ochtend', h: 7, m: 15 }, { ed: 'middag', h: 11, m: 55, weekdays: true }, { ed: 'avond', h: 16, m: 15 }];
+  function hhmm(d) { return String(d.getHours()).padStart(2, '0') + '.' + String(d.getMinutes()).padStart(2, '0'); }
+  function nextEdition() {
+    var now = new Date();
+    for (var day = 0; day < 3; day++) {
+      for (var i = 0; i < EDITION_SLOTS.length; i++) {
+        var s = EDITION_SLOTS[i];
+        var t = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + day, s.h, s.m));
+        var wd = t.getUTCDay();
+        if (s.weekdays && (wd === 0 || wd === 6)) continue;
+        if (t > now) return (EDITION_LABEL[s.ed] || s.ed).toLowerCase() + (day === 0 ? ' rond ' : (day === 1 ? ' morgen rond ' : ' rond ')) + hhmm(t);
+      }
+    }
+    return '';
+  }
+  function briefingIsFresh(b) { return b && (Date.now() - Date.parse(b.observed_at)) < 20 * 3600000; }
+
+  var KIND_LABEL = { gebeurd: 'Gebeurd', betekent: 'Voor jou', vandaag: 'Vandaag' };
+  function renderBriefing(all) {
+    var b = all[0] || null;
+    state.briefing = b;
+    var fresh = briefingIsFresh(b);
+    var next = nextEdition();
+    $('edition-next').textContent = next ? 'volgende: ' + next : '';
+    if (b) {
+      var d = new Date(b.observed_at);
+      var today = new Date().toDateString() === d.toDateString();
+      $('brief-kicker').textContent = (EDITION_LABEL[b.edition] || 'Editie') + ' · ' +
+        (today ? '' : DAYS_NL[d.getDay()].toLowerCase() + ' ' + d.getDate() + ' ' + MONTHS_NL[d.getMonth()] + ' · ') + hhmm(d);
+    }
+    var items = fresh ? (b.items || []) : [];
+    $('brief-items').hidden = !items.length;
+    $('brief-items').innerHTML = items.map(function (i) {
+      return '<li class="bi-' + i.kind + '"><span class="bi-kind">' + (KIND_LABEL[i.kind] || i.kind) + '</span>' +
+        '<span>' + i.text + ' <span class="bi-src">(' + i.source + ')</span></span></li>';
+    }).join('');
+    var pulse = fresh ? (b.pulse || []) : [];
+    $('pulse').hidden = !pulse.length;
+    $('pulse-src').hidden = !pulse.length;
+    $('pulse').innerHTML = pulse.map(function (p) {
+      var c = (p.change || '').trim(), arrow = /^[-−]/.test(c) ? '▼ ' : (/^\+/.test(c) ? '▲ ' : '');
+      return '<div class="pulse-tile" title="' + p.source + ' · ' + p.as_of + '"><div class="pulse-name">' + p.name + '</div>' +
+        '<div class="pulse-value">' + p.value + (c ? '<span class="pulse-change">' + arrow + c + '</span>' : '') + '</div></div>';
+    }).join('');
+    var srcs = [];
+    pulse.forEach(function (p) { p.source.split(';').forEach(function (x) { x = x.trim(); if (x && srcs.indexOf(x) === -1) srcs.push(x); }); });
+    $('pulse-src').textContent = srcs.length ? 'Marktcijfers zoals gemeld door ' + srcs.join('; ') + ' — geen koersen van je eigen posities.' : '';
+    renderBrief();
+  }
+
+  // Mirrors kompas/core/briefing.call_streak: calendar days on the same pick.
+  function callStreak(calls) {
+    if (!calls.length) return { days: 0, since: '' };
+    var subject = calls[0].subject, since = calls[0].observed_at;
+    for (var i = 1; i < calls.length && calls[i].subject === subject; i++) since = calls[i].observed_at;
+    var day = function (iso) { return Date.UTC(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10)); };
+    return { days: Math.round((day(calls[0].observed_at) - day(since)) / 86400000) + 1, since: since };
+  }
+
+  function renderNews() {
+    if (!state.loaded) return;
+    var out = [];
+    function add(level, html) { out.push('<li><span class="dot s-' + level + '"></span><span>' + html + '</span></li>'); }
+    if (state.sell && isNew(state.sell.observed_at)) add('actief', '<a href="#sell-section">Nieuw voorstel om te verschuiven</a>');
+    var calls = state.calls || [];
+    if (calls.length && isNew(calls[0].observed_at)) {
+      var prevCall = calls.filter(function (c) { return !isNew(c.observed_at); })[0];
+      if (!prevCall || prevCall.subject !== calls[0].subject) add('up', '<a href="#capital-call-section">Nieuwe call: ' + calls[0].subject + '</a>');
+      else add('waakzaam', 'Call herbekeken: nog altijd ' + calls[0].subject + ' (dag ' + callStreak(calls).days + ')');
+    }
+    (state.playbooks || []).forEach(function (p) {
+      if (isNew(p.updated_at) && p.status !== 'waakzaam') add(p.status, '<a href="#draaiboeken">Draaiboek “' + p.what_if + '” staat nu op ' + p.status + '</a>');
+    });
+    function monitorChanges(all, field, label) {
+      var cur = (all || [])[0], prev = (all || [])[1];
+      if (!cur || !prev || !isNew(cur.observed_at)) return;
+      var before = {};
+      prev[field].forEach(function (x) { before[x.key] = x.status; });
+      cur[field].forEach(function (x) {
+        if (before[x.key] && before[x.key] !== x.status) add(x.status, '<a href="#risico">' + label + ': ' + x.name + ' van ' + before[x.key] + ' naar ' + x.status + '</a>');
+      });
+    }
+    monitorChanges(state.bubbleAll, 'indicators', 'AI-bubbel');
+    monitorChanges(state.scenAll, 'scenarios', 'Risico');
+    var cc = (state.compassAll || [])[0], cp = (state.compassAll || [])[1];
+    if (cc && cp && isNew(cc.observed_at)) {
+      var was = {};
+      cp.themes.forEach(function (t) { was[t.key] = t.stance; });
+      cc.themes.forEach(function (t) {
+        if (was[t.key] && was[t.key] !== t.stance) add(t.stance === 'positief' ? 'up' : (t.stance === 'voorzichtig' ? 'naderend' : 'waakzaam'),
+          'Kompasroos: ' + t.name + ' naar ' + t.stance + ' (was ' + was[t.key] + ')');
+      });
+    }
+    var fresh = (state.events || []).filter(function (e) { return isNew(e.observed_at); });
+    var subjects = [];
+    fresh.forEach(function (e) { if (subjects.indexOf(e.subject) === -1) subjects.push(e.subject); });
+    if (subjects.length) add('up', '<a href="#signals">' + fresh.length + (fresh.length === 1 ? ' nieuw signaal' : ' nieuwe signalen') + '</a>: ' +
+      subjects.slice(0, 5).join(', ') + (subjects.length > 5 ? ' en ' + (subjects.length - 5) + ' meer' : ''));
+    $('news').hidden = false;
+    $('news-title').textContent = VISIT.known ? 'Nieuw sinds je laatste bezoek' : 'Nieuw in de afgelopen 24 uur';
+    $('news-since').textContent = VISIT.known ? 'sinds ' + formatDateTime(new Date(VISIT.anchor).toISOString()) : '';
+    var next = nextEdition();
+    $('news-list').innerHTML = out.length ? out.join('')
+      : '<li><span class="dot"></span><span>Niets nieuws sinds je laatste bezoek.' + (next ? ' De ' + next + ' brengt de volgende ronde.' : '') + '</span></li>';
   }
 
   // ---- Kompasroos: kompas/core/compass.py, one needle per theme ---------
@@ -518,6 +679,7 @@
   var STANCE_RANK = { voorzichtig: 0, neutraal: 1, positief: 2 };
 
   function renderCompass(all) {
+    state.compassAll = all;
     var cur = all[0], prev = all[1];
     $('rose-figure').hidden = !cur;
     $('rose-details').hidden = !cur;
@@ -588,6 +750,11 @@
     section.hidden = false;
     var c = calls[0], cv = c.capital_view;
     state.call = c;
+    state.calls = calls;
+    var streak = callStreak(calls);
+    var age = streak.days > 1
+      ? '<span class="call-age' + (streak.days > 3 ? ' stale' : '') + '">dag ' + streak.days + ' van dit idee' + (streak.days > 3 ? ' — het team zoekt een nieuw idee of een nieuw feit' : '') + '</span>'
+      : '<span class="call-age">nieuw idee vandaag</span>';
     var lede = firstSentence(cv.reasoning);
     var rest = cv.reasoning.trim().slice(lede.length).trim();
     var considered = c.considered && c.considered.length ? c.considered : [];
@@ -596,7 +763,8 @@
       '<span class="action ' + cv.action + '">' + (CAPITAL_VIEW_LABELS[cv.action] || cv.action) + '</span></div>' +
       '<p class="lede">' + lede + '</p>' +
       '<dl class="kv"><dt>Vervalt als</dt><dd>' + (cv.trigger || '—') + '</dd>' +
-      '<dt>Sinds</dt><dd>' + formatDateTime(c.observed_at) + '</dd></dl>' +
+      '<dt>Sinds</dt><dd>' + formatDateTime(streak.since) + ' · ' + age + '</dd>' +
+      '<dt>Laatst herbekeken</dt><dd>' + formatDateTime(c.observed_at) + '</dd></dl>' +
       (rest || considered.length ? '<details><summary>Volledige redenering en wat het team afwoog</summary><div class="more">' +
         (rest ? '<p class="prose">' + rest + '</p>' : '') +
         (considered.length ? '<div class="meta">afgewogen: ' + considered.join(' · ') + '</div>' : '') +
@@ -866,7 +1034,10 @@
 
     // Recap lifecycle: a signal stays in the database, but drops off the
     // page once its story is no longer relevant or four days old.
-    on('events', function (all) { renderAll(all.filter(function (e) { return e.relevant !== false && isFresh(e); })); }, true);
+    // Let the first snapshots land before saying "niets nieuws".
+    setTimeout(function () { state.loaded = true; renderNews(); }, 1500);
+    on('events', function (all) { state.events = all.filter(function (e) { return e.relevant !== false && isFresh(e); }); renderAll(state.events); renderNews(); }, true);
+    on('briefing', renderBriefing, true);
     on('synthesis', function (all) { renderSynthesis(all.filter(isFresh)); }, true);
     // Positions only -- the watchlist collection is deliberately never read here.
     on('wallet-positions', function (all) { portfolio.positions = all; renderPortfolio(); });
