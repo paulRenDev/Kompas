@@ -396,7 +396,7 @@
   </section>
 
   <section id="draaiboeken" hidden>
-    <div class="section-label"><span>Draaiboeken — wat als…</span><span id="playbook-stamp"></span></div>
+    <div class="section-label"><span>Farah’s facts &amp; fortunes — wat als…</span><span id="playbook-stamp"></span></div>
     <div class="card">
       <div class="review" id="review" hidden></div>
       <div id="playbook-rows"></div>
@@ -959,7 +959,7 @@
     var added = r.candidates.filter(function (c) { return c.key === r.added; })[0];
     function meter(d) { var h = ''; for (var i = 1; i <= 5; i++) h += '<i' + (i <= d ? ' class="on"' : '') + '></i>'; return '<span class="meter d' + d + '" title="ontwrichting ' + d + ' op 5">' + h + '</span>'; }
     box.innerHTML =
-      '<div class="review-head"><span class="block-label" style="margin:0">Farah’s facts &amp; fortunes · wat je posities kan breken, en waar de kans ligt</span><span class="fine">' + formatDateTime(r.observed_at) + '</span></div>' +
+      '<div class="review-head"><span class="block-label" style="margin:0">Weekoverleg · wat je posities kan breken, en waar de kans ligt</span><span class="fine">' + formatDateTime(r.observed_at) + '</span></div>' +
       '<p class="prose">' + r.verdict + '</p>' +
       '<div class="review-moves">' +
         '<div><span class="pill p-naderend">erin</span><span>' + (pbName(r.added) !== r.added || !added ? pbName(r.added) : added.what_if) + (added ? ' · raakt ' + added.hits.join(', ') : '') + '</span></div>' +
