@@ -70,3 +70,39 @@ class TestPlaybookSale(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+from kompas.core.playbook import Candidate, PlaybookReview, validate_review
+from kompas.db.kompas_db import playbook_review_doc
+
+
+def _cand(key, d=3, hits=("INRE",)):
+    return Candidate(key=key, what_if="wat als " + key, hits=list(hits), disruption=d,
+                     why="mechanisme", when="dec 2026", source="bron 16/11")
+
+
+def _review(**o):
+    d = dict(candidates=[_cand("cop_faalt", 2), _cand("mff_vast", 4, ("IWDA", "IWVL")), _cand("uranium_ban", 3, ("NUCL",))],
+             added="mff_vast", retired=["klimaatramp_europa"], verdict="De begroting raakt het meest.",
+             observed_at="2026-11-16T19:00:00+00:00")
+    d.update(o)
+    return PlaybookReview(**d)
+
+
+class TestPlaybookReview(unittest.TestCase):
+    def test_doc_ranks_strongest_first(self):
+        doc = playbook_review_doc(_review(), held={"INRE", "IWDA", "IWVL", "NUCL"})
+        self.assertEqual(doc["path"], "playbook_reviews/2026-11-16")
+        self.assertEqual([c["key"] for c in doc["candidates"]], ["mff_vast", "uranium_ban", "cop_faalt"])
+        self.assertEqual(doc["chair"], "Farah")
+
+    def test_added_must_be_a_candidate(self):
+        self.assertFalse(validate_review(_review(added="iets_anders")).ok)
+
+    def test_candidate_must_hit_a_held_position(self):
+        self.assertFalse(validate_review(_review(), held={"IWDA"}).ok)
+        self.assertFalse(validate_review(_review(candidates=[_cand("a", hits=()), _cand("b"), _cand("c")], added="b")).ok)
+
+    def test_candidate_count_and_scale(self):
+        self.assertFalse(validate_review(_review(candidates=[_cand("mff_vast")])).ok)
+        self.assertFalse(validate_review(_review(candidates=[_cand("mff_vast", 6), _cand("b"), _cand("c")])).ok)

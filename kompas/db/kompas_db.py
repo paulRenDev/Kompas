@@ -510,3 +510,27 @@ def briefing_doc(briefing: "Briefing") -> dict:
                    "source": p.source.strip(), "as_of": p.as_of.strip()} for p in briefing.pulse],
         "observed_at": briefing.observed_at,
     }
+
+
+def playbook_review_doc(review: "PlaybookReview", held: set[str] | None = None) -> dict:
+    """`playbook_reviews/{date}` -- Farah's weekly session, see kompas/core/playbook.py.
+    Candidates are stored strongest first."""
+    from kompas.core.playbook import validate_review
+
+    result = validate_review(review, held)
+    if not result.ok:
+        raise ValueError(f"playbook review failed validation, not writing: {result.errors}")
+    ranked = sorted(review.candidates, key=lambda c: -c.disruption)
+    return {
+        "path": f"playbook_reviews/{review.observed_at[:10]}",
+        "chair": review.chair,
+        "added": review.added,
+        "retired": list(review.retired),
+        "verdict": review.verdict.strip(),
+        "candidates": [
+            {"key": c.key, "what_if": c.what_if.strip(), "hits": list(c.hits), "disruption": c.disruption,
+             "why": c.why.strip(), "when": c.when.strip(), "source": c.source.strip()}
+            for c in ranked
+        ],
+        "observed_at": review.observed_at,
+    }

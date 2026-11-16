@@ -107,3 +107,73 @@ def max_shift_eur(p: Playbook, value_by_ticker: dict[str, float]) -> float:
     if p.status != "actief":
         return 0.0
     return round(min(p.shift_max, MAX_SHIFT) * sum(value_by_ticker.values()), 2)
+
+
+# ---- Farah's weekly session ------------------------------------------------
+# Paul, 16/11/2026: "de wat als scenario's mogen eens vervangen worden. die
+# hoeven niet fix te zijn. 1 keer per week zou er toch een nieuw moeten bedacht
+# worden. ik denk aan eu budget, klimaat cop, verkiezingen in eu landen. welk
+# scenario kan potentieel ontwrichtend zijn voor mijn posities [...]
+# misschien moet het team hierover wekelijks samenzitten. mss olv Farah?"
+#
+# The evening cycles react to news within about 30 days. Farah's weekly session
+# looks further ahead and starts from the other end: what Paul holds. She
+# ranks a handful of candidate what-ifs by how hard they would hit his
+# positions, adds the strongest as a new playbook and retires what has gone
+# stale, so the list changes every week.
+
+DISRUPTION = range(1, 6)  # 1 = a scratch, 5 = would break a position's thesis
+MIN_CANDIDATES, MAX_CANDIDATES = 3, 6
+REVIEW_HORIZON_DAYS = 180  # how far ahead the session may look
+
+
+@dataclass(frozen=True)
+class Candidate:
+    key: str  # the playbook key it would get
+    what_if: str
+    hits: list[str]  # held tickers it would hurt (or lift)
+    disruption: int  # 1-5, see DISRUPTION
+    why: str  # the mechanism, one or two sentences: how it reaches those positions
+    when: str  # the dated moment, or what would set it off
+    source: str
+
+
+@dataclass(frozen=True)
+class PlaybookReview:
+    candidates: list[Candidate]
+    added: str  # key of the candidate that becomes a new playbook
+    retired: list[str]  # playbook keys set to voorbij this session
+    verdict: str  # Farah, two or three sentences: why this one, what she dropped
+    observed_at: str  # RFC3339
+    chair: str = "Farah"
+
+
+def validate_review(r: PlaybookReview, held: set[str] | None = None) -> PlaybookValidationResult:
+    """`held`: the tickers in wallet-positions; when given, every hit must be one."""
+    errors: list[str] = []
+    if not MIN_CANDIDATES <= len(r.candidates) <= MAX_CANDIDATES:
+        errors.append(f"{len(r.candidates)} kandidaten, verwacht {MIN_CANDIDATES} tot {MAX_CANDIDATES}")
+    keys = [c.key for c in r.candidates]
+    if len(set(keys)) != len(keys):
+        errors.append("twee kandidaten met dezelfde key")
+    for c in r.candidates:
+        if not c.key.strip() or c.key != c.key.strip().lower() or " " in c.key:
+            errors.append(f"{c.key!r}: key moet een korte id zijn zonder spaties, in kleine letters")
+        if c.disruption not in DISRUPTION:
+            errors.append(f"{c.key}: ontwrichting {c.disruption} valt buiten 1 tot 5")
+        if not c.hits:
+            errors.append(f"{c.key}: raakt geen enkele positie, dan hoort het hier niet")
+        if held is not None:
+            unknown = [t for t in c.hits if t not in held]
+            if unknown:
+                errors.append(f"{c.key}: {unknown} zit niet in de portefeuille")
+        for name, text in (("what_if", c.what_if), ("why", c.why), ("when", c.when), ("source", c.source)):
+            if not text.strip():
+                errors.append(f"{c.key}: {name} ontbreekt")
+    if r.added not in keys:
+        errors.append(f"de nieuwe {r.added!r} staat niet tussen de kandidaten")
+    if not r.verdict.strip():
+        errors.append("geen oordeel van Farah")
+    if not r.observed_at.strip():
+        errors.append("observed_at ontbreekt")
+    return PlaybookValidationResult(ok=not errors, errors=errors)

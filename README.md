@@ -238,6 +238,56 @@ opnieuw wegzakt. De Routine-prompt is bijgewerkt om elke cyclus expliciet
 te wegen of de AI/chip-thematiek weer domineert, en zo ja, bewust
 elders te zoeken.
 
+## Weekoverleg over de draaiboeken, onder leiding van Farah (16/11/2026)
+
+Paul, 16/11: "de wat als scenario's mogen eens vervangen worden. die hoeven
+niet fix te zijn. 1 keer per week zou er toch een nieuw moeten bedacht
+worden. ik denk aan eu budget, klimaat cop, verkiezingen in eu landen. welk
+scenario kan potentieel ontwrichtend zijn voor mijn posities [...]
+misschien moet het team hierover wekelijks samenzitten. mss olv Farah?"
+
+Het team vindt het een goed idee, met één aanpassing: het overleg begint bij
+Pauls posities, niet bij het nieuws.
+
+De avondcycli reageren op nieuws dat binnen ongeveer 30 dagen valt. Zo
+kwamen er sinds 26/10 draaiboeken bij en gingen er weg. Wat ontbrak, is de
+blik verder vooruit: wat over één tot zes maanden een positie kan breken.
+Twee draaiboeken stonden sinds 19/10 onaangeroerd. Dat is het werk van de
+red team, dus Farah zit het overleg voor.
+
+Elke zondagavond houdt Farah het overleg
+(`kompas/core/playbook.py`: `Candidate`, `PlaybookReview`,
+`validate_review`; collectie `playbook_reviews/{datum}`):
+1. **Per positie: wat breekt de these?** Bijvoorbeeld:
+   - IWDA en de Amerikaanse megabedrijven;
+   - HLTW en de Amerikaanse geneesmiddelenprijzen;
+   - CEBS met China en tarieven op koper;
+   - INRE met subsidies en de klimaatonderhandelingen;
+   - NUCL met uranium, Rusland en Kazachstan;
+   - GOLD als het vertrouwen terugkeert.
+2. **3 tot 6 kandidaten**, elk met:
+   - de posities die het raakt (alleen tickers uit wallet-positions);
+   - een ontwrichtingsscore van 1 tot 5;
+   - het mechanisme: hoe raakt het die positie;
+   - het moment en een bron.
+
+   De kalender hoogstens `REVIEW_HORIZON_DAYS` (180) dagen vooruit is de
+   bron: Europese begroting, klimaattop, verkiezingen in EU-landen, centrale
+   banken, wetgeving, kwartaalcijfers. Een kandidaat die geen positie raakt,
+   hoort er niet bij, hoe groot het nieuws ook is.
+3. **Elke week één nieuw draaiboek**: de sterkste kandidaat wordt een
+   volwaardig draaiboek, met beschermen, kans en een weg terug.
+4. **Wat verouderd is gaat eruit**: wat niet meer bewoog, voorbij is of
+   zwakker scoort dan de nieuwe. Er blijven er hoogstens `MAX_LIVE` live.
+5. **Farahs oordeel in twee of drie zinnen**: waarom deze en wat ze liet
+   vallen. Een kandidaat die ze zwak vindt (bijvoorbeeld een klimaattop die
+   de beurs zelden beweegt) zegt ze ook zo.
+
+Het overleg verandert de call niet, raakt de monitoren niet en stelt geen
+verkoop voor. Dat blijft bij de gewone cycli en de verkoopregels. De pagina
+toont het overleg bovenaan de draaiboeken: wat erin kwam, wat eruit ging, en
+de afgewogen kandidaten met hun ontwrichtingsmeter.
+
 ## Elke ronde een nieuwe editie (4/11/2026)
 
 Paul, 4/11: "er bougeert niet veel de laatste dagen? [...] waarom ziet dat

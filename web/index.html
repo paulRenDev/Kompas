@@ -283,6 +283,22 @@
   .pb-reason { font-size: 13px; color: var(--text); }
   @media (max-width: 560px) { .pb-cols { grid-template-columns: 1fr; } }
 
+  /* Farah's weekly session (kompas/core/playbook.py, Paul 16/11): what came
+     in, what went out, and the candidates ranked by how hard they would hit. */
+  .review { display: grid; gap: 8px; padding-bottom: 14px; margin-bottom: 14px; border-bottom: 1px solid var(--border2); }
+  .review-head { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; align-items: baseline; }
+  .review-moves { display: grid; gap: 6px; font-size: 13.5px; color: var(--text); line-height: 1.5; }
+  .review-moves > div { display: flex; gap: 8px; align-items: baseline; }
+  .cand { display: grid; grid-template-columns: auto minmax(0,1fr); gap: 4px 12px; padding: 10px 0; border-top: 1px solid var(--border2); }
+  .cand:first-child { border-top: none; }
+  .cand-what { font-family: var(--display); font-weight: 700; font-size: 13.5px; color: var(--ink); }
+  .cand-body { grid-column: 2; font-size: 12.5px; color: var(--muted); line-height: 1.55; }
+  .meter { display: inline-flex; gap: 2px; padding-top: 4px; }
+  .meter i { width: 7px; height: 12px; border-radius: 2px; background: var(--border); }
+  .meter.d4 i.on, .meter.d5 i.on { background: var(--st-alert); }
+  .meter.d3 i.on { background: var(--st-watch); }
+  .meter.d1 i.on, .meter.d2 i.on { background: var(--st-ok); }
+
   /* Portfolio */
   .sleeve { display: grid; grid-template-columns: minmax(0,1fr) auto auto; gap: 4px 12px; align-items: baseline; padding: 8px 0; border-top: 1px solid var(--border2); font-variant-numeric: tabular-nums; }
   .sleeve-name { font-family: var(--display); font-weight: 700; font-size: 13.5px; color: var(--ink); }
@@ -382,6 +398,7 @@
   <section id="draaiboeken" hidden>
     <div class="section-label"><span>Draaiboeken — wat als…</span><span id="playbook-stamp"></span></div>
     <div class="card">
+      <div class="review" id="review" hidden></div>
       <div id="playbook-rows"></div>
       <details id="radar-playbooks" hidden>
         <summary id="radar-playbooks-summary">Op de radar</summary>
@@ -497,7 +514,7 @@
   }
 
   // ---- the brief: one glance, built from the newest doc of each kind ----
-  var state = { call: null, bubble: null, scenarios: null, playbooks: [], wallet: null, sell: null, briefing: null, calls: [], events: [], compassAll: [], loaded: false };
+  var state = { call: null, bubble: null, scenarios: null, playbooks: [], wallet: null, sell: null, briefing: null, calls: [], events: [], compassAll: [], review: null, loaded: false };
 
   function eur(x) {
     var n = Number(x);
@@ -637,6 +654,7 @@
       if (!prevCall || prevCall.subject !== calls[0].subject) add('up', '<a href="#capital-call-section">Nieuwe call: ' + calls[0].subject + '</a>');
       else add('waakzaam', 'Call herbekeken: nog altijd ' + calls[0].subject + ' (dag ' + callStreak(calls).days + ')');
     }
+    if (state.review && isNew(state.review.observed_at)) add('naderend', '<a href="#draaiboeken">Weekoverleg van ' + (state.review.chair || 'Farah') + ': nieuw draaiboek “' + pbName(state.review.added) + '”</a>');
     (state.playbooks || []).forEach(function (p) {
       if (isNew(p.updated_at) && p.status !== 'waakzaam') add(p.status, '<a href="#draaiboeken">Draaiboek “' + p.what_if + '” staat nu op ' + p.status + '</a>');
     });
@@ -929,8 +947,35 @@
       '</div>';
   }
 
+  function pbName(key) {
+    var p = (state.playbooks || []).filter(function (x) { return x.key === key; })[0];
+    return p ? p.what_if : key;
+  }
+  function renderReview(all) {
+    if (all) state.review = all[0] || null;
+    var r = state.review, box = $('review');
+    box.hidden = !r;
+    if (!r) return;
+    var added = r.candidates.filter(function (c) { return c.key === r.added; })[0];
+    function meter(d) { var h = ''; for (var i = 1; i <= 5; i++) h += '<i' + (i <= d ? ' class="on"' : '') + '></i>'; return '<span class="meter d' + d + '" title="ontwrichting ' + d + ' op 5">' + h + '</span>'; }
+    box.innerHTML =
+      '<div class="review-head"><span class="block-label" style="margin:0">Weekoverleg onder leiding van ' + (r.chair || 'Farah') + '</span><span class="fine">' + formatDateTime(r.observed_at) + '</span></div>' +
+      '<p class="prose">' + r.verdict + '</p>' +
+      '<div class="review-moves">' +
+        '<div><span class="pill p-naderend">erin</span><span>' + (pbName(r.added) !== r.added || !added ? pbName(r.added) : added.what_if) + (added ? ' · raakt ' + added.hits.join(', ') : '') + '</span></div>' +
+        ((r.retired || []).length ? '<div><span class="pill p-voorbij">eruit</span><span>' + r.retired.map(pbName).join(' · ') + '</span></div>' : '') +
+      '</div>' +
+      '<details><summary>Wat Farah afwoog (' + r.candidates.length + '), van meest naar minst ontwrichtend</summary><div class="more" style="gap:0">' +
+      r.candidates.map(function (c) {
+        return '<div class="cand">' + meter(c.disruption) + '<span class="cand-what">' + c.what_if + (c.key === r.added ? ' <span class="pill p-naderend">gekozen</span>' : '') + '</span>' +
+          '<div class="cand-body">' + c.why + '<br>Raakt: ' + c.hits.join(', ') + ' · ' + c.when + ' <span class="fine">(' + c.source + ')</span></div></div>';
+      }).join('') + '</div></details>';
+    renderNews();
+  }
+
   function renderPlaybooks(list) {
     state.playbooks = list || [];
+    if (state.review) renderReview();
     var section = $('draaiboeken');
     if (!state.playbooks.length) { section.hidden = true; renderBrief(); return; }
     section.hidden = false;
@@ -1054,6 +1099,7 @@
     on('bubble_monitor', function (all) { state.bubbleAll = all; state.bubble = all[0] || null; renderRadar(); renderWeather(); }, true);
     on('compass', renderCompass, true);
     on('playbooks', renderPlaybooks);
+    on('playbook_reviews', renderReview, true);
     on('allocation_views', function (all) { portfolio.allocation = all[0] || null; renderPortfolio(); }, true);
     on('portfolio_roundups', function (all) { portfolio.roundup = all[0] || null; renderPortfolio(); }, true);
     on('capital_calls', function (calls) { renderCapitalCall(calls); renderCapitalCallRatio(calls); }, true);
