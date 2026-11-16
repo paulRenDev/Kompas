@@ -106,3 +106,9 @@ class TestPlaybookReview(unittest.TestCase):
     def test_candidate_count_and_scale(self):
         self.assertFalse(validate_review(_review(candidates=[_cand("mff_vast")])).ok)
         self.assertFalse(validate_review(_review(candidates=[_cand("mff_vast", 6), _cand("b"), _cand("c")])).ok)
+
+
+class TestNoFutureStamps(unittest.TestCase):
+    def test_future_timestamps_rejected(self):
+        self.assertFalse(validate_playbook(_pb(updated_at="2999-01-01T00:00:00+00:00")).ok)
+        self.assertFalse(validate_review(_review(observed_at="2999-01-01T00:00:00+00:00")).ok)

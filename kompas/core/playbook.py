@@ -27,6 +27,7 @@ Everything stays hypothetical and non-executing: Paul trades himself.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from datetime import datetime, timedelta, timezone
 
 from kompas.core.capital_call import KNOWN_UNTRADABLE
 from kompas.core.scenario_monitor import SCENARIOS
@@ -67,8 +68,23 @@ class PlaybookValidationResult:
     errors: list[str]
 
 
+def _in_future(ts: str) -> bool:
+    """A timestamp more than a few minutes ahead of now. The first weekly
+    session (16/11) stamped its docs with the scheduled Sunday slot instead of
+    the real time, which put them in the future on the page."""
+    try:
+        t = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+    except ValueError:
+        return False
+    if t.tzinfo is None:
+        t = t.replace(tzinfo=timezone.utc)
+    return t > datetime.now(timezone.utc) + timedelta(minutes=10)
+
+
 def validate_playbook(p: Playbook) -> PlaybookValidationResult:
     errors: list[str] = []
+    if _in_future(p.updated_at):
+        errors.append("updated_at ligt in de toekomst: gebruik het echte tijdstip, niet het geplande")
     if not p.key.strip() or p.key != p.key.strip().lower() or " " in p.key:
         errors.append("key moet een korte id zijn zonder spaties, in kleine letters")
     if p.status not in STATUSES:
@@ -176,4 +192,6 @@ def validate_review(r: PlaybookReview, held: set[str] | None = None) -> Playbook
         errors.append("geen oordeel van Farah")
     if not r.observed_at.strip():
         errors.append("observed_at ontbreekt")
+    elif _in_future(r.observed_at):
+        errors.append("observed_at ligt in de toekomst: gebruik het echte tijdstip, niet het geplande")
     return PlaybookValidationResult(ok=not errors, errors=errors)
