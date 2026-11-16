@@ -238,6 +238,50 @@ opnieuw wegzakt. De Routine-prompt is bijgewerkt om elke cyclus expliciet
 te wegen of de AI/chip-thematiek weer domineert, en zo ja, bewust
 elders te zoeken.
 
+## De NUCL-misser: vier vragen voor elke koopcall (16/11/2026)
+
+Paul, 16/11: "die uranium [...] was toch een misser hoor. dat gaan we moeten
+vermijden".
+
+Het team zocht het na in `capital_calls`. Tussen 28/9 en 13/11 stelde het
+NUCL vier keer voor, als vier aparte ideeën. Het liep mis op vier manieren:
+1. **28/9: om een sleeve te vullen.** Dat was een reden om te herbalanceren,
+   en die is sinds 30/9 verboden. Paul kocht toen twee keer (zie "Waarom het
+   team bleef zeggen koop NUCL").
+2. **4/10 en 8/11: "uranium op een record, de aandelen blijven achter".**
+   Die kloof sloot nooit, en de call bleef erop leunen.
+3. **13 tot 15/11: "39% onder de top terwijl uranium standhoudt, dus
+   overdreven".** Maar NUCL houdt ook reactorbouwers en ontwikkelaars van
+   kleine reactoren die op AI-sentiment handelen. In een AI-uitverkoop
+   zakken die mee, hoe sterk uranium ook staat. Het team oordeelde op het
+   etiket van het fonds, niet op de inhoud.
+4. **Farahs bezwaar werd niet gevolgd.** Op 9, 14 en 15/11 noemde ze precies
+   dat risico, en het kwam uit. Op 16/11 zei haar eigen Fed-draaiboek "mijd
+   NUCL" tot 9/12, terwijl de call van de dagen ervoor nog "koop" zei.
+
+Wat er nu verandert (`kompas/core/call_guard.py`: `CallGuard`,
+`guard_errors`). Elke koopcall moet langs vier controles. Ze staan in code,
+zodat geen routine ze kan overslaan:
+- **Geen tegenspraak met een draaiboek.** Geen koop in een ticker die een
+  naderend of actief draaiboek "mijd" noemt.
+- **Geen vallend mes.** Is de reden om nu te kopen een daling, dan moet Mila
+  een bodem tonen: `FLOOR_DAYS` (5) beursdagen zonder nieuw slotdieptepunt,
+  uit een gebronnde grafiek. Anders moet een gebronnd feit de oorzaak van de
+  daling hebben weggenomen. "Het is veel gezakt" is geen bodem.
+- **Kijk door het fonds.** Bij een fonds zegt de call welk deel echt de these
+  volgt, volgens de factsheet van de uitgever. Is dat minder dan
+  `MIN_THESIS_SHARE` (60%), dan zegt de call ook wat de rest drijft.
+- **Een derde poging vraagt de scorekaart.** Een derde idee op dezelfde
+  ticker binnen `REPEAT_WINDOW_DAYS` (60) dagen moet de scorekaart van de
+  eerdere pogingen citeren.
+
+Met deze controles was de call van 13/11 op drie punten tegengehouden: het
+Fed-draaiboek, geen bodem, en de vierde poging zonder scorekaart.
+
+Farahs scorekaart rekent de NUCL-ideeën zondag na, met publieke koersen. Een
+eigen schatting van hoeveel het kostte, staat hier niet, omdat het team die
+koersen nog niet gebronnd heeft.
+
 ## Pijngrens, scorekaart en feedback zonder invloed op Farah (16/11/2026)
 
 Farah vroeg Paul drie dingen. Zijn antwoorden:
