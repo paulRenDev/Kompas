@@ -84,7 +84,7 @@ def _cand(key, d=3, hits=("INRE",)):
 def _review(**o):
     d = dict(candidates=[_cand("cop_faalt", 2), _cand("mff_vast", 4, ("IWDA", "IWVL")), _cand("uranium_ban", 3, ("NUCL",))],
              added="mff_vast", retired=["klimaatramp_europa"], verdict="De begroting raakt het meest.",
-             observed_at="2026-11-16T19:00:00+00:00")
+             observed_at="2026-11-15T19:00:00+00:00")
     d.update(o)
     return PlaybookReview(**d)
 
@@ -92,7 +92,7 @@ def _review(**o):
 class TestPlaybookReview(unittest.TestCase):
     def test_doc_ranks_strongest_first(self):
         doc = playbook_review_doc(_review(), held={"INRE", "IWDA", "IWVL", "NUCL"})
-        self.assertEqual(doc["path"], "playbook_reviews/2026-11-16")
+        self.assertEqual(doc["path"], "playbook_reviews/2026-11-15")
         self.assertEqual([c["key"] for c in doc["candidates"]], ["mff_vast", "uranium_ban", "cop_faalt"])
         self.assertEqual(doc["chair"], "Farah")
 
