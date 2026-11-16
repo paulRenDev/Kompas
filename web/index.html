@@ -654,7 +654,7 @@
       if (!prevCall || prevCall.subject !== calls[0].subject) add('up', '<a href="#capital-call-section">Nieuwe call: ' + calls[0].subject + '</a>');
       else add('waakzaam', 'Call herbekeken: nog altijd ' + calls[0].subject + ' (dag ' + callStreak(calls).days + ')');
     }
-    if (state.review && isNew(state.review.observed_at)) add('naderend', '<a href="#draaiboeken">Farah’s facts: nieuw draaiboek “' + pbName(state.review.added) + '”</a>');
+    if (state.review && isNew(state.review.observed_at)) add('naderend', '<a href="#draaiboeken">Farah’s facts &amp; fortunes: nieuw draaiboek “' + pbName(state.review.added) + '”</a>');
     (state.playbooks || []).forEach(function (p) {
       if (isNew(p.updated_at) && p.status !== 'waakzaam') add(p.status, '<a href="#draaiboeken">Draaiboek “' + p.what_if + '” staat nu op ' + p.status + '</a>');
     });
@@ -959,7 +959,7 @@
     var added = r.candidates.filter(function (c) { return c.key === r.added; })[0];
     function meter(d) { var h = ''; for (var i = 1; i <= 5; i++) h += '<i' + (i <= d ? ' class="on"' : '') + '></i>'; return '<span class="meter d' + d + '" title="ontwrichting ' + d + ' op 5">' + h + '</span>'; }
     box.innerHTML =
-      '<div class="review-head"><span class="block-label" style="margin:0">Farah’s facts · wat je posities kan breken</span><span class="fine">' + formatDateTime(r.observed_at) + '</span></div>' +
+      '<div class="review-head"><span class="block-label" style="margin:0">Farah’s facts &amp; fortunes · wat je posities kan breken, en waar de kans ligt</span><span class="fine">' + formatDateTime(r.observed_at) + '</span></div>' +
       '<p class="prose">' + r.verdict + '</p>' +
       '<div class="review-moves">' +
         '<div><span class="pill p-naderend">erin</span><span>' + (pbName(r.added) !== r.added || !added ? pbName(r.added) : added.what_if) + (added ? ' · raakt ' + added.hits.join(', ') : '') + '</span></div>' +

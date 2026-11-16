@@ -249,10 +249,11 @@ misschien moet het team hierover wekelijks samenzitten. mss olv Farah?"
 Het team vindt het een goed idee, met één aanpassing: het overleg begint bij
 Pauls posities, niet bij het nieuws.
 
-Op de pagina heet het **Farah's facts** (16/11, de naam komt van Pauls
-marketeer). De naam legt een plicht op: elke kandidaat steunt op een bron en
-een mechanisme. Het "wat als" zelf blijft een scenario, geen feit, en de
-pagina zegt dat ook zo.
+Op de pagina heet het **Farah's facts & fortunes** (16/11). De naam komt
+van Pauls marketeer, "& fortunes" van Paul zelf: "het leven mag wat
+ingekleurd worden". "Facts" legt een plicht op: elke kandidaat steunt op een
+bron en een mechanisme. Het "wat als" zelf blijft een scenario, geen feit.
+"Fortunes" staat voor de helft "de kans" die elk draaiboek heeft.
 
 De avondcycli reageren op nieuws dat binnen ongeveer 30 dagen valt. Zo
 kwamen er sinds 26/10 draaiboeken bij en gingen er weg. Wat ontbrak, is de
