@@ -238,6 +238,64 @@ opnieuw wegzakt. De Routine-prompt is bijgewerkt om elke cyclus expliciet
 te wegen of de AI/chip-thematiek weer domineert, en zo ja, bewust
 elders te zoeken.
 
+## Pijngrens, scorekaart en feedback zonder invloed op Farah (16/11/2026)
+
+Farah vroeg Paul drie dingen. Zijn antwoorden:
+1. "pijngrens 20% Kan zijn dat ik soms geld nodig heb, maar dat is het
+   risico dat ik neem. zo weinig mogelijk laten we zeggen maar tegenslagen
+   bestaan"
+2. Over een scorekaart: "top idee, maar ik ben nog niet bereid om te betalen
+   voor bronnen."
+3. Over feedback per draaiboek: "goed idee maar het mag zeker niet te in
+   your face zijn en ik ben ook bang van rabbit holes, ik weet niet in
+   hoeverre dit de mening van Farah gaat vormen zodat ik een selffullfilling
+   promise kweek of net geen 'onafhankelijke farah'"
+
+Wat het team ermee deed:
+- **De ontwrichtingsscore volgt nu uit de pijngrens** (`kompas/core/profile.py`:
+  `PAIN_LIMIT` = 20%, `disruption_for`). Elke kandidaat in het weekoverleg
+  krijgt een geschatte daling van de HELE portefeuille als het scenario zich
+  voordoet. Die schatting is het gewicht van de geraakte posities maal een
+  daling die het team kan staven, bijvoorbeeld een vergelijkbare reactie uit
+  het verleden. Ze komt altijd met haar basis en bron. De score volgt daar
+  mechanisch uit:
+
+  | Score | Geschatte daling |
+  |---|---|
+  | 1 | minder dan 2% |
+  | 2 | minder dan 5% |
+  | 3 | minder dan 10% |
+  | 4 | minder dan 20% |
+  | 5 | de pijngrens zelf (20% of meer) |
+
+  Zo is "ontwrichtend" de maat van Paul, niet het gevoel van Farah. Dat Paul
+  soms geld nodig kan hebben, weegt mee als reden om scenario's die snel
+  toeslaan iets zwaarder te nemen. Het verandert de schaal niet.
+- **De scorekaart, met gratis bronnen** (`kompas/core/scorecard.py`,
+  collectie `scorecard`). Farah scoort in haar weekoverleg:
+  - **Elk call-idee, niet elke dag.** Een reeks calls op hetzelfde aandeel
+    telt één keer. Na 7 en na 28 dagen vergelijkt ze het idee met gewoon
+    meer IWDA kopen, want dat zou het geld anders doen. Het oordeel is
+    beter, gelijk of slechter, met een marge van 2 procentpunt.
+  - **Elk draaiboek dat voorbij is:** kwam het uit, deels, of niet, en
+    tegen welke score het toen geschreven werd.
+
+  De koersen komen uit publieke, citeerbare bronnen. Vindt ze er geen, dan
+  is het oordeel "onbekend". Een eerlijk gat is beter dan een verzonnen
+  getal. Pauls eigen posities en aankopen worden nooit gescoord.
+- **Feedback: één tik, en Farah leest ze nooit.** Onder elk draaiboek staat
+  klein "Nuttig voor jou? ja · nee". Er is geen teller, geen vraag naar
+  uitleg en geen herinnering. De tik gaat naar `feedback/{key}`. Om geen
+  self-fulfilling prophecy te kweken, geldt:
+  - **Geen enkele routine leest `feedback`.** Farahs weekoverleg en de
+    cycli zijn daar uitdrukkelijk van afgesloten. Haar scores, keuzes en
+    oordelen blijven blind voor wat Paul ervan vond.
+  - Feedback mag alleen de vorm sturen: hoe lang, hoeveel uitleg, welk soort
+    draaiboek meer toelichting nodig heeft. Dat bespreekt het team met Paul
+    in een gesprek, nooit automatisch.
+  - De scorekaart beslist of Farah gelijk had. Pauls mening beslist alleen
+    of het nuttig was om te lezen. Die twee blijven gescheiden.
+
 ## Weekoverleg over de draaiboeken, onder leiding van Farah (16/11/2026)
 
 Paul, 16/11: "de wat als scenario's mogen eens vervangen worden. die hoeven

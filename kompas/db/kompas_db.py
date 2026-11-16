@@ -529,8 +529,52 @@ def playbook_review_doc(review: "PlaybookReview", held: set[str] | None = None) 
         "verdict": review.verdict.strip(),
         "candidates": [
             {"key": c.key, "what_if": c.what_if.strip(), "hits": list(c.hits), "disruption": c.disruption,
-             "why": c.why.strip(), "when": c.when.strip(), "source": c.source.strip()}
+             "why": c.why.strip(), "when": c.when.strip(), "source": c.source.strip(),
+             "impact": c.impact, "impact_basis": c.impact_basis.strip()}
             for c in ranked
         ],
         "observed_at": review.observed_at,
+    }
+
+
+def call_score_doc(score: "CallScore") -> dict:
+    """`scorecard/call-{idea}-{horizon}d` -- see kompas/core/scorecard.py."""
+    from kompas.core.scorecard import call_verdict, validate_call_score
+
+    result = validate_call_score(score)
+    if not result.ok:
+        raise ValueError(f"call score failed validation, not writing: {result.errors}")
+    return {
+        "path": f"scorecard/call-{score.idea}-{score.horizon_days}d",
+        "kind": "call",
+        "ref": score.idea,
+        "subject": score.subject,
+        "given_at": score.given_at,
+        "horizon_days": score.horizon_days,
+        "change_pct": score.change_pct,
+        "bench_change_pct": score.bench_change_pct,
+        "verdict": call_verdict(score.change_pct, score.bench_change_pct),
+        "prices": score.prices.strip(),
+        "source": score.source.strip(),
+        "observed_at": score.scored_at,
+    }
+
+
+def playbook_score_doc(score: "PlaybookScore") -> dict:
+    """`scorecard/draaiboek-{key}` -- see kompas/core/scorecard.py."""
+    from kompas.core.scorecard import validate_playbook_score
+
+    result = validate_playbook_score(score)
+    if not result.ok:
+        raise ValueError(f"playbook score failed validation, not writing: {result.errors}")
+    return {
+        "path": f"scorecard/draaiboek-{score.key}",
+        "kind": "draaiboek",
+        "ref": score.key,
+        "subject": score.what_if.strip(),
+        "verdict": score.verdict,
+        "disruption_then": score.disruption_then,
+        "what_happened": score.what_happened.strip(),
+        "source": score.source.strip(),
+        "observed_at": score.scored_at,
     }

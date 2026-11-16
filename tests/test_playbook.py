@@ -76,9 +76,14 @@ from kompas.core.playbook import Candidate, PlaybookReview, validate_review
 from kompas.db.kompas_db import playbook_review_doc
 
 
-def _cand(key, d=3, hits=("INRE",)):
+IMPACT_FOR = {1: 0.01, 2: 0.03, 3: 0.07, 4: 0.15, 5: 0.25}
+
+
+def _cand(key, d=3, hits=("INRE",), impact=None):
     return Candidate(key=key, what_if="wat als " + key, hits=list(hits), disruption=d,
-                     why="mechanisme", when="dec 2026", source="bron 16/11")
+                     why="mechanisme", when="dec 2026", source="bron 16/11",
+                     impact=IMPACT_FOR.get(d, 0.07) if impact is None else impact,
+                     impact_basis="gewicht x daling, bron")
 
 
 def _review(**o):
@@ -112,3 +117,15 @@ class TestNoFutureStamps(unittest.TestCase):
     def test_future_timestamps_rejected(self):
         self.assertFalse(validate_playbook(_pb(updated_at="2999-01-01T00:00:00+00:00")).ok)
         self.assertFalse(validate_review(_review(observed_at="2999-01-01T00:00:00+00:00")).ok)
+
+
+class TestPainLimit(unittest.TestCase):
+    def test_bands_against_twenty_percent(self):
+        from kompas.core.profile import PAIN_LIMIT, disruption_for
+        self.assertEqual(PAIN_LIMIT, 0.20)
+        self.assertEqual([disruption_for(x) for x in (0.01, 0.03, 0.07, 0.15, 0.20, 0.3)], [1, 2, 3, 4, 5, 5])
+
+    def test_score_must_match_impact(self):
+        bad = [_cand("mff_vast", 4, impact=0.01), _cand("b"), _cand("c")]
+        self.assertFalse(validate_review(_review(candidates=bad)).ok)
+        self.assertFalse(validate_review(_review(candidates=[_cand("mff_vast", 4, impact=0.0), _cand("b"), _cand("c")])).ok)

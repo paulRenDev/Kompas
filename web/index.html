@@ -299,6 +299,21 @@
   .meter.d3 i.on { background: var(--st-watch); }
   .meter.d1 i.on, .meter.d2 i.on { background: var(--st-ok); }
 
+  /* One quiet tap per playbook (Paul 16/11: "het mag zeker niet te in your
+     face zijn"). The weekly session never reads it: it shapes how the team
+     explains, never what Farah scores or chooses. */
+  .fb { font-size: 11.5px; color: var(--dim); display: flex; gap: 8px; align-items: baseline; justify-content: flex-end; }
+  .fb button { font: inherit; color: var(--dim); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+  .fb button:hover { color: var(--coral-text); }
+  .fb button.on { color: var(--ink); font-weight: 700; text-decoration: none; }
+  .cand-impact { font-family: var(--display); font-weight: 700; color: var(--ink); }
+  .score-line { font-size: 13px; color: var(--text); line-height: 1.6; }
+  .score-row { padding: 8px 0; border-top: 1px solid var(--border2); font-size: 12.5px; color: var(--muted); line-height: 1.55; }
+  .score-row:first-child { border-top: none; }
+  .v-beter, .v-uitgekomen { color: var(--teal); font-weight: 700; }
+  .v-slechter, .v-niet_uitgekomen { color: var(--red); font-weight: 700; }
+  .v-gelijk, .v-deels, .v-onbekend { color: var(--muted); font-weight: 700; }
+
   /* Portfolio */
   .sleeve { display: grid; grid-template-columns: minmax(0,1fr) auto auto; gap: 4px 12px; align-items: baseline; padding: 8px 0; border-top: 1px solid var(--border2); font-variant-numeric: tabular-nums; }
   .sleeve-name { font-family: var(--display); font-weight: 700; font-size: 13.5px; color: var(--ink); }
@@ -404,6 +419,11 @@
         <summary id="radar-playbooks-summary">Op de radar</summary>
         <div class="more" id="radar-playbook-rows"></div>
       </details>
+      <div id="scorecard" hidden style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border2)">
+        <div class="block-label">Scorekaart — houdt het team zich aan zijn woord?</div>
+        <p class="score-line" id="score-line"></p>
+        <details><summary>Alle scores, met de gebruikte koersen en bronnen</summary><div class="more" id="score-rows" style="gap:0"></div></details>
+      </div>
       <p class="fine" style="margin:12px 0 0;">Alleen als de gebeurtenis echt plaatsvindt (actief) mag het team een verschuiving voorstellen: hoogstens 20% van je portefeuille, altijd met een weg terug. Een draaiboek beschrijft wat de beurs doet, geen oordeel over de uitkomst zelf.</p>
     </div>
   </section>
@@ -944,7 +964,64 @@
       '<div class="pb-cols"><div><div class="block-label">Beschermen</div>' + moves(p.protect) + '</div>' +
       '<div><div class="block-label">De kans</div>' + moves(p.opportunity) + '</div></div>' +
       '<div class="fine">Let op: ' + (p.watch || []).join(' · ') + '<br>Terug: ' + p.undo + ' · hoogstens ' + Math.round((p.shift_max || 0) * 100) + '%</div>' +
+      fbRow(p.key) +
       '</div>';
+  }
+
+  // ---- feedback: one tap, stored in `feedback/{key}`, never read by a routine
+  function fbRow(key) {
+    if (!state.db || !key) return '';
+    var f = (state.feedback || {})[key];
+    var on = function (v) { return f && f.useful === v ? ' class="on"' : ''; };
+    return '<div class="fb"><span>Nuttig voor jou?</span><button type="button" data-fb="' + key + '" data-v="1"' + on(true) + '>ja</button>' +
+      '<button type="button" data-fb="' + key + '" data-v="0"' + on(false) + '>nee</button></div>';
+  }
+  document.addEventListener('click', function (ev) {
+    var b = ev.target.closest && ev.target.closest('button[data-fb]');
+    if (!b || !state.db) return;
+    var key = b.getAttribute('data-fb'), useful = b.getAttribute('data-v') === '1';
+    var prev = (state.feedback || {})[key];
+    if (prev && prev.useful === useful) return;
+    state.feedback = state.feedback || {};
+    state.feedback[key] = { key: key, useful: useful };
+    renderPlaybooks(state.playbooks);
+    state.db.doc('feedback/' + key).set({ key: key, useful: useful, at: new Date().toISOString() }).catch(function () {
+      if (prev) state.feedback[key] = prev; else delete state.feedback[key];
+      renderPlaybooks(state.playbooks);
+    });
+  });
+
+  // ---- scorecard: kompas/core/scorecard.py --------------------------------
+  var VERDICT_LABEL = { beter: 'beter dan IWDA', gelijk: 'gelijk met IWDA', slechter: 'slechter dan IWDA', onbekend: 'onbekend',
+    uitgekomen: 'uitgekomen', niet_uitgekomen: 'niet uitgekomen', deels: 'deels uitgekomen' };
+  function renderScorecard(all) {
+    var box = $('scorecard');
+    box.hidden = !all.length;
+    if (!all.length) return;
+    function count(list, order) {
+      var c = {};
+      list.forEach(function (x) { c[x.verdict] = (c[x.verdict] || 0) + 1; });
+      return order.filter(function (v) { return c[v]; }).map(function (v) { return '<span class="v-' + v + '">' + c[v] + ' ' + VERDICT_LABEL[v] + '</span>'; }).join(' · ');
+    }
+    var calls = all.filter(function (x) { return x.kind === 'call'; });
+    var by = {};
+    calls.forEach(function (x) { var k = x.ref; if (!by[k] || x.horizon_days > by[k].horizon_days) by[k] = x; });
+    var latest = Object.keys(by).map(function (k) { return by[k]; });
+    var pbs = all.filter(function (x) { return x.kind === 'draaiboek'; });
+    var parts = [];
+    if (latest.length) parts.push('Calls (' + latest.length + (latest.length === 1 ? ' idee' : ' ideeën') + ', langste termijn gemeten): ' + count(latest, ['beter', 'gelijk', 'slechter', 'onbekend']));
+    if (pbs.length) parts.push('Draaiboeken: ' + count(pbs, ['uitgekomen', 'deels', 'niet_uitgekomen']));
+    $('score-line').innerHTML = parts.join('<br>');
+    $('score-rows').innerHTML = all.map(function (x) {
+      if (x.kind === 'call') {
+        var pct = function (n) { return (n > 0 ? '+' : n < 0 ? '−' : '') + Math.abs(n).toLocaleString('nl-BE', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%'; };
+        var nums = x.change_pct == null || x.bench_change_pct == null ? 'koers niet gevonden' : pct(x.change_pct) + ' tegen IWDA ' + pct(x.bench_change_pct);
+        return '<div class="score-row"><strong>' + x.subject + '</strong> · na ' + x.horizon_days + ' dagen · <span class="v-' + x.verdict + '">' + VERDICT_LABEL[x.verdict] + '</span><br>' +
+          nums + (x.prices ? ' (' + x.prices + ')' : '') + (x.source ? ' <span class="fine">(' + x.source + ')</span>' : '') + '</div>';
+      }
+      return '<div class="score-row"><strong>' + x.subject + '</strong> · <span class="v-' + x.verdict + '">' + VERDICT_LABEL[x.verdict] + '</span> · toen ingeschat op ' + x.disruption_then + ' op 5<br>' +
+        x.what_happened + ' <span class="fine">(' + x.source + ')</span></div>';
+    }).join('');
   }
 
   function pbName(key) {
@@ -965,10 +1042,11 @@
         '<div><span class="pill p-naderend">erin</span><span>' + (pbName(r.added) !== r.added || !added ? pbName(r.added) : added.what_if) + (added ? ' · raakt ' + added.hits.join(', ') : '') + '</span></div>' +
         ((r.retired || []).length ? '<div><span class="pill p-voorbij">eruit</span><span>' + r.retired.map(pbName).join(' · ') + '</span></div>' : '') +
       '</div>' +
-      '<details><summary>Wat Farah afwoog (' + r.candidates.length + '), van meest naar minst ontwrichtend</summary><div class="more" style="gap:0">' +
+      '<details><summary>Wat Farah afwoog (' + r.candidates.length + '), gemeten tegen je pijngrens van 20%</summary><div class="more" style="gap:0">' +
       r.candidates.map(function (c) {
         return '<div class="cand">' + meter(c.disruption) + '<span class="cand-what">' + c.what_if + (c.key === r.added ? ' <span class="pill p-naderend">gekozen</span>' : '') + '</span>' +
-          '<div class="cand-body">' + c.why + '<br>Raakt: ' + c.hits.join(', ') + ' · ' + c.when + ' <span class="fine">(' + c.source + ')</span></div></div>';
+          '<div class="cand-body">' + (c.impact ? '<span class="cand-impact">≈ ' + (c.impact * 100).toLocaleString('nl-BE', { maximumFractionDigits: 1 }) + '% van je portefeuille</span> · ' : '') +
+          c.why + '<br>Raakt: ' + c.hits.join(', ') + ' · ' + c.when + ' <span class="fine">(' + c.source + (c.impact_basis ? '; schatting: ' + c.impact_basis : '') + ')</span></div></div>';
       }).join('') + '</div></details>';
     renderNews();
   }
@@ -1079,6 +1157,7 @@
 
     // Recap lifecycle: a signal stays in the database, but drops off the
     // page once its story is no longer relevant or four days old.
+    state.db = db;
     // Let the first snapshots land before saying "niets nieuws".
     setTimeout(function () { state.loaded = true; renderNews(); }, 1500);
     on('events', function (all) { state.events = all.filter(function (e) { return e.relevant !== false && isFresh(e); }); renderAll(state.events); renderNews(); }, true);
@@ -1100,6 +1179,12 @@
     on('compass', renderCompass, true);
     on('playbooks', renderPlaybooks);
     on('playbook_reviews', renderReview, true);
+    on('scorecard', renderScorecard, true);
+    on('feedback', function (all) {
+      state.feedback = {};
+      all.forEach(function (f) { state.feedback[f.key] = f; });
+      renderPlaybooks(state.playbooks);
+    });
     on('allocation_views', function (all) { portfolio.allocation = all[0] || null; renderPortfolio(); }, true);
     on('portfolio_roundups', function (all) { portfolio.roundup = all[0] || null; renderPortfolio(); }, true);
     on('capital_calls', function (calls) { renderCapitalCall(calls); renderCapitalCallRatio(calls); }, true);

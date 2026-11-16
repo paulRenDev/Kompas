@@ -30,6 +30,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 
 from kompas.core.capital_call import KNOWN_UNTRADABLE
+from kompas.core.profile import disruption_for
 from kompas.core.scenario_monitor import SCENARIOS
 
 STATUSES = ("waakzaam", "naderend", "actief", "voorbij")
@@ -138,7 +139,7 @@ def max_shift_eur(p: Playbook, value_by_ticker: dict[str, float]) -> float:
 # positions, adds the strongest as a new playbook and retires what has gone
 # stale, so the list changes every week.
 
-DISRUPTION = range(1, 6)  # 1 = a scratch, 5 = would break a position's thesis
+DISRUPTION = range(1, 6)  # from kompas.core.profile.disruption_for: 5 = at Paul's pain limit
 MIN_CANDIDATES, MAX_CANDIDATES = 3, 6
 REVIEW_HORIZON_DAYS = 180  # how far ahead the session may look
 
@@ -148,10 +149,15 @@ class Candidate:
     key: str  # the playbook key it would get
     what_if: str
     hits: list[str]  # held tickers it would hurt (or lift)
-    disruption: int  # 1-5, see DISRUPTION
+    disruption: int  # 1-5, must equal kompas.core.profile.disruption_for(impact)
     why: str  # the mechanism, one or two sentences: how it reaches those positions
     when: str  # the dated moment, or what would set it off
     source: str
+    # Estimated drop of the WHOLE portfolio if it happens (0.035 = 3.5%):
+    # weights of the hit positions times a fall the team can source (a
+    # comparable past reaction, an analyst range). Paul's limit: 20%.
+    impact: float = 0.0
+    impact_basis: str = ""  # how the estimate was made, with its source
 
 
 @dataclass(frozen=True)
@@ -177,6 +183,13 @@ def validate_review(r: PlaybookReview, held: set[str] | None = None) -> Playbook
             errors.append(f"{c.key!r}: key moet een korte id zijn zonder spaties, in kleine letters")
         if c.disruption not in DISRUPTION:
             errors.append(f"{c.key}: ontwrichting {c.disruption} valt buiten 1 tot 5")
+        if not 0 < c.impact < 1:
+            errors.append(f"{c.key}: geschatte impact {c.impact} moet een aandeel tussen 0 en 1 zijn")
+        elif c.disruption != disruption_for(c.impact):
+            errors.append(f"{c.key}: ontwrichting {c.disruption} past niet bij een impact van "
+                          f"{c.impact:.1%}; dat is {disruption_for(c.impact)} tegen Pauls pijngrens")
+        if not c.impact_basis.strip():
+            errors.append(f"{c.key}: hoe is de impact geschat?")
         if not c.hits:
             errors.append(f"{c.key}: raakt geen enkele positie, dan hoort het hier niet")
         if held is not None:
